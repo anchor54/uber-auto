@@ -1,0 +1,398 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart
+lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+import '../../core/models.dart';
+^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+ - 'Object' is from 'dart:core'.
+ - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+              s.setRepeat(m);
+                          ^
+lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+          final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                         ^^^^^^^^^^
+00:00 +0 -1: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+  import '../../core/models.dart';
+  ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+   - 'Object' is from 'dart:core'.
+   - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+                s.setRepeat(m);
+                            ^
+  lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+            final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                           ^^^^^^^^^^
+  .
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+import '../../core/models.dart';
+^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+ - 'Object' is from 'dart:core'.
+ - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+              s.setRepeat(m);
+                          ^
+lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+          final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                         ^^^^^^^^^^
+00:00 +0 -2: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+  import '../../core/models.dart';
+  ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+   - 'Object' is from 'dart:core'.
+   - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+                s.setRepeat(m);
+                            ^
+  lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+            final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                           ^^^^^^^^^^
+  .
+00:00 +0 -2: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+import '../../core/models.dart';
+^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+ - 'Object' is from 'dart:core'.
+ - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+              s.setRepeat(m);
+                          ^
+lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+          final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                         ^^^^^^^^^^
+00:00 +0 -3: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+  import '../../core/models.dart';
+  ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+   - 'Object' is from 'dart:core'.
+   - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+                s.setRepeat(m);
+                            ^
+  lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+            final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                           ^^^^^^^^^^
+  .
+00:00 +0 -3: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+import '../../core/models.dart';
+^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+ - 'Object' is from 'dart:core'.
+ - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+              s.setRepeat(m);
+                          ^
+lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+          final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                         ^^^^^^^^^^
+00:00 +0 -4: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+  import '../../core/models.dart';
+  ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+   - 'Object' is from 'dart:core'.
+   - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+                s.setRepeat(m);
+                            ^
+  lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+            final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                           ^^^^^^^^^^
+  .
+00:00 +0 -4: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+import '../../core/models.dart';
+^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+ - 'Object' is from 'dart:core'.
+ - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+              s.setRepeat(m);
+                          ^
+lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+          final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                         ^^^^^^^^^^
+00:00 +0 -5: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+  import '../../core/models.dart';
+  ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+   - 'Object' is from 'dart:core'.
+   - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+                s.setRepeat(m);
+                            ^
+  lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+            final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                           ^^^^^^^^^^
+  .
+00:00 +0 -5: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.everyWeekday, 'Every weekday'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+              (RepeatMode.chosenDays, 'Chosen days each week'),
+               ^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+import '../../core/models.dart';
+^^^^^^^^^^
+lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+ - 'Object' is from 'dart:core'.
+ - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+              s.setRepeat(m);
+                          ^
+lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+          final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                         ^^^^^^^^^^
+00:00 +0 -6: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: lib/features/commute_setup/setup_screen.dart:226:16: Error: Not a constant expression.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:226:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.everyWeekday, 'Every weekday'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: Not a constant expression.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:227:16: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+                (RepeatMode.chosenDays, 'Chosen days each week'),
+                 ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:5:1: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+  import '../../core/models.dart';
+  ^^^^^^^^^^
+  lib/features/commute_setup/setup_screen.dart:230:27: Error: The argument type 'Object?' can't be assigned to the parameter type 'RepeatMode'.
+   - 'Object' is from 'dart:core'.
+   - 'RepeatMode' is from 'package:rider/core/models.dart' ('lib/core/models.dart').
+                s.setRepeat(m);
+                            ^
+  lib/features/commute_setup/setup_screen.dart:268:42: Error: 'RepeatMode' is imported from both 'package:flutter/src/widgets/repeating_animation_builder.dart' and 'package:rider/core/models.dart'.
+            final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+                                           ^^^^^^^^^^
+  .
+00:00 +0 -6: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+00:00 +0 -6: Some tests failed.
+
+Failing tests:
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart
+  ... and 2 more
