@@ -219,12 +219,12 @@ class _SetupScreenState extends State<SetupScreen> {
         children: [
           Text('Repeat', style: AppText.body(15, weight: FontWeight.w600)),
           const SizedBox(height: 10),
-          PillSegments<RepeatMode>(
+          PillSegments<CommuteRepeat>(
             label: 'Repeat',
             value: s.repeat,
             options: const [
-              (RepeatMode.everyWeekday, 'Every weekday'),
-              (RepeatMode.chosenDays, 'Chosen days each week'),
+              (CommuteRepeat.everyWeekday, 'Every weekday'),
+              (CommuteRepeat.chosenDays, 'Chosen days each week'),
             ],
             onChanged: (m) {
               s.setRepeat(m);
@@ -265,7 +265,7 @@ class _SetupScreenState extends State<SetupScreen> {
       child: GestureDetector(
         key: Key('setup.day.$d'),
         onTap: () {
-          final wasWeekday = s.repeat == RepeatMode.everyWeekday;
+          final wasWeekday = s.repeat == CommuteRepeat.everyWeekday;
           s.toggleDay(d);
           if (wasWeekday) _loadOptions();
         },

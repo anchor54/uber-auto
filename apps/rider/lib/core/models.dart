@@ -57,7 +57,7 @@ extension BookingFlowInfo on BookingFlow {
       };
 }
 
-enum RepeatMode { everyWeekday, chosenDays }
+enum CommuteRepeat { everyWeekday, chosenDays }
 
 enum TimingMode { pickupAt, arriveBy }
 
@@ -175,7 +175,7 @@ class CommuteRequest {
 
   final Place pickup;
   final Place drop;
-  final RepeatMode repeat;
+  final CommuteRepeat repeat;
 
   /// ISO weekdays, 1 = Monday … 7 = Sunday.
   final Set<int> weekdays;
@@ -192,7 +192,7 @@ class CommuteRequest {
   final RideType rideType;
   final Set<RidePreference> preferences;
 
-  BookingFlow get flow => repeat == RepeatMode.everyWeekday
+  BookingFlow get flow => repeat == CommuteRepeat.everyWeekday
       ? BookingFlow.recurringWeekday
       : BookingFlow.recurringWeekly;
 

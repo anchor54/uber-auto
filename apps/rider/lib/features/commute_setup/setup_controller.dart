@@ -11,7 +11,7 @@ class CommuteSetup extends ChangeNotifier {
 
   Place? pickup;
   Place? drop;
-  RepeatMode repeat = RepeatMode.everyWeekday;
+  CommuteRepeat repeat = CommuteRepeat.everyWeekday;
   Set<int> chosenDays = {...weekdaysMonToFri};
   TimingMode timing = TimingMode.pickupAt;
 
@@ -27,10 +27,10 @@ class CommuteSetup extends ChangeNotifier {
   DriverMatch? match;
   PaymentMethod usualPayment = PaymentMethod.upi;
 
-  Set<int> get weekdays => repeat == RepeatMode.everyWeekday ? weekdaysMonToFri : chosenDays;
+  Set<int> get weekdays => repeat == CommuteRepeat.everyWeekday ? weekdaysMonToFri : chosenDays;
 
   BookingFlow get flow =>
-      repeat == RepeatMode.everyWeekday ? BookingFlow.recurringWeekday : BookingFlow.recurringWeekly;
+      repeat == CommuteRepeat.everyWeekday ? BookingFlow.recurringWeekday : BookingFlow.recurringWeekly;
 
   int get pickupTime {
     if (timing == TimingMode.pickupAt) return time;
@@ -79,7 +79,7 @@ class CommuteSetup extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setRepeat(RepeatMode mode) {
+  void setRepeat(CommuteRepeat mode) {
     if (repeat == mode) return;
     repeat = mode;
     options = null;
@@ -89,9 +89,9 @@ class CommuteSetup extends ChangeNotifier {
 
   /// Tapping a day while on "Every weekday" switches to chosen days.
   void toggleDay(int isoWeekday) {
-    if (repeat == RepeatMode.everyWeekday) {
+    if (repeat == CommuteRepeat.everyWeekday) {
       chosenDays = {...weekdaysMonToFri};
-      repeat = RepeatMode.chosenDays;
+      repeat = CommuteRepeat.chosenDays;
       options = null;
     }
     final next = {...chosenDays};

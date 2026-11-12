@@ -5,7 +5,7 @@ import 'package:rider/core/models.dart';
 CommuteRequest _request({Set<RidePreference> prefs = const {}, RideType type = RideType.cabSedan}) => CommuteRequest(
       pickup: demoPlaces.first,
       drop: demoPlaces[1],
-      repeat: RepeatMode.everyWeekday,
+      repeat: CommuteRepeat.everyWeekday,
       weekdays: const {1, 2, 3, 4, 5},
       timing: TimingMode.pickupAt,
       time: 520,
