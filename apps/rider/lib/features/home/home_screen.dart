@@ -26,7 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _data ??= AppScope.of(context).api.home();
   }
 
-  void _reload() => setState(() => _data = AppScope.of(context).api.home());
+  void _reload() {
+    final next = AppScope.of(context).api.home();
+    setState(() {
+      _data = next;
+    });
+  }
 
   Future<void> _startSetup() async {
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const SetupScreen()));
