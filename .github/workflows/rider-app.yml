@@ -1,0 +1,139 @@
+name: Rider app
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/rider/**', '.github/workflows/rider-app.yml']
+  pull_request:
+    paths: ['apps/rider/**', '.github/workflows/rider-app.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: rider-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: apps/rider
+
+env:
+  # Platform folders (android/, web/) are generated on CI until someone runs
+  # `flutter create` locally and commits them.
+  CREATE_ARGS: --platforms=android,web --org com.uberauto --project-name rider
+
+jobs:
+  test:
+    name: Analyze, unit and widget tests, screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter --version
+      - name: Generate platform folders
+        run: |
+          flutter create . $CREATE_ARGS
+          git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
+      - run: flutter pub get
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+      - name: Unit, widget and flow tests
+        run: flutter test --exclude-tags screenshots --reporter expanded
+      - name: Render screenshots
+        if: always()
+        run: flutter test --tags screenshots --update-goldens --reporter expanded
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rider-screenshots
+          path: apps/rider/test/screenshots/goldens/
+          if-no-files-found: warn
+
+  build:
+    name: Build Android APK and web app
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate platform folders
+        run: |
+          flutter create . $CREATE_ARGS
+          git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
+      - run: flutter pub get
+      - name: Build APK (debug, installable on any Android phone)
+        run: flutter build apk --debug
+      - name: Build web
+        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rider-apk
+          path: apps/rider/build/app/outputs/flutter-apk/app-debug.apk
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/rider/build/web
+
+  deploy-web:
+    name: Publish web app to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  integration:
+    name: Integration tests on an Android emulator
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable KVM
+        working-directory: .
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate platform folders
+        run: |
+          flutter create . $CREATE_ARGS
+          git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
+      - run: flutter pub get
+      - name: Run integration tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          working-directory: apps/rider
+          script: flutter test integration_test --reporter expanded

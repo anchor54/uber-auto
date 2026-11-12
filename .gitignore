@@ -1,0 +1,30 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+.DS_Store
+
+# Generated on CI for visual review, not committed
+apps/*/test/screenshots/goldens/
+apps/*/test/screenshots/failures/
+
+# Android local files
+local.properties
+**/android/.gradle
+**/android/captures/
+**/android/key.properties
+*.jks
+*.keystore
+
+# Node (backend)
+node_modules/
+dist/
+coverage/
+.env

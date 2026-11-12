@@ -1,0 +1,3 @@
+tags:
+  screenshots:
+    description: Renders every screen to PNG for visual review. Run with --update-goldens.
