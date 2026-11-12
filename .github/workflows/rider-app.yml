@@ -3,55 +3,66 @@ name: Rider app
 on:
   push:
     branches: [main]
-    paths: ['apps/rider/**', '.github/workflows/rider-app.yml']
+    paths: ['apps/rider/**', '.github/workflows/rider-app.yml', '.github/scripts/**']
   pull_request:
-    paths: ['apps/rider/**', '.github/workflows/rider-app.yml']
+    paths: ['apps/rider/**', '.github/workflows/rider-app.yml', '.github/scripts/**']
   workflow_dispatch:
 
 concurrency:
   group: rider-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 defaults:
   run:
     working-directory: apps/rider
+    shell: bash
 
 env:
   # Platform folders (android/, web/) are generated on CI until someone runs
   # `flutter create` locally and commits them.
   CREATE_ARGS: --platforms=android,web --org com.uberauto --project-name rider
+  OUT: ${{ github.workspace }}/ci-out
 
 jobs:
   test:
     name: Analyze, unit and widget tests, screenshots
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - run: flutter --version
       - name: Generate platform folders
         run: |
-          flutter create . $CREATE_ARGS
+          mkdir -p "$OUT"
+          flutter --version | tee "$OUT/flutter-version.txt"
+          flutter create . $CREATE_ARGS > "$OUT/create.txt" 2>&1
           git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
-      - run: flutter pub get
+      - name: Get packages
+        run: flutter pub get 2>&1 | tee "$OUT/pub-get.txt"
       - name: Analyze
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze --no-fatal-infos 2>&1 | tee "$OUT/analyze.txt"
       - name: Unit, widget and flow tests
-        run: flutter test --exclude-tags screenshots --reporter expanded
+        if: always()
+        run: flutter test --exclude-tags screenshots --reporter expanded --no-color 2>&1 | tee "$OUT/tests.txt"
       - name: Render screenshots
         if: always()
-        run: flutter test --tags screenshots --update-goldens --reporter expanded
-      - name: Upload screenshots
+        run: |
+          flutter test --tags screenshots --update-goldens --reporter expanded --no-color 2>&1 | tee "$OUT/screenshots.txt"
+      - name: Publish logs and screenshots
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rider-screenshots
-          path: apps/rider/test/screenshots/goldens/
-          if-no-files-found: warn
+        working-directory: .
+        run: |
+          mkdir -p "$OUT/screens"
+          cp apps/rider/test/screenshots/goldens/*.png "$OUT/screens/" 2>/dev/null || true
+          cp -r apps/rider/test/screenshots/failures "$OUT/" 2>/dev/null || true
+          find apps/rider/test -path '*failures*' -name '*.png' -exec cp {} "$OUT/" \; 2>/dev/null || true
+          .github/scripts/publish-results.sh rider-test "$OUT"
 
   build:
     name: Build Android APK and web app
@@ -70,36 +81,43 @@ jobs:
           cache: true
       - name: Generate platform folders
         run: |
-          flutter create . $CREATE_ARGS
+          mkdir -p "$OUT"
+          flutter create . $CREATE_ARGS > "$OUT/create.txt" 2>&1
           git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
-      - run: flutter pub get
-      - name: Build APK (debug, installable on any Android phone)
-        run: flutter build apk --debug
+          flutter pub get
+      - name: Build APK
+        # Release build signed with the debug key: small, fast, installable on any phone.
+        run: flutter build apk --release 2>&1 | tee "$OUT/build-apk.txt"
       - name: Build web
-        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: rider-apk
-          path: apps/rider/build/app/outputs/flutter-apk/app-debug.apk
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: apps/rider/build/web
-
-  deploy-web:
-    name: Publish web app to GitHub Pages
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - id: deploy
-        uses: actions/deploy-pages@v4
+        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/" 2>&1 | tee "$OUT/build-web.txt"
+      - name: Publish APK as the "rider-latest" download
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk rider.apk
+          notes="Rider app, demo mode. Built from ${GITHUB_SHA::7} (run ${GITHUB_RUN_NUMBER}). Sign-in code: 123456."
+          gh release view rider-latest >/dev/null 2>&1 || gh release create rider-latest --prerelease --title "Rider app (latest build)" --notes "$notes"
+          gh release edit rider-latest --notes "$notes"
+          gh release upload rider-latest rider.apk --clobber
+      - name: Publish web app to the gh-pages branch
+        if: github.ref == 'refs/heads/main'
+        working-directory: .
+        run: |
+          git config user.name "ci-results-bot"
+          git config user.email "ci-results-bot@users.noreply.github.com"
+          site=$(mktemp -d)
+          cp -r apps/rider/build/web/. "$site/"
+          touch "$site/.nojekyll"
+          cd "$site"
+          git init -q -b gh-pages
+          git add -A
+          git commit -qm "Rider web app ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" gh-pages
+      - name: Publish logs
+        if: always()
+        working-directory: .
+        run: .github/scripts/publish-results.sh rider-build "$OUT"
 
   integration:
     name: Integration tests on an Android emulator
@@ -124,9 +142,10 @@ jobs:
           cache: true
       - name: Generate platform folders
         run: |
-          flutter create . $CREATE_ARGS
+          mkdir -p "$OUT"
+          flutter create . $CREATE_ARGS > "$OUT/create.txt" 2>&1
           git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
-      - run: flutter pub get
+          flutter pub get
       - name: Run integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -136,4 +155,8 @@ jobs:
           profile: pixel_6
           disable-animations: true
           working-directory: apps/rider
-          script: flutter test integration_test --reporter expanded
+          script: bash -c 'set -o pipefail; flutter test integration_test --reporter expanded --no-color 2>&1 | tee "$OUT/integration.txt"'
+      - name: Publish logs
+        if: always()
+        working-directory: .
+        run: .github/scripts/publish-results.sh rider-integration "$OUT"
