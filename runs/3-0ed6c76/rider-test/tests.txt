@@ -1,0 +1,390 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute starts with weekday defaults and no route
+00:00 +1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute starts with weekday defaults and no route
+00:01 +2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1 Welcome Send OTP stays disabled until 10 digits are entered
+00:01 +3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:01 +4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:01 +5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:01 +6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:01 +7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:02 +8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:02 +9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1b Enter the code the right code signs in and lands on Home with no regular ride
+00:02 +10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute the same place for pickup and drop-off is not allowed
+00:02 +11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute the same place for pickup and drop-off is not allowed
+00:02 +12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute place search shows a message when nothing matches
+00:02 +13: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute tapping Saturday switches to chosen days and adds it
+00:03 +14: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute a Saturday-only ride starts this Saturday
+00:03 +15: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:04 +16: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:04 +17: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:04 +18: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:05 +19: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type picking Auto updates the fare and hides the AC preference
+00:05 +20: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home with no regular ride greets by time of day and offers to set up a ride
+00:06 +21: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home with no regular ride greets by time of day and offers to set up a ride
+00:06 +22: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type a city with no regular ride types says so
+00:07 +23: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home with no regular ride one-time booking and other tabs say which flow brings them
+00:07 +24: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match proposes Ravi with the route, reasons and schedule
+00:07 +25: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute shows the first ride, the driver and the week
+00:08 +26: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute shows the first ride, the driver and the week
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#f0373 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  shows the first ride, the driver and the week
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +26 -1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match no match offers to relax the preference, and that finds a driver
+00:08 +26 -1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute shows the first ride, the driver and the week [E]
+  Test failed. See exception logs above.
+  The test description was: shows the first ride, the driver and the week
+  
+00:09 +27 -1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute a confirmation message names the driver and first pickup
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#c3a5c was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  a confirmation message names the driver and first pickup
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +27 -2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match joining the waitlist returns Home and says so
+00:10 +27 -2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute a confirmation message names the driver and first pickup [E]
+  Test failed. See exception logs above.
+  The test description was: a confirmation message names the driver and first pickup
+  
+00:10 +27 -2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match joining the waitlist returns Home and says so
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#6a541 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  joining the waitlist returns Home and says so
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +27 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match joining the waitlist returns Home and says so [E]
+  Test failed. See exception logs above.
+  The test description was: joining the waitlist returns Home and says so
+  
+00:10 +27 -3: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart
+00:10 +27 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:10 +28 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +29 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +30 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +31 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +32 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +33 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +34 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +35 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +36 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +37 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +38 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +39 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +40 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +41 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +42 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +43 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +44 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +45 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +46 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +47 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +48 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +49 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:11 +50 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#9353f was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  confirming saves the usual payment method and opens Home
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:11 +50 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home [E]
+  Test failed. See exception logs above.
+  The test description was: confirming saves the usual payment method and opens Home
+  
+00:12 +50 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:12 +51 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:12 +52 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:12 +53 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:12 +54 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares are always multiples of five
+00:12 +55 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: cab fares rise with the class
+00:12 +56 -4: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart
+00:13 +56 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on small phone 360x640
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#c2e9f was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 happy path on small phone 360x640
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:15 +56 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on small phone 360x640 [E]
+  Test failed. See exception logs above.
+  The test description was: R1 happy path on small phone 360x640
+  
+00:15 +56 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on iPhone 14 390x844
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#89dca was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 happy path on iPhone 14 390x844
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:16 +56 -6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on iPhone 14 390x844 [E]
+  Test failed. See exception logs above.
+  The test description was: R1 happy path on iPhone 14 390x844
+  
+00:16 +56 -6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on Pixel 7 412x915
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#94b0f was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 happy path on Pixel 7 412x915
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:17 +56 -7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on Pixel 7 412x915 [E]
+  Test failed. See exception logs above.
+  The test description was: R1 happy path on Pixel 7 412x915
+  
+00:17 +56 -7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Bike commute
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#b8822 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 books a Bike commute
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:18 +56 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Bike commute [E]
+  Test failed. See exception logs above.
+  The test description was: R1 books a Bike commute
+  
+00:18 +56 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Auto commute
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#4150e was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 books a Auto commute
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:19 +56 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Auto commute [E]
+  Test failed. See exception logs above.
+  The test description was: R1 books a Auto commute
+  
+00:19 +56 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · Hatchback commute
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#725d6 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 books a Cab · Hatchback commute
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:20 +56 -10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · Hatchback commute [E]
+  Test failed. See exception logs above.
+  The test description was: R1 books a Cab · Hatchback commute
+  
+00:20 +56 -10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · Sedan commute
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#5b024 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 books a Cab · Sedan commute
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:20 +56 -11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · Sedan commute [E]
+  Test failed. See exception logs above.
+  The test description was: R1 books a Cab · Sedan commute
+  
+00:20 +56 -11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · SUV commute
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#9fd55 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 books a Cab · SUV commute
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:21 +56 -12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · SUV commute [E]
+  Test failed. See exception logs above.
+  The test description was: R1 books a Cab · SUV commute
+  
+00:21 +56 -12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 with a Saturday-only ride, one way, cash
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#31ea1 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 with a Saturday-only ride, one way, cash
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:22 +56 -13: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 with a Saturday-only ride, one way, cash [E]
+  Test failed. See exception logs above.
+  The test description was: R1 with a Saturday-only ride, one way, cash
+  
+00:22 +56 -13: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 survives the slow network used in demo mode
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#2e112 was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 survives the slow network used in demo mode
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:23 +56 -14: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 survives the slow network used in demo mode [E]
+  Test failed. See exception logs above.
+  The test description was: R1 survives the slow network used in demo mode
+  
+00:23 +56 -14: Some tests failed.
+
+Failing tests:
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute a confirmation message names the driver and first pickup
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute shows the first ride, the driver and the week
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match joining the waitlist returns Home and says so
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+  ... and 10 more

@@ -1,0 +1,29 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+setState() callback argument returned a Future.
+The setState() method on _HomeScreenState#f586d was called with a closure or method that returned a
+Future. Maybe it is marked as "async".
+Instead of performing asynchronous work inside a call to setState(), first execute the work (without
+updating the widget state), and then synchronously update the state inside a call to setState().
+
+When the exception was thrown, this was the stack:
+#0      State.setState.<anonymous closure> (package:flutter/src/widgets/framework.dart:1206:9)
+#1      State.setState (package:flutter/src/widgets/framework.dart:1222:6)
+#2      _HomeScreenState._reload (package:rider/features/home/home_screen.dart:29:21)
+#3      _HomeScreenState._startSetup (package:rider/features/home/home_screen.dart:33:18)
+<asynchronous suspension>
+
+The test description was:
+  R1 screens
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:05 +0 -1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens [E]
+  Test failed. See exception logs above.
+  The test description was: R1 screens
+  
+00:05 +0 -1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1.3 ride types on a small phone
+00:06 +1 -1: Some tests failed.
+
+Failing tests:
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens
