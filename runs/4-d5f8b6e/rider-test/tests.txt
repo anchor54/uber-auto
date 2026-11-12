@@ -1,0 +1,73 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute starts with weekday defaults and no route
+00:00 +1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute starts with weekday defaults and no route
+00:01 +2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute starts with weekday defaults and no route
+00:01 +3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1 Welcome letters are ignored and the number is capped at 10 digits
+00:01 +4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:01 +5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:02 +6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:02 +7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:02 +8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute choosing both places quotes the lowest fare and enables Continue
+00:02 +9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1b Enter the code the right code signs in and lands on Home with no regular ride
+00:02 +10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute the same place for pickup and drop-off is not allowed
+00:03 +11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute the same place for pickup and drop-off is not allowed
+00:03 +12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute place search shows a message when nothing matches
+00:03 +13: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute tapping Saturday switches to chosen days and adds it
+00:03 +14: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a commute a Saturday-only ride starts this Saturday
+00:04 +15: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:04 +16: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:05 +17: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:05 +18: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type lists every allowed type with its fare, sedan picked by default
+00:06 +19: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type picking Auto updates the fare and hides the AC preference
+00:06 +20: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home with no regular ride greets by time of day and offers to set up a ride
+00:07 +21: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home with no regular ride greets by time of day and offers to set up a ride
+00:07 +22: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.3 Choose a ride type a city with no regular ride types says so
+00:08 +23: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home with no regular ride one-time booking and other tabs say which flow brings them
+00:08 +24: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match proposes Ravi with the route, reasons and schedule
+00:09 +25: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute shows the first ride, the driver and the week
+00:09 +26: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match See other drivers lets the rider pick someone else
+00:09 +27: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute a confirmation message names the driver and first pickup
+00:10 +28: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home with a commute a confirmation message names the driver and first pickup
+00:10 +29: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.4 Driver match joining the waitlist returns Home and says so
+00:11 +30: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +31: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +32: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +33: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +34: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +35: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +36: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +37: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +38: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +39: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +40: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +41: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +42: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +43: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute summarises the commute and explains payment
+00:11 +44: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +45: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +46: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +47: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +48: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +49: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +50: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +51: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +52: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +53: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute confirming saves the usual payment method and opens Home
+00:12 +54: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:13 +55: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:13 +56: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:13 +57: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:13 +58: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:13 +59: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_match_confirm_test.dart: R1.5 Confirm the commute back from Confirm keeps everything chosen so far
+00:13 +60: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart
+00:13 +60: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on small phone 360x640
+00:16 +61: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on iPhone 14 390x844
+00:16 +62: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 happy path on Pixel 7 412x915
+00:17 +63: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Bike commute
+00:18 +64: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Auto commute
+00:18 +65: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · Hatchback commute
+00:19 +66: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · Sedan commute
+00:19 +67: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 books a Cab · SUV commute
+00:20 +68: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 with a Saturday-only ride, one way, cash
+00:20 +69: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 survives the slow network used in demo mode
+00:21 +70: All tests passed!
