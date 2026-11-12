@@ -32,6 +32,9 @@ abstract final class AppText {
   static const inter = 'Inter';
   static const grotesk = 'SpaceGrotesk';
 
+  /// Characters the bundled fonts lack (arrows) come from here.
+  static const fallback = ['Arrows'];
+
   static TextStyle display(
     double size, {
     Color color = AppColors.ink,
@@ -41,6 +44,7 @@ abstract final class AppText {
   }) =>
       TextStyle(
         fontFamily: grotesk,
+        fontFamilyFallback: fallback,
         fontSize: size,
         fontWeight: weight,
         color: color,
@@ -57,6 +61,7 @@ abstract final class AppText {
   }) =>
       TextStyle(
         fontFamily: inter,
+        fontFamilyFallback: fallback,
         fontSize: size,
         fontWeight: weight,
         color: color,
@@ -69,6 +74,7 @@ ThemeData buildRiderTheme() {
   final base = ThemeData(
     useMaterial3: true,
     fontFamily: AppText.inter,
+    fontFamilyFallback: AppText.fallback,
     scaffoldBackgroundColor: AppColors.ground,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.green,

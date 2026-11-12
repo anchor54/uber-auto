@@ -11,6 +11,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   const families = {
     'Inter': ['Regular', 'Medium', 'SemiBold', 'Bold'],
     'SpaceGrotesk': ['Medium', 'SemiBold', 'Bold'],
+    'Arrows': ['Regular', 'Bold'],
   };
   for (final entry in families.entries) {
     final loader = FontLoader(entry.key);

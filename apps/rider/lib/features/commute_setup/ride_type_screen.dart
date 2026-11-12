@@ -275,10 +275,12 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
             borderRadius: BorderRadius.circular(999),
             border: on ? null : Border.all(color: AppColors.line),
           ),
-          alignment: Alignment.center,
-          child: Text(
+          child: Center(
+            widthFactor: 1,
+            child: Text(
             p.label,
             style: AppText.body(13, weight: on ? FontWeight.w600 : FontWeight.w500, color: on ? Colors.white : AppColors.ink),
+            ),
           ),
         ),
       ),

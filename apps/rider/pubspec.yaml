@@ -39,3 +39,9 @@ flutter:
           weight: 600
         - asset: assets/fonts/SpaceGrotesk-Bold.ttf
           weight: 700
+    # Arrow glyphs (→ ⇄) cut from DejaVu Sans; Inter's web subset lacks them.
+    - family: Arrows
+      fonts:
+        - asset: assets/fonts/Arrows-Regular.ttf
+        - asset: assets/fonts/Arrows-Bold.ttf
+          weight: 700
