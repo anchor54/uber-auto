@@ -1,0 +1,4 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens
+00:04 +1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1.3 ride types on a small phone
+00:04 +2: All tests passed!
