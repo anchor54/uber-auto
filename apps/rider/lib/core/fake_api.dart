@@ -84,7 +84,7 @@ class FakeRiderApi implements RiderApi {
   Future<void> sendOtp(String phone) async {
     await _wait();
     if (!RegExp(r'^[6-9]\d{9}$').hasMatch(phone)) {
-      throw const ApiException('invalid_phone', 'Enter a 10-digit mobile number');
+      throw const ApiException('invalid_phone', 'Enter a 10-digit mobile number starting with 6, 7, 8 or 9');
     }
   }
 
@@ -185,6 +185,7 @@ class FakeRiderApi implements RiderApi {
       usualPayment: usualPayment,
       status: acceptNow ? CommuteStatus.active : CommuteStatus.awaitingDriver,
       respondBy: acceptNow ? null : now.add(const Duration(hours: 12)),
+      trip: estimateRoadTrip(request.pickup, request.drop),
     );
     if (acceptNow) _commuteActive();
     return _commute!;
@@ -228,6 +229,7 @@ class FakeRiderApi implements RiderApi {
           fare: c.fare,
           usualPayment: c.usualPayment,
           status: CommuteStatus.active,
+          trip: c.trip,
         );
         _commuteActive();
       case DemoDriverResponse.decline:

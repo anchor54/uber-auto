@@ -78,6 +78,29 @@ void main() {
     await leave(tester);
   });
 
+  testWidgets('after a decline, an arrive-by commute keeps the pickup time it was booked with', (tester) async {
+    final api = await pumpRiderApp(
+      tester,
+      api: FakeRiderApi(driverResponse: DemoDriverResponse.acceptLater, now: () => testNow),
+    );
+    final robot = R1Robot(tester);
+    await robot.signIn();
+    await robot.fillSetup();
+    await robot.tap('segment.Get me there by'); // arrive by 9:30
+    await robot.chooseRideType(RideType.cabSedan);
+    // 38-minute trip + 10-minute buffer, rounded down to 5: pick up at 8:40.
+    expect(find.text('8:40 AM'), findsOneWidget);
+    await robot.confirm();
+    expect(api.commute!.request.pickupTime, 520);
+
+    api.driverDeclines();
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    await robot.tap('home.rematch');
+    expect(find.text('8:40 AM'), findsOneWidget, reason: 'not 8:45 from a default trip time');
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('no answer in time says so and offers another driver', (tester) async {
     final (api, _) = await confirmAndWait(tester);
     api.driverNeverAnswers();

@@ -288,7 +288,7 @@ export async function liveView(ctx: AppContext, ride: RideRow): Promise<LiveView
     : undefined;
   let eta: number | null = null;
   if (loc && ride.state === 'on_the_way') eta = etaMinutes(haversineKm(loc.lat, loc.lng, ride.pickup.lat, ride.pickup.lng));
-  if (loc && ride.state === 'in_ride') eta = etaMinutes(haversineKm(loc.lat, loc.lng, ride.drop_off.lat, ride.drop_off.lng));
+  if (loc && ride.state === 'in_ride') eta = inRideEta(ride, loc);
   if (ride.state === 'arrived') eta = 0;
   const late = ride.late_flagged_at !== null || (eta !== null && (await flagIfLate(ctx, ride, eta)));
   return {
@@ -302,6 +302,19 @@ export async function liveView(ctx: AppContext, ride: RideRow): Promise<LiveView
     updatedAt: loc?.at.toISOString() ?? null,
     serverTime: now.toISOString(),
   };
+}
+
+/**
+ * Minutes left in the ride: the trip time it was booked with (a road time
+ * from the maps provider) times the share of the straight-line distance
+ * still to go. Agrees with the trip time shown at booking, and needs no
+ * maps call on every 5-second poll.
+ */
+export function inRideEta(ride: Pick<RideRow, 'pickup' | 'drop_off' | 'trip_minutes'>, at: { lat: number; lng: number }): number {
+  const total = haversineKm(ride.pickup.lat, ride.pickup.lng, ride.drop_off.lat, ride.drop_off.lng);
+  const left = haversineKm(at.lat, at.lng, ride.drop_off.lat, ride.drop_off.lng);
+  if (total < 0.05) return 1;
+  return Math.max(1, Math.round(ride.trip_minutes * Math.min(1, left / total)));
 }
 
 /** Sets late_flagged_at once and queues the push. Returns whether the ride is late. */

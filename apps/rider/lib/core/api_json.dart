@@ -119,6 +119,7 @@ Commute commuteFromJson(Map<String, Object?> j) {
     usualPayment: paymentFrom(j['usualPayment'] as String),
     status: commuteStatusFrom(j['status'] as String),
     respondBy: j['respondBy'] == null ? null : DateTime.parse(j['respondBy'] as String).toLocal(),
+    trip: j['trip'] == null ? null : tripFromJson(j['trip'] as Map<String, Object?>),
     declineReason: switch (j['declineReason']) {
       'declined' => DeclineReason.declined,
       'no_answer' => DeclineReason.noAnswer,

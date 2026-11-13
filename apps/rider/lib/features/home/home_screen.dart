@@ -131,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// After a decline: the same route and times, a fresh search for a driver.
   Future<void> _findAnotherDriver(Commute c) async {
     _clearMessages();
-    final setup = CommuteSetup.fromRequest(c.request, today: dateOnly(AppScope.of(context).clock.now()));
+    final setup = CommuteSetup.fromRequest(c.request, today: dateOnly(AppScope.of(context).clock.now()), trip: c.trip);
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => MatchScreen(setup: setup)));
     if (mounted) _reload();
   }

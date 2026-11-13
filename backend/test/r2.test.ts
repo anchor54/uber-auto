@@ -217,6 +217,26 @@ describe('a normal leg', () => {
   });
 });
 
+describe('in-ride ETA', () => {
+  it('scales the booked trip time by the distance left, so it never exceeds the trip', async () => {
+    const { rider, first } = await commuter();
+    const driver = await arrivedAt(first.id, first.pickup, '08:38');
+    const pin = (await t.db.query('select pin from rides where id = $1', [first.id])).rows[0].pin;
+    await post(`/v1/driver/rides/${first.id}/start`, { pin }, driver);
+    const live = async () => (await get(`/v1/rides/${first.id}/live`, rider)).json().etaMinutes as number;
+    // At the pickup: the whole 38-minute trip is ahead.
+    expect(await live()).toBe(38);
+    // Halfway there in straight-line terms: half the trip time.
+    t.clock.now = thu('08:58');
+    await sendLocation(driver, (first.pickup.lat + first.drop.lat) / 2, (first.pickup.lng + first.drop.lng) / 2);
+    expect(await live()).toBe(19);
+    // Almost at the drop-off.
+    t.clock.now = thu('09:15');
+    await sendLocation(driver, first.drop.lat, first.drop.lng);
+    expect(await live()).toBe(1);
+  });
+});
+
 describe('location', () => {
   it('points older than 2 minutes or in the future are refused', async () => {
     const driver = await driverToken();

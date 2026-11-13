@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { AppContext } from '../context.js';
 import { ApiError } from '../domain/types.js';
 
-const phoneSchema = z.string().regex(/^[6-9]\d{9}$/, 'Enter a 10-digit mobile number');
+const phoneSchema = z.string().regex(/^[6-9]\d{9}$/, 'Enter a 10-digit mobile number starting with 6, 7, 8 or 9');
 const OTP_TTL_MS = 5 * 60_000;
 const SESSION_TTL_MS = 30 * 24 * 60 * 60_000;
 const MAX_ATTEMPTS = 5;
@@ -20,7 +20,7 @@ const codeHash = (ctx: AppContext, phone: string, code: string) =>
 /** A bad number is `invalid_phone`, the same code the app's demo backend uses. */
 export function parsePhone(body: unknown): { phone: string } {
   const r = z.object({ phone: phoneSchema }).safeParse(body);
-  if (!r.success) throw new ApiError(400, 'invalid_phone', 'Enter a 10-digit mobile number');
+  if (!r.success) throw new ApiError(400, 'invalid_phone', 'Enter a 10-digit mobile number starting with 6, 7, 8 or 9');
   return r.data;
 }
 

@@ -300,10 +300,15 @@ class Commute {
     required this.status,
     this.respondBy,
     this.declineReason,
+    this.trip,
   });
 
   final String id;
   final CommuteRequest request;
+
+  /// The trip the server booked with (road distance and minutes). Setting up
+  /// the same commute again uses it, so previews match the booking.
+  final TripEstimate? trip;
   final Driver driver;
   final int fare;
   final PaymentMethod usualPayment;
@@ -324,6 +329,7 @@ class Commute {
         status: s,
         respondBy: respondBy,
         declineReason: reason,
+        trip: trip,
       );
 }
 

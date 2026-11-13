@@ -29,7 +29,7 @@ describe('R1.1 sign in with OTP', () => {
   it('rejects numbers that are not Indian mobiles', async () => {
     const res = await post('/v1/auth/otp', { phone: '1234567890' });
     expect(res.statusCode).toBe(400);
-    expect(res.json().message).toBe('Enter a 10-digit mobile number');
+    expect(res.json().message).toBe('Enter a 10-digit mobile number starting with 6, 7, 8 or 9');
   });
 
   it('rejects a wrong code, then locks after five tries', async () => {

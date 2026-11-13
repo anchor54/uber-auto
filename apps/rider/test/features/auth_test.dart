@@ -35,13 +35,31 @@ void main() {
       expect(field.controller!.text, '9886054321');
     });
 
-    testWidgets('a number that is not a mobile shows an error', (tester) async {
-      await pumpRiderApp(tester);
+    testWidgets('a number that is not a mobile says why, without asking the server', (tester) async {
+      final api = _CountingSends();
+      await pumpRiderApp(tester, api: api);
       final robot = R1Robot(tester);
-      await robot.type('welcome.phone', '1234567890');
+      await robot.type('welcome.phone', '5123456789');
       await robot.tap('welcome.sendOtp');
-      expect(find.byKey(const Key('welcome.error')), findsOneWidget);
+      expect(find.text('Enter a 10-digit mobile number starting with 6, 7, 8 or 9'), findsOneWidget);
       expect(find.byKey(const Key('otp.code')), findsNothing);
+      expect(api.sends, 0);
+    });
+
+    testWidgets('with the keyboard up, the error scrolls into view above Send OTP', (tester) async {
+      await pumpRiderApp(tester);
+      // A 300-point keyboard on the 844-point screen.
+      tester.view.viewInsets = const FakeViewPadding(bottom: 900);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      final robot = R1Robot(tester);
+      await robot.type('welcome.phone', '5123456789');
+      await tester.tap(find.byKey(const Key('welcome.sendOtp')));
+      await tester.pumpAndSettle();
+      final error = tester.getRect(find.byKey(const Key('welcome.error')));
+      final button = tester.getRect(find.byKey(const Key('welcome.sendOtp')));
+      expect(error.bottom, lessThanOrEqualTo(button.top), reason: 'not hidden behind the button');
+      expect(error.top, greaterThanOrEqualTo(0));
     });
 
     testWidgets('the driver sign-up link explains where drivers sign up', (tester) async {
@@ -88,4 +106,15 @@ void main() {
       expect(find.text('Your daily commute, sorted'), findsOneWidget);
     });
   });
+}
+
+/// The demo backend, counting codes asked for.
+class _CountingSends extends FakeRiderApi {
+  int sends = 0;
+
+  @override
+  Future<void> sendOtp(String phone) {
+    sends++;
+    return super.sendOtp(phone);
+  }
 }

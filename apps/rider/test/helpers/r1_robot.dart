@@ -14,6 +14,11 @@ class R1Robot {
 
   Future<void> tap(String k) async {
     final f = key(k);
+    // Against a real backend, results arrive a little later (network, and
+    // the 300 ms wait after typing in place search): give them 5 seconds.
+    for (var i = 0; i < 50 && f.evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     if (f.evaluate().isEmpty) {
       await tester.scrollUntilVisible(f, 200, scrollable: find.byType(Scrollable).first);
     }

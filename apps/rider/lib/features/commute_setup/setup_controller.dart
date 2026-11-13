@@ -8,9 +8,11 @@ class CommuteSetup extends ChangeNotifier {
   CommuteSetup({required this.today});
 
   /// The choices from an earlier commute, e.g. to find another driver after
-  /// one declined. The start date is worked out again from [today].
-  factory CommuteSetup.fromRequest(CommuteRequest r, {required DateTime today}) {
+  /// one declined. The start date is worked out again from [today]; [trip]
+  /// (the one the server booked with) keeps an arrive-by pickup the same.
+  factory CommuteSetup.fromRequest(CommuteRequest r, {required DateTime today, TripEstimate? trip}) {
     return CommuteSetup(today: today)
+      ..trip = trip
       ..pickup = r.pickup
       ..drop = r.drop
       ..repeat = r.repeat

@@ -18,8 +18,12 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   final _phone = TextEditingController();
+  final _errorKey = GlobalKey();
   bool _sending = false;
   String? _error;
+
+  /// Indian mobile numbers start with 6, 7, 8 or 9.
+  static const invalidPhone = 'Enter a 10-digit mobile number starting with 6, 7, 8 or 9';
 
   @override
   void initState() {
@@ -35,7 +39,27 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   bool get _valid => _phone.text.length == 10;
 
+  /// Shows [message] under the number and scrolls it into view: with the
+  /// keyboard up, it would otherwise sit hidden behind the Send OTP button.
+  void _showError(String message) {
+    setState(() {
+      _sending = false;
+      _error = message;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _errorKey.currentContext;
+      if (target != null && target.mounted) {
+        Scrollable.ensureVisible(target, duration: const Duration(milliseconds: 200), alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+      }
+    });
+  }
+
   Future<void> _send() async {
+    // Caught here, so the rider doesn't wait on the network to learn it.
+    if (!RegExp(r'^[6-9]').hasMatch(_phone.text)) {
+      _showError(invalidPhone);
+      return;
+    }
     setState(() => _sending = true);
     final api = AppScope.of(context).api;
     try {
@@ -45,10 +69,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => OtpScreen(phone: _phone.text)));
     } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() {
-        _sending = false;
-        _error = e.message;
-      });
+      _showError(e.message);
     }
   }
 
@@ -115,7 +136,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                         if (_error != null) ...[
                           const SizedBox(height: 6),
-                          Text(_error!, key: const Key('welcome.error'), style: AppText.body(13, color: AppColors.red)),
+                          KeyedSubtree(
+                            key: _errorKey,
+                            child: Text(_error!, key: const Key('welcome.error'), style: AppText.body(13, color: AppColors.red)),
+                          ),
                         ],
                       ],
                     ),
