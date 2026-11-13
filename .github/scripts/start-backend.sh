@@ -6,7 +6,7 @@
 set -euo pipefail
 
 mkdir -p "${OUT:-/tmp}"
-cd "$(dirname "$0")/../../backend-go"
+cd "$(dirname "$0")/../../backend"
 bash build.sh
 ./bin/db seed
 MAPS_PROVIDER=demo FIXED_OTP=123456 ENABLE_DRIVER_SIM=true RUN_JOBS_IN_API=true AUTO_ACCEPT_COMMUTES="${AUTO_ACCEPT_COMMUTES:-false}" PORT=8080 \

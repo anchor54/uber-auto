@@ -23,12 +23,9 @@ local.properties
 *.jks
 *.keystore
 
-# Node (backend)
-node_modules/
-dist/
-coverage/
+# Local secrets
 .env
 
-# Go backend build output
-backend-go/bin/
-backend-go/backend.log
+# Backend build output
+backend/bin/
+backend/backend.log

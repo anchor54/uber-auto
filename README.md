@@ -9,7 +9,7 @@ Designs, flows and rules live in the design canvas and the Rider and Driver App 
 | Path | What it is |
 |---|---|
 | `apps/rider/` | Rider app (Flutter, Android + web) |
-| `backend-go/` | API and worker (Go, Postgres) |
+| `backend/` | API and worker (Go, Postgres) |
 | `render.yaml` | Hosting: API, worker and Postgres on Render |
 | `.github/workflows/` | CI: tests, screenshots, APK and web builds, emulator tests, end-to-end tests |
 
@@ -63,7 +63,7 @@ The **contract test** (`test/contract/`) runs one script of `RiderApi` calls aga
 Go 1.24+, Postgres 16.
 
 ```sh
-cd backend-go
+cd backend
 export DATABASE_URL=postgres://app:app@localhost:5432/commute_dev
 go run ./cmd/db seed   # wipe and load the demo city (same places and drivers as the app's demo mode)
 FIXED_OTP=123456 ENABLE_DRIVER_SIM=true RUN_JOBS_IN_API=true go run ./cmd/server
@@ -114,7 +114,7 @@ All JSON; everything except the `auth` routes needs `Authorization: Bearer <toke
 | Rides, rider (R2) | `GET /v1/rides/upcoming?days=`, `/v1/rides/unsettled`, `/v1/rides/:id`, `/v1/rides/:id/live`; `POST /v1/rides/:id/running-late`, `/payment`, `/rating`; `PUT /v1/devices` |
 | Rides, driver (D3 API) | `GET /v1/driver/run?date=`, `PUT /v1/driver/duty`, `POST /v1/driver/location`, `POST /v1/driver/rides/:id/depart`, `/arrive`, `/start`, `/end`, `/contact`, `/no-show`, `/payment` |
 
-The ride lifecycle is one pure function (`Transition` in `backend-go/internal/domain/rides.go`); every move writes a `ride_events` row.
+The ride lifecycle is one pure function (`Transition` in `backend/internal/domain/rides.go`); every move writes a `ride_events` row.
 
 ## Going live
 
@@ -123,5 +123,5 @@ The ride lifecycle is one pure function (`Transition` in `backend-go/internal/do
 3. **Maps (Ola Maps).** Create a project in the Ola Maps console and put its key in `OLA_MAPS_API_KEY`. The backend uses it for place search, road distances and routes, and serves the app's map (`/v1/map/…`: Ola's style trimmed to the base map, with tiles, fonts and sprite passed through and cached), so the key never reaches phones. Check Ola's terms on caching tiles; `MAP_TILE_CACHE_MB=0` turns the cache off.
 4. **App.** In GitHub, set the repository variable `API_BASE_URL` to the API's URL (e.g. `https://commute-api.onrender.com`). CI then builds the APK and the web app in real mode.
 5. **Web app.** In GitHub *Settings → Pages*, choose *Deploy from a branch* → `gh-pages`. CI publishes the web build there on every push to `main`.
-6. **Push notifications** (later): create a Firebase project, add the Android app, and implement `PushService` (`lib/core/push.dart`) and an FCM `PushSender` (`backend-go/internal/app/notify.go`). Until then notifications are logged and riders see changes in the app within 5 seconds.
+6. **Push notifications** (later): create a Firebase project, add the Android app, and implement `PushService` (`lib/core/push.dart`) and an FCM `PushSender` (`backend/internal/app/notify.go`). Until then notifications are logged and riders see changes in the app within 5 seconds.
 7. **Driver app.** Real riders shouldn't get "Driver confirmed" from a stand-in: drivers need the driver app (or ops acting through `/v1/driver/*`) before launch.

@@ -26,7 +26,7 @@ void main() {
     );
   }
 
-  // UTF-8 bytes, as Fastify sends them ("·" in vehicle names).
+  // UTF-8 bytes, as the backend sends them ("·" in vehicle names).
   http.Response json(Object body, [int status = 200]) =>
       http.Response.bytes(utf8.encode(jsonEncode(body)), status, headers: {'content-type': 'application/json; charset=utf-8'});
 

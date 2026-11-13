@@ -23,7 +23,7 @@ services:
     runtime: go
     region: singapore
     plan: starter
-    rootDir: backend-go
+    rootDir: backend
     buildCommand: bash build.sh
     startCommand: ./bin/server
     healthCheckPath: /health
@@ -57,7 +57,7 @@ services:
     runtime: go
     region: singapore
     plan: starter
-    rootDir: backend-go
+    rootDir: backend
     buildCommand: bash build.sh
     startCommand: ./bin/worker
     autoDeploy: true
