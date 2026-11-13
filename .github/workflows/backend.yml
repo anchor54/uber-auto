@@ -45,6 +45,8 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: mkdir -p "$OUT" && npm ci 2>&1 | tee "$OUT/npm-ci.txt"
       - run: npm run typecheck 2>&1 | tee "$OUT/typecheck.txt"
+      - name: Production build (what Render runs)
+        run: npm run build 2>&1 | tee "$OUT/build.txt"
       - if: always()
         run: npm test 2>&1 | tee "$OUT/tests.txt"
       - name: Publish logs

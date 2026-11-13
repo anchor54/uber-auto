@@ -1,0 +1,103 @@
+name: End to end
+
+# The rider app in real mode against the backend and a real Postgres:
+#   contract  - the RiderApi script against the demo backend and the real one
+#   emulator  - flows on an Android emulator, the app talking to the backend
+on:
+  push:
+    branches: [main]
+    paths: ['apps/rider/**', 'backend/**', '.github/workflows/e2e.yml', '.github/scripts/**']
+  pull_request:
+    paths: ['apps/rider/**', 'backend/**', '.github/workflows/e2e.yml', '.github/scripts/**']
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  OUT: ${{ github.workspace }}/ci-out
+  DATABASE_URL: postgres://app:app@localhost:5432/commute
+  FLUTTER_VERSION: 3.50.0
+
+jobs:
+  contract:
+    name: RiderApi contract, demo vs real backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: commute }
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: backend/package-lock.json }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
+      - name: Start the backend
+        run: .github/scripts/start-backend.sh
+      - name: Contract test
+        working-directory: apps/rider
+        env:
+          RIDER_API_URL: http://localhost:8080
+        run: |
+          flutter pub get
+          flutter test --tags contract --reporter expanded --no-color 2>&1 | tee "$OUT/contract.txt"
+      - name: Publish logs
+        if: always()
+        run: .github/scripts/publish-results.sh e2e-contract "$OUT"
+
+  emulator:
+    name: Flows on an Android emulator against the backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: commute }
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: backend/package-lock.json }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
+      - name: Start the backend
+        run: .github/scripts/start-backend.sh
+      - name: Get packages
+        working-directory: apps/rider
+        run: flutter pub get
+      - name: Run end-to-end tests on the emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          working-directory: apps/rider
+          # 10.0.2.2 is the emulator's address for the machine running it.
+          script: bash -c 'set -o pipefail; flutter test integration_test/r1_e2e_test.dart integration_test/r2_e2e_test.dart --dart-define=API_BASE_URL=http://10.0.2.2:8080 --reporter expanded --no-color 2>&1 | tee "$OUT/e2e.txt"'
+      - name: Publish logs
+        if: always()
+        run: |
+          cp backend/backend.log "$OUT/" 2>/dev/null || true
+          .github/scripts/publish-results.sh e2e-emulator "$OUT"

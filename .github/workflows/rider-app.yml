@@ -21,9 +21,6 @@ defaults:
     shell: bash
 
 env:
-  # Platform folders (android/, web/) are generated on CI until someone runs
-  # `flutter create` locally and commits them.
-  CREATE_ARGS: --platforms=android,web --org com.uberauto --project-name rider
   OUT: ${{ github.workspace }}/ci-out
 
 jobs:
@@ -38,14 +35,11 @@ jobs:
           channel: stable
           flutter-version: 3.50.0
           cache: true
-      - name: Generate platform folders
+      - name: Get packages
         run: |
           mkdir -p "$OUT"
           flutter --version | tee "$OUT/flutter-version.txt"
-          flutter create . $CREATE_ARGS > "$OUT/create.txt" 2>&1
-          git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
-      - name: Get packages
-        run: flutter pub get 2>&1 | tee "$OUT/pub-get.txt"
+          flutter pub get 2>&1 | tee "$OUT/pub-get.txt"
       - name: Analyze
         run: flutter analyze --no-fatal-infos 2>&1 | tee "$OUT/analyze.txt"
       - name: Unit, widget and flow tests
@@ -81,24 +75,26 @@ jobs:
           channel: stable
           flutter-version: 3.50.0
           cache: true
-      - name: Generate platform folders
-        run: |
-          mkdir -p "$OUT"
-          flutter create . $CREATE_ARGS > "$OUT/create.txt" 2>&1
-          git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
-          flutter pub get
+      - name: Get packages
+        run: mkdir -p "$OUT" && flutter pub get
       - name: Build APK
         # Release build signed with the debug key: small, fast, installable on any phone.
-        run: flutter build apk --release 2>&1 | tee "$OUT/build-apk.txt"
+        # Real mode when the repository variable API_BASE_URL is set (Settings →
+        # Variables → Actions, e.g. https://commute-api.onrender.com); demo mode otherwise.
+        run: flutter build apk --release --dart-define=API_BASE_URL=${{ vars.API_BASE_URL }} 2>&1 | tee "$OUT/build-apk.txt"
       - name: Build web
-        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/" 2>&1 | tee "$OUT/build-web.txt"
+        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define=API_BASE_URL=${{ vars.API_BASE_URL }} 2>&1 | tee "$OUT/build-web.txt"
       - name: Publish APK as the "rider-latest" download
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp build/app/outputs/flutter-apk/app-release.apk rider.apk
-          notes="Rider app, demo mode. Built from ${GITHUB_SHA::7} (run ${GITHUB_RUN_NUMBER}). Sign-in code: 123456."
+          if [ -n "${{ vars.API_BASE_URL }}" ]; then
+            notes="Rider app against ${{ vars.API_BASE_URL }}. Built from ${GITHUB_SHA::7} (run ${GITHUB_RUN_NUMBER})."
+          else
+            notes="Rider app, demo mode. Built from ${GITHUB_SHA::7} (run ${GITHUB_RUN_NUMBER}). Sign-in code: 123456."
+          fi
           gh release view rider-latest >/dev/null 2>&1 || gh release create rider-latest --prerelease --title "Rider app (latest build)" --notes "$notes"
           gh release edit rider-latest --notes "$notes"
           gh release upload rider-latest rider.apk --clobber
@@ -106,13 +102,15 @@ jobs:
         if: github.ref == 'refs/heads/main'
         working-directory: .
         run: |
-          git config user.name "ci-results-bot"
-          git config user.email "ci-results-bot@users.noreply.github.com"
           site=$(mktemp -d)
           cp -r apps/rider/build/web/. "$site/"
           touch "$site/.nojekyll"
           cd "$site"
           git init -q -b gh-pages
+          # The identity must be set in this new repo: config set in the
+          # checkout doesn't apply here, and without it the commit fails.
+          git config user.name "ci-results-bot"
+          git config user.email "ci-results-bot@users.noreply.github.com"
           git add -A
           git commit -qm "Rider web app ${GITHUB_SHA::7}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" gh-pages
@@ -143,12 +141,8 @@ jobs:
           channel: stable
           flutter-version: 3.50.0
           cache: true
-      - name: Generate platform folders
-        run: |
-          mkdir -p "$OUT"
-          flutter create . $CREATE_ARGS > "$OUT/create.txt" 2>&1
-          git ls-files --error-unmatch test/widget_test.dart 2>/dev/null || rm -f test/widget_test.dart
-          flutter pub get
+      - name: Get packages
+        run: mkdir -p "$OUT" && flutter pub get
       - name: Run integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
