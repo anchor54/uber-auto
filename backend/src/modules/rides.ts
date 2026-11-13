@@ -59,6 +59,7 @@ export interface RideRow {
   rider_marked_at: Date | null;
   driver_payment: DriverMark;
   driver_marked_at: Date | null;
+  route: string | null;
 }
 
 const RIDE_COLUMNS = `r.*, to_char(r.ride_date, 'YYYY-MM-DD') as ride_date`;
@@ -84,7 +85,7 @@ export async function createRides(ctx: AppContext, commuteId?: string): Promise<
   const commutes = (
     await ctx.db.query(
       `select id, rider_id, driver_id, city, pickup, drop_off, weekdays, pickup_time, return_trip, return_time,
-              to_char(start_date, 'YYYY-MM-DD') as start_date, trip_minutes, fare, ride_type
+              to_char(start_date, 'YYYY-MM-DD') as start_date, trip_minutes, fare, ride_type, route_out, route_back
        from commutes where status = 'active' and ($1::uuid is null or id = $1)`,
       [commuteId ?? null],
     )
@@ -115,13 +116,14 @@ export async function createRides(ctx: AppContext, commuteId?: string): Promise<
     for (const p of plan) {
       const res = await ctx.db.query(
         `insert into rides (commute_id, rider_id, driver_id, ride_date, direction, pickup, drop_off, pickup_at,
-                            window_start, window_end, trip_minutes, fare, ride_type, pin, state, closed_at)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                            window_start, window_end, trip_minutes, fare, ride_type, pin, state, closed_at, route)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
          on conflict (commute_id, ride_date, direction) do nothing`,
         [
           c.id, c.rider_id, c.driver_id, p.rideDate, p.direction, JSON.stringify(p.pickup), JSON.stringify(p.drop),
           p.pickupAt, p.windowStart, p.windowEnd, c.trip_minutes, c.fare, c.ride_type, newPin(),
           p.skipped ? 'skipped' : 'scheduled', p.skipped ? now : null,
+          p.direction === 'outbound' ? c.route_out : c.route_back,
         ],
       );
       created += res.rowCount ?? 0;
@@ -368,6 +370,8 @@ export async function riderRideJson(ctx: AppContext, r: RideRow) {
     tripMinutes: r.trip_minutes,
     fare: r.fare,
     rideType: r.ride_type,
+    /** Encoded polyline of the road route, or null (draw a straight line). */
+    route: r.route,
     pin: showPin ? r.pin : null,
     pinLocked: r.pin_tries >= 3,
     departedAt: iso(r.departed_at),

@@ -108,13 +108,18 @@ export function olaMaps(apiKey: string, opts: { fetch?: Fetch; timeoutMs?: numbe
         origins: `${from.lat},${from.lng}`,
         destinations: `${to.lat},${to.lng}`,
       });
-      const el = (body.rows as Array<{ elements?: Array<{ distance?: number; duration?: number; status?: string }> }> | undefined)?.[0]
-        ?.elements?.[0];
+      const el = (
+        body.rows as Array<{ elements?: Array<{ distance?: number; duration?: number; status?: string; polyline?: string }> }> | undefined
+      )?.[0]?.elements?.[0];
       if (!el || typeof el.distance !== 'number' || typeof el.duration !== 'number') {
         // No route (e.g. across water): fall back to the straight-line estimate.
         return estimateTrip(from, to);
       }
-      return { distanceKm: Math.round(el.distance / 100) / 10, minutes: Math.max(5, Math.round(el.duration / 60)) };
+      return {
+        distanceKm: Math.round(el.distance / 100) / 10,
+        minutes: Math.max(5, Math.round(el.duration / 60)),
+        ...(typeof el.polyline === 'string' && el.polyline ? { polyline: el.polyline } : {}),
+      };
     },
   };
 }

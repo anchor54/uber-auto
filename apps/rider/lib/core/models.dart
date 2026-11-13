@@ -114,9 +114,12 @@ class Place {
 }
 
 class TripEstimate {
-  const TripEstimate({required this.distanceKm, required this.minutes});
+  const TripEstimate({required this.distanceKm, required this.minutes, this.polyline});
   final double distanceKm;
   final int minutes;
+
+  /// The road route (encoded polyline) when the maps provider gives one.
+  final String? polyline;
 }
 
 class RideTypeOption {
@@ -427,10 +430,14 @@ class Ride {
     this.paymentStatus = PaymentStatus.unmarked,
     this.rating,
     this.endedAt,
+    this.route,
   });
 
   final String id;
   final DateTime date;
+
+  /// The road route of this leg (encoded polyline), or null: draw a straight line.
+  final String? route;
   final RideDirection direction;
   final RideState state;
   final Place pickup;
@@ -497,6 +504,7 @@ class Ride {
         paymentStatus: paymentStatus ?? this.paymentStatus,
         rating: rating ?? this.rating,
         endedAt: endedAt ?? this.endedAt,
+        route: route,
       );
 }
 

@@ -15,6 +15,9 @@ import 'core/session_store.dart';
 /// CI passes API_BASE_URL.
 const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 
+/// Bump when the backend's map style changes in a way the app must see at once.
+const mapStyleVersion = 2;
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   if (apiBaseUrl.isEmpty) {
@@ -29,6 +32,12 @@ void main() {
       ),
     ));
   } else {
-    runApp(RiderApp(api: HttpRiderApi(baseUrl: apiBaseUrl, store: SecureSessionStore()), demoMode: false));
+    runApp(RiderApp(
+      api: HttpRiderApi(baseUrl: apiBaseUrl, store: SecureSessionStore()),
+      demoMode: false,
+      // Real maps (Ola Maps through the backend) when it serves a style.
+      // The version makes map views fetch the style afresh when it changes.
+      mapStyleUrl: '$apiBaseUrl/v1/map/style.json?v=$mapStyleVersion',
+    ));
   }
 }

@@ -4,6 +4,7 @@ import '../../app_scope.dart';
 import '../../core/dialer.dart';
 import '../../core/models.dart';
 import '../../ui/live_map.dart';
+import '../../ui/ride_map.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import 'ride_screen.dart';
@@ -148,11 +149,19 @@ class _OnTheWayViewState extends State<OnTheWayView> {
                     ),
                     const SizedBox(height: 10),
                   ],
-                  LiveRideMap(
+                  RideMap(
                     pickup: ride.pickup,
                     drop: ride.drop,
+                    route: ride.route,
                     driver: live?.driverAt,
+                    towardsDrop: false,
                     label: t.updating ? 'Last known position' : null,
+                    fallback: LiveRideMap(
+                      pickup: ride.pickup,
+                      drop: ride.drop,
+                      driver: live?.driverAt,
+                      label: t.updating ? 'Last known position' : null,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   CardBox(

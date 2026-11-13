@@ -78,7 +78,9 @@ npm test          # needs Postgres; see test/helpers.ts
 | `AUTO_ACCEPT_COMMUTES` | Demo only: accept commutes on the driver's behalf. Off by default |
 | `OTP_SECRET` | Key for hashing sign-in codes; required in production |
 | `MSG91_AUTH_KEY`, `MSG91_OTP_TEMPLATE_ID` | Send codes by SMS; required in production (else codes are logged) |
-| `OLA_MAPS_API_KEY` | Place search and road distances from Ola Maps (else the demo places and straight-line estimate) |
+| `OLA_MAPS_API_KEY` | Place search, road distances and routes, and the app's street map, from Ola Maps (else the demo places, straight-line estimate and a drawn map) |
+| `MAPS_PROVIDER` | `demo` keeps the demo places even with an Ola key (the contract and end-to-end tests need them) |
+| `MAP_TILE_CACHE_MB` | Size of the backend's map tile cache (default 64; `0` turns it off) |
 | `CORS_ORIGINS` | Comma-separated web origins allowed to call the API |
 
 With `NODE_ENV=production` the server refuses to start with any of the demo switches on, or without `OTP_SECRET` and SMS.
@@ -114,7 +116,7 @@ The ride lifecycle is one pure function (`src/domain/rides.ts`); every move writ
 
 1. **Render.** Create an account, then *New → Blueprint* and pick this repository: `render.yaml` creates the API, the worker and Postgres in Singapore. Enter the keys it asks for (below). Then, once, open the API's *Shell* and run `npm run seed:config:prod` to load fare rules, ride types and places (add `-- --demo-drivers` for the demo drivers). It never deletes data.
 2. **SMS (MSG91).** Register your sender and an OTP template on DLT through MSG91; the template text must contain `##OTP##`. Put `MSG91_AUTH_KEY` and the template id (`MSG91_OTP_TEMPLATE_ID`) into Render. Codes are limited to one every 30 seconds and five an hour per phone, and wrong guesses count across resends.
-3. **Maps (Ola Maps).** Create a project in the Ola Maps console and put its key in `OLA_MAPS_API_KEY`. The adapter (`src/modules/maps.ts`) was written from Ola's API documentation and unit-tested against recorded shapes; try a search and a booking on staging before launch.
+3. **Maps (Ola Maps).** Create a project in the Ola Maps console and put its key in `OLA_MAPS_API_KEY`. The backend uses it for place search, road distances and routes, and serves the app's map (`/v1/map/…`: Ola's style trimmed to the base map, with tiles, fonts and sprite passed through and cached), so the key never reaches phones. Check Ola's terms on caching tiles; `MAP_TILE_CACHE_MB=0` turns the cache off.
 4. **App.** In GitHub, set the repository variable `API_BASE_URL` to the API's URL (e.g. `https://commute-api.onrender.com`). CI then builds the APK and the web app in real mode.
 5. **Web app.** In GitHub *Settings → Pages*, choose *Deploy from a branch* → `gh-pages`. CI publishes the web build there on every push to `main`.
 6. **Push notifications** (later): create a Firebase project, add the Android app, and implement `PushService` (`lib/core/push.dart`) and an FCM `PushSender` (`src/modules/notify.ts`). Until then notifications are logged and riders see changes in the app within 5 seconds.

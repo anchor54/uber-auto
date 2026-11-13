@@ -195,19 +195,30 @@ export function commuteRoutes(app: FastifyInstance, ctx: AppContext) {
         await client.query<{ id: string }>(
           `insert into commutes (rider_id, driver_id, city, pickup, drop_off, repeat, weekdays, timing, time_min, pickup_time,
                                  return_trip, return_time, start_date, ride_type, preferences, fare, trip_minutes, distance_km,
-                                 usual_payment, status, respond_by, responded_at)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+                                 usual_payment, status, respond_by, responded_at, route_out)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
            returning id`,
           [
             riderId, driver.id, ctx.config.city, JSON.stringify(c.pickup), JSON.stringify(c.drop), c.repeat, c.weekdays,
             c.timing, c.time, c.pickupTime, c.returnTrip, c.returnTime, c.startDate, c.rideType, c.preferences, p.fare,
             c.trip.minutes, c.trip.distanceKm, body.usualPayment, status, respondBy, auto ? ctx.clock() : null,
+            c.trip.polyline ?? null,
           ],
         )
       ).rows[0]!;
       await client.query('update riders set usual_payment = $2 where id = $1', [riderId, body.usualPayment]);
       await client.query('delete from match_proposals where rider_id = $1', [riderId]);
       await client.query('commit');
+      // The way back can take other roads: ask the maps provider once, outside
+      // the transaction. Without it the return ride just has no route to draw.
+      if (c.returnTrip && c.trip.polyline) {
+        try {
+          const back = await mapsOf(ctx).estimateTrip(c.drop, c.pickup);
+          if (back.polyline) await ctx.db.query('update commutes set route_back = $2 where id = $1', [row.id, back.polyline]);
+        } catch {
+          // Maps unavailable: no route for the return leg.
+        }
+      }
       if (auto) await createRides(ctx, row.id);
       return reply.code(201).send(await loadCommute(ctx, row.id));
     } catch (e) {

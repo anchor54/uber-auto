@@ -1,5 +1,6 @@
 import type { Db } from './db/pool.js';
 import type { OtpSender } from './modules/auth.js';
+import type { MapStyle } from './modules/map_style.js';
 import { cityAreas, demoMaps, type CityArea, type MapsProvider } from './modules/maps.js';
 
 export interface AppConfig {
@@ -39,6 +40,8 @@ export interface AppContext {
   setClock?: (now: Date) => void;
   /** Place search and trip estimates; the demo city when not given. */
   maps?: MapsProvider;
+  /** The map the app draws (Ola Maps' style); none in the demo city. */
+  mapStyle?: MapStyle;
 }
 
 export function mapsOf(ctx: AppContext): MapsProvider {

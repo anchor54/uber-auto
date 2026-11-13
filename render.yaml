@@ -45,6 +45,9 @@ services:
         sync: false
       - key: OLA_MAPS_API_KEY
         sync: false
+      # Map tiles cached in memory (MB); 0 turns the cache off.
+      - key: MAP_TILE_CACHE_MB
+        value: "64"
       # The web build on GitHub Pages calls the API from this origin.
       - key: CORS_ORIGINS
         value: https://anchor54.github.io

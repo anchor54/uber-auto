@@ -8,7 +8,7 @@ import { providersFromEnv } from './providers.js';
 
 const config = configFromEnv(); // Throws before touching the database if unsafe.
 const db = createPool();
-const { otpSender, maps } = providersFromEnv(process.env, db);
+const { otpSender, maps, mapStyle } = providersFromEnv(process.env, db);
 await migrate(db);
 
 // The dev simulator can move this clock (POST /dev/sim/clock) to replay a
@@ -20,6 +20,7 @@ const ctx = {
   setClock: config.enableDriverSim ? (now: Date) => void (offsetMs = now.getTime() - Date.now()) : undefined,
   otpSender,
   maps,
+  mapStyle,
   config,
 };
 const app = buildApp(ctx, { logger: true });

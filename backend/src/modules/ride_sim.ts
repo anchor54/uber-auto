@@ -1,4 +1,5 @@
-import type { AppContext } from '../context.js';
+import { mapsOf, type AppContext } from '../context.js';
+import { alongPath, decodePolyline, type LatLng } from '../domain/polyline.js';
 import { ApiError } from '../domain/types.js';
 import { applyMove, loadRide, logContact, recordLocation, setDuty, type RideRow } from './rides.js';
 
@@ -42,12 +43,6 @@ export async function simStep(ctx: AppContext, rideId: string, move: SimMove): P
   }
 }
 
-/** A point [f] of the way from a to b. */
-const between = (a: { lat: number; lng: number }, b: { lat: number; lng: number }, f: number) => ({
-  lat: a.lat + (b.lat - a.lat) * f,
-  lng: a.lng + (b.lng - a.lng) * f,
-});
-
 const playing = new Set<string>();
 
 export interface PlayOptions {
@@ -82,19 +77,44 @@ async function playRide(ctx: AppContext, rideId: string, o: PlayOptions) {
   await at(ctx, r.driver_id, start.lat, start.lng);
   await simStep(ctx, rideId, 'depart');
 
-  const drive = async (from: { lat: number; lng: number }, to: { lat: number; lng: number }, minutes: number) => {
+  /** Moves along [path] (or straight from its first to last point) over [minutes]. */
+  const drive = async (path: LatLng[], minutes: number) => {
+    const point = alongPath(path);
     const steps = Math.max(2, Math.round((minutes * 60) / 5));
     for (let i = 1; i <= steps; i++) {
       await sleep(tick);
-      const p = between(from, to, i / steps);
+      const p = point(i / steps);
       await at(ctx, r.driver_id, p.lat, p.lng);
     }
   };
 
-  await drive(start, r.pickup, o.approachMinutes ?? 6);
+  // Along the roads when the maps provider gives routes; else a straight line.
+  await drive(await approachRoute(ctx, start, r.pickup), o.approachMinutes ?? 6);
   await simStep(ctx, rideId, 'arrive');
   await sleep(((o.waitMinutes ?? 1) * 60_000) / o.speed);
   await simStep(ctx, rideId, 'start');
-  await drive(r.pickup, r.drop_off, r.trip_minutes);
+  await drive(routeOf(r.route, r.pickup, r.drop_off), r.trip_minutes);
   await simStep(ctx, rideId, 'end');
+}
+
+/** The ride's stored road route, or the straight line when it has none. */
+export function routeOf(encoded: string | null, from: LatLng, to: LatLng): LatLng[] {
+  if (encoded) {
+    try {
+      const path = decodePolyline(encoded);
+      if (path.length >= 2) return path;
+    } catch {
+      // A damaged route: drive straight.
+    }
+  }
+  return [from, to];
+}
+
+/** The road from where the simulated driver starts to the pickup, asked for once. */
+async function approachRoute(ctx: AppContext, from: LatLng, to: LatLng): Promise<LatLng[]> {
+  try {
+    return routeOf((await mapsOf(ctx).estimateTrip(from, to)).polyline ?? null, from, to);
+  } catch {
+    return [from, to];
+  }
 }

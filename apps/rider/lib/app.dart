@@ -8,12 +8,13 @@ import 'features/auth/start_screen.dart';
 import 'ui/tokens.dart';
 
 class RiderApp extends StatelessWidget {
-  const RiderApp({super.key, required this.api, this.clock = const SystemClock(), this.demoMode = true, this.push = const NoPush()});
+  const RiderApp({super.key, required this.api, this.clock = const SystemClock(), this.demoMode = true, this.push = const NoPush(), this.mapStyleUrl});
 
   final RiderApi api;
   final Clock clock;
   final bool demoMode;
   final PushService push;
+  final String? mapStyleUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +23,7 @@ class RiderApp extends StatelessWidget {
       clock: clock,
       demoMode: demoMode,
       push: push,
+      mapStyleUrl: mapStyleUrl,
       child: MaterialApp(
         title: 'Commute',
         debugShowCheckedModeBanner: false,

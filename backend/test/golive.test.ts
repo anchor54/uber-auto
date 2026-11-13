@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { olaMapStyle } from '../src/modules/map_style.js';
 import { olaMaps, cityAreas } from '../src/modules/maps.js';
 import { msg91OtpSender } from '../src/modules/sms.js';
 import { providersFromEnv } from '../src/providers.js';
-import { bearer, closeDb, DEMO_OTP, startTestApp, type TestApp } from './helpers.js';
+import { bearer, closeDb, commuteRequest, DEMO_OTP, startTestApp, type TestApp } from './helpers.js';
 
 /** Going live: SMS limits and delivery, the maps provider, CORS. */
 
@@ -198,6 +199,149 @@ describe('seed:config on a live database', () => {
       expect(await seedConfig(t.db, { demoDrivers: true })).toEqual({ fareRules: 0, rideTypeConfig: 0, places: 1, drivers: 0 });
       expect((await t.db.query(`select base from fare_rules where ride_type = 'bike'`)).rows[0].base).toBe(99);
       expect((await t.app.inject({ method: 'GET', url: '/v1/home', headers: bearer(rider) })).statusCode).toBe(200);
+    } finally {
+      await t.close();
+    }
+  });
+});
+
+describe('the map style for the app', () => {
+  const olaStyle = {
+    version: 8,
+    sprite: 'https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/sprite',
+    glyphs: 'https://api.olamaps.io/tiles/vector/v1/fonts/{fontstack}/{range}.pbf',
+    sources: {
+      openmaptiles: { type: 'vector', url: 'https://api.olamaps.io/tiles/vector/v1/data/planet.json' },
+      vectordata: { type: 'vector', url: 'https://api.olamaps.io/tiles/vector/v1/data/vectordata.json' },
+      street: { type: 'vector', url: 'https://api.olamaps.io/tiles/vector/v1/data/street.json' },
+    },
+    layers: [
+      { id: 'bg', type: 'background' },
+      { id: 'road', type: 'line', source: 'openmaptiles', 'source-layer': 'transportation' },
+      { id: 'building-3d', type: 'fill-extrusion', source: 'openmaptiles', 'source-layer': 'building' },
+      { id: 'ola-pois', type: 'symbol', source: 'vectordata', 'source-layer': 'hyperchargers' },
+      { id: 'sli', type: 'line', source: 'street', 'source-layer': 'street' },
+    ],
+  };
+  const tilejson = { tiles: ['https://api.olamaps.io/tiles/vector/v1/data/planet/{z}/{x}/{y}.pbf'], minzoom: 0, maxzoom: 14 };
+  const ola = () =>
+    fakeFetch((url) =>
+      url.pathname.endsWith('style.json') ? { body: olaStyle } : url.pathname.endsWith('.json') ? { body: tilejson } : { body: { tile: url.pathname } },
+    );
+
+  it('keeps only the base map, serves everything through here, and never contains the key', async () => {
+    const f = ola();
+    const style = (await olaMapStyle('SECRET-KEY', { fetch: f.fn }).style('https://api.example.com')) as any;
+    expect(JSON.stringify(style)).not.toContain('SECRET-KEY');
+    expect(Object.keys(style.sources)).toEqual(['openmaptiles']);
+    expect(style.sources.openmaptiles).toEqual({
+      type: 'vector',
+      minzoom: 0,
+      maxzoom: 14,
+      tiles: ['https://api.example.com/v1/map/tiles/openmaptiles/{z}/{x}/{y}.pbf'],
+    });
+    expect(style.layers.map((l: { id: string }) => l.id)).toEqual(['bg', 'road']);
+    expect(style.glyphs).toBe('https://api.example.com/v1/map/fonts/{fontstack}/{range}.pbf');
+    expect(style.sprite).toBe('https://api.example.com/v1/map/sprite');
+    // Ola is asked with the key, and the dropped sources are never fetched.
+    expect(f.calls.every((c) => c.url.searchParams.get('api_key') === 'SECRET-KEY')).toBe(true);
+    expect(f.calls.map((c) => c.url.pathname)).toEqual([
+      '/tiles/vector/v1/styles/default-light-standard/style.json',
+      '/tiles/vector/v1/data/planet.json',
+    ]);
+  });
+
+  it('the style is fetched from Ola once per 6 hours', async () => {
+    let clock = 0;
+    const f = ola();
+    const ms = olaMapStyle('k', { fetch: f.fn, now: () => clock });
+    await ms.style('https://a');
+    await ms.style('https://a');
+    expect(f.calls).toHaveLength(2);
+    clock += 7 * 3_600_000;
+    await ms.style('https://a');
+    expect(f.calls).toHaveLength(4);
+  });
+
+  it('tiles come from Ola once, then from the cache; impossible tiles are refused', async () => {
+    const f = ola();
+    const ms = olaMapStyle('k', { fetch: f.fn });
+    const a = await ms.tile('openmaptiles', 14, 11726, 7605);
+    expect(a.contentType).toBe('application/x-protobuf');
+    expect(JSON.parse(a.body.toString())).toEqual({ tile: '/tiles/vector/v1/data/planet/14/11726/7605.pbf' });
+    const before = f.calls.length;
+    await ms.tile('openmaptiles', 14, 11726, 7605);
+    expect(f.calls.length).toBe(before);
+    for (const [src, z, x, y] of [
+      ['vectordata', 14, 1, 1],
+      ['openmaptiles', 15, 1, 1], // past the source's max zoom
+      ['openmaptiles', 2, 4, 0], // x out of range at z2
+      ['openmaptiles', -1, 0, 0],
+    ] as const) {
+      await expect(ms.tile(src, z, x, y)).rejects.toMatchObject({ code: 'no_tile' });
+    }
+  });
+
+  it('with the cache off, every tile goes to Ola', async () => {
+    const f = ola();
+    const ms = olaMapStyle('k', { fetch: f.fn, cacheMb: 0 });
+    await ms.tile('openmaptiles', 3, 1, 1);
+    await ms.tile('openmaptiles', 3, 1, 1);
+    expect(f.calls.filter((c) => c.url.pathname.endsWith('.pbf'))).toHaveLength(2);
+  });
+
+  it('fonts are passed through; odd font names are refused', async () => {
+    const f = ola();
+    const ms = olaMapStyle('k', { fetch: f.fn });
+    await ms.font('Gentona Book', '0-255');
+    expect(f.calls.at(-1)!.url.pathname).toBe('/tiles/vector/v1/fonts/Gentona%20Book/0-255.pbf');
+    await expect(ms.font('../../etc', '0-255')).rejects.toMatchObject({ code: 'no_font' });
+    await expect(ms.font('Gentona Book', 'all')).rejects.toMatchObject({ code: 'no_font' });
+  });
+
+  it('is served under /v1/map without a session; 404 with no maps provider', async () => {
+    const t = await startTestApp();
+    try {
+      expect((await t.app.inject({ method: 'GET', url: '/v1/map/style.json' })).statusCode).toBe(404);
+      t.ctx.mapStyle = olaMapStyle('k1', { fetch: ola().fn });
+      const res = await t.app.inject({ method: 'GET', url: '/v1/map/style.json', headers: { host: 'api.example.com', 'x-forwarded-proto': 'https' } });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().sprite).toBe('https://api.example.com/v1/map/sprite');
+      const tile = await t.app.inject({ method: 'GET', url: '/v1/map/tiles/openmaptiles/3/1/2.pbf' });
+      expect([tile.statusCode, tile.headers['content-type'], tile.headers['cache-control']]).toEqual([200, 'application/x-protobuf', 'public, max-age=86400']);
+      expect((await t.app.inject({ method: 'GET', url: '/v1/map/tiles/openmaptiles/3/1/2.png' })).statusCode).toBe(404);
+      const font = await t.app.inject({ method: 'GET', url: '/v1/map/fonts/Gentona%20Book/0-255.pbf' });
+      expect(font.statusCode).toBe(200);
+    } finally {
+      await t.close();
+    }
+  });
+});
+
+describe('road routes for drawing', () => {
+  it('each ride keeps the route of its direction; the way back is asked for once', async () => {
+    const t = await startTestApp({ autoAcceptCommutes: true });
+    try {
+      const asked: string[] = [];
+      t.ctx.maps = {
+        name: 'fake',
+        async searchPlaces() {
+          return [];
+        },
+        async estimateTrip(from) {
+          const outbound = from.lat < 12.92; // home is south of the office
+          asked.push(outbound ? 'out' : 'back');
+          return { distanceKm: 9.5, minutes: 20, polyline: outbound ? 'OUT_ROUTE' : 'BACK_ROUTE' };
+        },
+      };
+      const rider = await t.signIn();
+      const proposals = (await t.app.inject({ method: 'POST', url: '/v1/commutes/proposals', payload: { request: commuteRequest() }, headers: bearer(rider) })).json();
+      expect(proposals.proposals[0].trip.polyline).toBe('OUT_ROUTE');
+      await t.app.inject({ method: 'POST', url: '/v1/commutes', payload: { proposalId: proposals.proposals[0].id, usualPayment: 'upi' }, headers: bearer(rider) });
+      const rides = (await t.app.inject({ method: 'GET', url: '/v1/rides/upcoming', headers: bearer(rider) })).json().rides;
+      expect(rides[0]).toMatchObject({ direction: 'outbound', route: 'OUT_ROUTE' });
+      expect(rides[1]).toMatchObject({ direction: 'return', route: 'BACK_ROUTE' });
+      expect(asked.filter((a) => a === 'back')).toHaveLength(1);
     } finally {
       await t.close();
     }

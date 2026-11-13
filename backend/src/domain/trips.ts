@@ -9,6 +9,8 @@ export interface FareRule {
 export interface TripEstimate {
   distanceKm: number;
   minutes: number;
+  /** The road route as an encoded polyline (precision 5), when the maps provider gives one. */
+  polyline?: string;
 }
 
 /** Straight-line distance in km. */

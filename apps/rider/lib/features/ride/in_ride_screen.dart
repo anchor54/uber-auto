@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/dialer.dart';
 import '../../ui/live_map.dart';
+import '../../ui/ride_map.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import 'ride_screen.dart';
@@ -72,7 +73,13 @@ class InRideView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  LiveRideMap(pickup: ride.pickup, drop: ride.drop, driver: live?.driverAt, towardsDrop: true),
+                  RideMap(
+                    pickup: ride.pickup,
+                    drop: ride.drop,
+                    route: ride.route,
+                    driver: live?.driverAt,
+                    fallback: LiveRideMap(pickup: ride.pickup, drop: ride.drop, driver: live?.driverAt, towardsDrop: true),
+                  ),
                   const SizedBox(height: 12),
                   CardBox(
                     child: Row(

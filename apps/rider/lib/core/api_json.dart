@@ -58,8 +58,11 @@ Place placeFromJson(Map<String, Object?> j) => Place(
       lng: _num(j['lng']),
     );
 
-TripEstimate tripFromJson(Map<String, Object?> j) =>
-    TripEstimate(distanceKm: _num(j['distanceKm']), minutes: (j['minutes'] as num).toInt());
+TripEstimate tripFromJson(Map<String, Object?> j) => TripEstimate(
+      distanceKm: _num(j['distanceKm']),
+      minutes: (j['minutes'] as num).toInt(),
+      polyline: j['polyline'] as String?,
+    );
 
 /// What the backend's commuteRequestSchema accepts. Pickup time and start
 /// date are not sent: the server works them out.
@@ -224,6 +227,7 @@ Ride rideFromJson(Map<String, Object?> j) => Ride(
       paymentStatus: paymentStatusFrom((j['paymentStatus'] as String?) ?? 'unmarked'),
       rating: _ratingFrom(j['rating']),
       endedAt: _time(j['endedAt']),
+      route: j['route'] as String?,
     );
 
 LiveRide liveRideFromJson(Map<String, Object?> j) {

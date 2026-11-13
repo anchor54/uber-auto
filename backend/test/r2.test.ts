@@ -425,6 +425,19 @@ describe('simulator', () => {
     expect(track).toBeGreaterThan(10);
   });
 
+  it('drives along the road route, not across it', async () => {
+    // A ride whose road route bends far east of the straight line home → office.
+    const { first } = await commuter();
+    const bend = { lat: 12.92, lng: 77.75 };
+    await t.db.query('update rides set route = $2 where id = $1', [first.id, encode([first.pickup, bend, first.drop])]);
+    t.clock.now = thu('08:25');
+    const sleep = async (ms: number) => void (t.clock.now = new Date(t.clock.now.getTime() + ms * 600));
+    await simPlay(t.ctx, first.id, { speed: 600, sleep });
+    const track = (await t.db.query<{ lng: number }>('select lng from ride_track where ride_id = $1 order by at', [first.id])).rows;
+    // The straight line never goes east of the office (77.6964); the road does.
+    expect(Math.max(...track.map((p) => p.lng))).toBeGreaterThan(77.72);
+  });
+
   it('dev routes step a ride and move the clock', async () => {
     await t.close();
     t = await startTestApp({ autoAcceptCommutes: true, enableDriverSim: true });
@@ -439,3 +452,27 @@ describe('simulator', () => {
     expect((await get(`/v1/rides/${first.id}`, rider)).json().state).toBe('completed');
   });
 });
+
+/** Encodes points as a polyline (precision 5), for test routes. */
+function encode(points: Array<{ lat: number; lng: number }>): string {
+  let out = '';
+  let pLat = 0;
+  let pLng = 0;
+  const one = (v: number) => {
+    let n = v < 0 ? ~(v << 1) : v << 1;
+    while (n >= 0x20) {
+      out += String.fromCharCode((0x20 | (n & 0x1f)) + 63);
+      n >>= 5;
+    }
+    out += String.fromCharCode(n + 63);
+  };
+  for (const p of points) {
+    const lat = Math.round(p.lat * 1e5);
+    const lng = Math.round(p.lng * 1e5);
+    one(lat - pLat);
+    one(lng - pLng);
+    pLat = lat;
+    pLng = lng;
+  }
+  return out;
+}

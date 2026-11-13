@@ -7,6 +7,7 @@ import { bookingRoutes } from './modules/booking.js';
 import { commuteRoutes } from './modules/commutes.js';
 import { devSimRoutes } from './modules/dev_sim.js';
 import { driverRequestRoutes } from './modules/driver_requests.js';
+import { mapStyleRoutes } from './modules/map_style.js';
 import { rideRoutes } from './modules/rides.js';
 
 export function buildApp(ctx: AppContext, opts: { logger?: boolean } = {}): FastifyInstance {
@@ -52,6 +53,7 @@ export function buildApp(ctx: AppContext, opts: { logger?: boolean } = {}): Fast
   commuteRoutes(app, ctx);
   driverRequestRoutes(app, ctx);
   rideRoutes(app, ctx);
+  mapStyleRoutes(app, ctx);
   if (ctx.config.enableDriverSim) devSimRoutes(app, ctx);
   return app;
 }

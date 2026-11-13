@@ -5,6 +5,7 @@ import '../../core/fares.dart';
 import '../../core/models.dart';
 import '../../core/schedule.dart';
 import '../../ui/map_preview.dart';
+import '../../ui/ride_map.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import '../home/home_screen.dart';
@@ -229,7 +230,14 @@ class _MatchScreenState extends State<MatchScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              RouteMapPreview(label: 'About ${m.trip.minutes} min · $km km'),
+              RideMap(
+                pickup: setup.pickup!,
+                drop: setup.drop!,
+                route: m.trip.polyline,
+                height: 170,
+                label: 'About ${m.trip.minutes} min · $km km',
+                fallback: RouteMapPreview(label: 'About ${m.trip.minutes} min · $km km'),
+              ),
               const SizedBox(height: 12),
               CardBox(
                 child: Column(
