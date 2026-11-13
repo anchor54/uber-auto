@@ -152,9 +152,9 @@ class _OnTheWayViewState extends State<OnTheWayView> {
                   RideMap(
                     pickup: ride.pickup,
                     drop: ride.drop,
-                    route: ride.route,
+                    phase: MapPhase.approach,
+                    approachRoute: live?.approachRoute,
                     driver: live?.driverAt,
-                    towardsDrop: false,
                     label: t.updating ? 'Last known position' : null,
                     fallback: LiveRideMap(
                       pickup: ride.pickup,

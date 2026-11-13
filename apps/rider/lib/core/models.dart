@@ -526,9 +526,13 @@ class LiveRide {
     this.waitEndsAt,
     this.late = false,
     this.pinLocked = false,
+    this.approachRoute,
   });
 
   final RideState state;
+
+  /// While on the way: the driver's road route to the pickup (encoded), or null.
+  final String? approachRoute;
 
   /// The server's clock when it answered, so countdowns don't trust the phone's.
   final DateTime serverTime;

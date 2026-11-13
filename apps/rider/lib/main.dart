@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app.dart';
 import 'core/fake_api.dart';
@@ -20,6 +21,9 @@ const mapStyleVersion = 2;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Draw under the system bars (screens keep clear of them with SafeArea),
+  // so a screen can run its colour or map up under the status bar.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   if (apiBaseUrl.isEmpty) {
     // The demo driver takes a few seconds to accept, so "Waiting for …" shows.
     // Then, 20 seconds after accepting, the first ride plays itself out at 20x speed.

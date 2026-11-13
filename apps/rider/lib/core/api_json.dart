@@ -242,5 +242,6 @@ LiveRide liveRideFromJson(Map<String, Object?> j) {
     waitEndsAt: _time(j['waitEndsAt']),
     late: (j['late'] as bool?) ?? false,
     pinLocked: (j['pinLocked'] as bool?) ?? false,
+    approachRoute: j['approachRoute'] as String?,
   );
 }
