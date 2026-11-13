@@ -9,7 +9,7 @@ Designs, flows and rules live in the design canvas and the Rider and Driver App 
 | Path | What it is |
 |---|---|
 | `apps/rider/` | Rider app (Flutter, Android + web) |
-| `backend/` | API and worker (Node 22, TypeScript, Fastify, Postgres) |
+| `backend-go/` | API and worker (Go, Postgres) |
 | `render.yaml` | Hosting: API, worker and Postgres on Render |
 | `.github/workflows/` | CI: tests, screenshots, APK and web builds, emulator tests, end-to-end tests |
 
@@ -60,14 +60,18 @@ The **contract test** (`test/contract/`) runs one script of `RiderApi` calls aga
 
 ## Backend
 
+Go 1.24+, Postgres 16.
+
 ```sh
-cd backend
-npm install
+cd backend-go
 export DATABASE_URL=postgres://app:app@localhost:5432/commute_dev
-npm run seed      # wipe and load the demo city (same places and drivers as the app's demo mode)
-FIXED_OTP=123456 ENABLE_DRIVER_SIM=true RUN_JOBS_IN_API=true npm run dev
-npm test          # needs Postgres; see test/helpers.ts
+go run ./cmd/db seed   # wipe and load the demo city (same places and drivers as the app's demo mode)
+FIXED_OTP=123456 ENABLE_DRIVER_SIM=true RUN_JOBS_IN_API=true go run ./cmd/server
+go test ./...          # needs Postgres: DATABASE_URL, else postgres://app:app@localhost:5432/commute_test
+./build.sh             # the production binaries in bin/: server, worker, db, sim
 ```
+
+Layout: `cmd/` holds the four programs; `internal/domain` the pure rules (dates, fares, the ride plan, the ride lifecycle, polylines); `internal/db` the pool, migrations (embedded in the binaries) and seeds; `internal/app` the HTTP API, its services and the worker jobs.
 
 | Variable | Meaning |
 |---|---|
@@ -83,19 +87,19 @@ npm test          # needs Postgres; see test/helpers.ts
 | `MAP_TILE_CACHE_MB` | Size of the backend's map tile cache (default 64; `0` turns it off) |
 | `CORS_ORIGINS` | Comma-separated web origins allowed to call the API |
 
-With `NODE_ENV=production` the server refuses to start with any of the demo switches on, or without `OTP_SECRET` and SMS.
+With `APP_ENV=production` (or `NODE_ENV=production`) the server refuses to start with any of the demo switches on, or without `OTP_SECRET` and SMS.
 
-**Processes.** `npm run dev` / `npm start` is the API. `npm run worker` is the worker: every 30 seconds it creates rides 14 days ahead (nightly), queues "Leg is on", flags late drivers, queues payment reminders, closes stale rides and sends notifications. Each job is safe to run twice.
+**Processes.** `cmd/server` is the API. `cmd/worker` is the worker: every 30 seconds it creates rides 14 days ahead (nightly), queues "Leg is on", flags late drivers, queues payment reminders, closes stale rides and sends notifications. Each job is safe to run twice.
 
 **Playing the driver** (backend running with `ENABLE_DRIVER_SIM=true`):
 
 ```sh
-npm run sim -- requests                 # commutes waiting for a driver (D2)
-npm run sim -- accept                   # accept the newest (or: decline, expire)
-npm run sim -- rides                    # open rides, soonest first
-npm run sim -- clock pickup-20          # move the server clock to 20 min before the next pickup
-npm run sim -- play next 30             # play the next ride at 30× speed
-npm run sim -- ride next depart         # or one move: arrive, start, end, no_show, contact
+go run ./cmd/sim requests              # commutes waiting for a driver (D2)
+go run ./cmd/sim accept                # accept the newest (or: decline, expire)
+go run ./cmd/sim rides                 # open rides, soonest first
+go run ./cmd/sim clock pickup-20       # move the server clock to 20 min before the next pickup
+go run ./cmd/sim play next 30          # play the next ride at 30× speed
+go run ./cmd/sim ride next depart      # or one move: arrive, start, end, no_show, contact
 ```
 
 ### API
@@ -110,14 +114,14 @@ All JSON; everything except the `auth` routes needs `Authorization: Bearer <toke
 | Rides, rider (R2) | `GET /v1/rides/upcoming?days=`, `/v1/rides/unsettled`, `/v1/rides/:id`, `/v1/rides/:id/live`; `POST /v1/rides/:id/running-late`, `/payment`, `/rating`; `PUT /v1/devices` |
 | Rides, driver (D3 API) | `GET /v1/driver/run?date=`, `PUT /v1/driver/duty`, `POST /v1/driver/location`, `POST /v1/driver/rides/:id/depart`, `/arrive`, `/start`, `/end`, `/contact`, `/no-show`, `/payment` |
 
-The ride lifecycle is one pure function (`src/domain/rides.ts`); every move writes a `ride_events` row.
+The ride lifecycle is one pure function (`Transition` in `backend-go/internal/domain/rides.go`); every move writes a `ride_events` row.
 
 ## Going live
 
-1. **Render.** Create an account, then *New → Blueprint* and pick this repository: `render.yaml` creates the API, the worker and Postgres in Singapore. Enter the keys it asks for (below). Then, once, open the API's *Shell* and run `npm run seed:config:prod` to load fare rules, ride types and places (add `-- --demo-drivers` for the demo drivers). It never deletes data.
+1. **Render.** Create an account, then *New → Blueprint* and pick this repository: `render.yaml` creates the API, the worker and Postgres in Singapore. Enter the keys it asks for (below). Then, once, open the API's *Shell* and run `./bin/db seed-config` to load fare rules, ride types and places (add `--demo-drivers` for the demo drivers). It never deletes data.
 2. **SMS (MSG91).** Register your sender and an OTP template on DLT through MSG91; the template text must contain `##OTP##`. Put `MSG91_AUTH_KEY` and the template id (`MSG91_OTP_TEMPLATE_ID`) into Render. Codes are limited to one every 30 seconds and five an hour per phone, and wrong guesses count across resends.
 3. **Maps (Ola Maps).** Create a project in the Ola Maps console and put its key in `OLA_MAPS_API_KEY`. The backend uses it for place search, road distances and routes, and serves the app's map (`/v1/map/…`: Ola's style trimmed to the base map, with tiles, fonts and sprite passed through and cached), so the key never reaches phones. Check Ola's terms on caching tiles; `MAP_TILE_CACHE_MB=0` turns the cache off.
 4. **App.** In GitHub, set the repository variable `API_BASE_URL` to the API's URL (e.g. `https://commute-api.onrender.com`). CI then builds the APK and the web app in real mode.
 5. **Web app.** In GitHub *Settings → Pages*, choose *Deploy from a branch* → `gh-pages`. CI publishes the web build there on every push to `main`.
-6. **Push notifications** (later): create a Firebase project, add the Android app, and implement `PushService` (`lib/core/push.dart`) and an FCM `PushSender` (`src/modules/notify.ts`). Until then notifications are logged and riders see changes in the app within 5 seconds.
+6. **Push notifications** (later): create a Firebase project, add the Android app, and implement `PushService` (`lib/core/push.dart`) and an FCM `PushSender` (`backend-go/internal/app/notify.go`). Until then notifications are logged and riders see changes in the app within 5 seconds.
 7. **Driver app.** Real riders shouldn't get "Driver confirmed" from a stand-in: drivers need the driver app (or ops acting through `/v1/driver/*`) before launch.

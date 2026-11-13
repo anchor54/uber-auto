@@ -6,9 +6,9 @@ name: End to end
 on:
   push:
     branches: [main]
-    paths: ['apps/rider/**', 'backend/**', '.github/workflows/e2e.yml', '.github/scripts/**']
+    paths: ['apps/rider/**', 'backend-go/**', '.github/workflows/e2e.yml', '.github/scripts/**']
   pull_request:
-    paths: ['apps/rider/**', 'backend/**', '.github/workflows/e2e.yml', '.github/scripts/**']
+    paths: ['apps/rider/**', 'backend-go/**', '.github/workflows/e2e.yml', '.github/scripts/**']
   workflow_dispatch:
 
 concurrency:
@@ -40,8 +40,8 @@ jobs:
         options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm, cache-dependency-path: backend/package-lock.json }
+      - uses: actions/setup-go@v5
+        with: { go-version-file: backend-go/go.mod, cache-dependency-path: backend-go/go.sum }
       - uses: subosito/flutter-action@v2
         with: { channel: stable, flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
       - name: Start the backend
@@ -76,8 +76,8 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21' }
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm, cache-dependency-path: backend/package-lock.json }
+      - uses: actions/setup-go@v5
+        with: { go-version-file: backend-go/go.mod, cache-dependency-path: backend-go/go.sum }
       - uses: subosito/flutter-action@v2
         with: { channel: stable, flutter-version: '${{ env.FLUTTER_VERSION }}', cache: true }
       - name: Start the backend
@@ -99,5 +99,5 @@ jobs:
       - name: Publish logs
         if: always()
         run: |
-          cp backend/backend.log "$OUT/" 2>/dev/null || true
+          cp backend-go/backend.log "$OUT/" 2>/dev/null || true
           .github/scripts/publish-results.sh e2e-emulator "$OUT"

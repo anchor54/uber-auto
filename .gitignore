@@ -28,3 +28,7 @@ node_modules/
 dist/
 coverage/
 .env
+
+# Go backend build output
+backend-go/bin/
+backend-go/backend.log

@@ -3,9 +3,9 @@ name: Backend
 on:
   push:
     branches: [main]
-    paths: ['backend/**', '.github/workflows/backend.yml', '.github/scripts/**']
+    paths: ['backend-go/**', '.github/workflows/backend.yml', '.github/scripts/**']
   pull_request:
-    paths: ['backend/**', '.github/workflows/backend.yml', '.github/scripts/**']
+    paths: ['backend-go/**', '.github/workflows/backend.yml', '.github/scripts/**']
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: backend
+    working-directory: backend-go
     shell: bash
 
 jobs:
@@ -38,17 +38,18 @@ jobs:
       OUT: ${{ github.workspace }}/ci-out
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-go@v5
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
-      - run: mkdir -p "$OUT" && npm ci 2>&1 | tee "$OUT/npm-ci.txt"
-      - run: npm run typecheck 2>&1 | tee "$OUT/typecheck.txt"
+          go-version-file: backend-go/go.mod
+          cache-dependency-path: backend-go/go.sum
+      - run: mkdir -p "$OUT"
+      - name: Formatting
+        run: test -z "$(gofmt -l . | tee "$OUT/gofmt.txt")"
+      - run: go vet ./... 2>&1 | tee "$OUT/vet.txt"
       - name: Production build (what Render runs)
-        run: npm run build 2>&1 | tee "$OUT/build.txt"
+        run: bash build.sh 2>&1 | tee "$OUT/build.txt"
       - if: always()
-        run: npm test 2>&1 | tee "$OUT/tests.txt"
+        run: go test -count=1 ./... 2>&1 | tee "$OUT/tests.txt"
       - name: Publish logs
         if: always()
         working-directory: .

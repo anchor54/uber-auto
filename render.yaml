@@ -5,7 +5,7 @@
 #   MSG91_AUTH_KEY, MSG91_OTP_TEMPLATE_ID   (MSG91 dashboard, DLT-approved OTP template)
 #   OLA_MAPS_API_KEY                        (Ola Maps console; optional, else the demo places)
 # Then, once, from the API service's Shell:
-#   npm run seed:config:prod                (fare rules, ride types, places; never deletes)
+#   ./bin/db seed-config                    (fare rules, ride types, places; never deletes)
 # Full checklist: README.md → "Going live".
 #
 # Singapore is Render's closest region to India.
@@ -20,19 +20,17 @@ databases:
 services:
   - type: web
     name: commute-api
-    runtime: node
+    runtime: go
     region: singapore
     plan: starter
-    rootDir: backend
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: npm run start:prod
+    rootDir: backend-go
+    buildCommand: bash build.sh
+    startCommand: ./bin/server
     healthCheckPath: /health
     autoDeploy: true
     envVars:
-      - key: NODE_ENV
+      - key: APP_ENV
         value: production
-      - key: NODE_VERSION
-        value: "22"
       - key: DATABASE_URL
         fromDatabase:
           name: commute-db
@@ -56,18 +54,16 @@ services:
   # late drivers, payment reminders, stale rides, sending notifications.
   - type: worker
     name: commute-worker
-    runtime: node
+    runtime: go
     region: singapore
     plan: starter
-    rootDir: backend
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: npm run worker:prod
+    rootDir: backend-go
+    buildCommand: bash build.sh
+    startCommand: ./bin/worker
     autoDeploy: true
     envVars:
-      - key: NODE_ENV
+      - key: APP_ENV
         value: production
-      - key: NODE_VERSION
-        value: "22"
       - key: DATABASE_URL
         fromDatabase:
           name: commute-db
