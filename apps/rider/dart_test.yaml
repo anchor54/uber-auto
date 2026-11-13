@@ -1,3 +1,5 @@
 tags:
   screenshots:
     description: Renders every screen to PNG for visual review. Run with --update-goldens.
+  contract:
+    description: The same RiderApi script against the demo backend and, with RIDER_API_URL set, the real one.

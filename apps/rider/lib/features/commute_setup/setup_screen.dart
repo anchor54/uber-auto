@@ -55,9 +55,15 @@ class _SetupScreenState extends State<SetupScreen> {
     if (a == null || b == null || a == b) return;
     final id = ++_loadId;
     final api = AppScope.of(context).api;
-    final trip = await api.estimateTrip(a, b);
-    if (!mounted || id != _loadId) return;
-    setup.setTrip(trip);
+    // Only the summary's preview: if it can't load, the summary shows "–" and
+    // the ride-type step loads (and reports errors) on its own.
+    try {
+      final trip = await api.estimateTrip(a, b);
+      if (!mounted || id != _loadId) return;
+      setup.setTrip(trip);
+    } on ApiException {
+      return;
+    }
     await _loadOptions();
   }
 
@@ -65,14 +71,18 @@ class _SetupScreenState extends State<SetupScreen> {
     final a = setup.pickup, b = setup.drop;
     if (a == null || b == null || a == b) return;
     final id = ++_loadId;
-    final options = await AppScope.of(context).api.bookingOptions(
-          flow: setup.flow,
-          pickup: a,
-          drop: b,
-          pickupTime: setup.pickupTime,
-        );
-    if (!mounted || id != _loadId) return;
-    setup.setOptions(options);
+    try {
+      final options = await AppScope.of(context).api.bookingOptions(
+            flow: setup.flow,
+            pickup: a,
+            drop: b,
+            pickupTime: setup.pickupTime,
+          );
+      if (!mounted || id != _loadId) return;
+      setup.setOptions(options);
+    } on ApiException {
+      // As above: a preview only.
+    }
   }
 
   Future<void> _pickTime({required bool returnLeg}) async {

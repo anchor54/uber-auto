@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
@@ -23,6 +25,11 @@ class _PlaceSearchScreenState extends State<PlaceSearchScreen> {
   List<Place> _results = const [];
   bool _loaded = false;
   int _requestId = 0;
+  String? _error;
+  Timer? _debounce;
+
+  /// Real mode asks a paid maps API, so it waits for a pause in typing.
+  static const debounce = Duration(milliseconds: 300);
 
   @override
   void didChangeDependencies() {
@@ -35,15 +42,36 @@ class _PlaceSearchScreenState extends State<PlaceSearchScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _query.dispose();
     super.dispose();
   }
 
+  void _onChanged(String q) {
+    _debounce?.cancel();
+    if (AppScope.of(context).demoMode) {
+      _search(q);
+    } else {
+      _debounce = Timer(debounce, () => _search(q));
+    }
+  }
+
   Future<void> _search(String q) async {
     final id = ++_requestId;
-    final results = await AppScope.of(context).api.searchPlaces(q);
-    if (!mounted || id != _requestId) return;
-    setState(() => _results = results);
+    try {
+      final results = await AppScope.of(context).api.searchPlaces(q);
+      if (!mounted || id != _requestId) return;
+      setState(() {
+        _results = results;
+        _error = null;
+      });
+    } on ApiException catch (e) {
+      if (!mounted || id != _requestId) return;
+      setState(() {
+        _results = const [];
+        _error = e.message;
+      });
+    }
   }
 
   @override
@@ -61,7 +89,7 @@ class _PlaceSearchScreenState extends State<PlaceSearchScreen> {
                 controller: _query,
                 autofocus: true,
                 textInputAction: TextInputAction.search,
-                onChanged: _search,
+                onChanged: _onChanged,
                 style: AppText.body(15, weight: FontWeight.w500),
                 decoration: riderInputDecoration('Search a place or address').copyWith(
                   prefixIcon: const Padding(
@@ -77,7 +105,7 @@ class _PlaceSearchScreenState extends State<PlaceSearchScreen> {
                   ? Padding(
                       padding: const EdgeInsets.all(24),
                       child: Text(
-                        _query.text.isEmpty ? 'Start typing a place' : 'No places match "${_query.text}"',
+                        _error ?? (_query.text.isEmpty ? 'Start typing a place' : 'No places match "${_query.text}"'),
                         key: const Key('place.empty'),
                         style: AppText.body(14, color: AppColors.muted),
                       ),

@@ -22,7 +22,9 @@ Future<FakeRiderApi> pumpRiderApp(
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
   final fake = api ?? FakeRiderApi();
-  await tester.pumpWidget(RiderApp(api: fake, clock: FixedClock(now ?? testNow)));
+  final clock = FixedClock(now ?? testNow);
+  fake.syncClock(clock.now);
+  await tester.pumpWidget(RiderApp(api: fake, clock: clock));
   await tester.pumpAndSettle();
   return fake;
 }

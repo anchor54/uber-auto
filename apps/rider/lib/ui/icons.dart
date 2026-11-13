@@ -64,6 +64,9 @@ abstract final class AppIcons {
     CirclePart(12, 10, 2.5),
   ]);
   static const clock = AppIconData(width: 24, height: 24, parts: [CirclePart(12, 12, 9), PathPart('M12 7v5l3 2')]);
+  static const star = AppIconData(width: 24, height: 24, strokeWidth: 1.8, parts: [PathPart(_starPath)]);
+  static const starFilled = AppIconData(width: 24, height: 24, strokeWidth: 1.8, parts: [PathPart(_starPath, filled: true)]);
+  static const _starPath = 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z';
 
   static const bike = AppIconData(width: 48, height: 32, parts: [
     CirclePart(10, 22, 6),

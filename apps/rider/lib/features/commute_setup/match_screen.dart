@@ -28,6 +28,7 @@ class _MatchScreenState extends State<MatchScreen> {
   bool _searching = true;
   bool _started = false;
   bool _joining = false;
+  String? _error;
 
   @override
   void didChangeDependencies() {
@@ -39,13 +40,22 @@ class _MatchScreenState extends State<MatchScreen> {
   }
 
   Future<void> _search() async {
-    final results = await AppScope.of(context).api.findDrivers(setup.toRequest());
-    if (!mounted) return;
-    if (results.isNotEmpty) setup.setMatch(results.first);
-    setState(() {
-      _matches = results;
-      _searching = false;
-    });
+    try {
+      final results = await AppScope.of(context).api.findDrivers(setup.toRequest());
+      if (!mounted) return;
+      if (results.isNotEmpty) setup.setMatch(results.first);
+      setState(() {
+        _matches = results;
+        _searching = false;
+        _error = null;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _searching = false;
+        _error = e.message;
+      });
+    }
   }
 
   void _retry(void Function() change) {
@@ -56,7 +66,14 @@ class _MatchScreenState extends State<MatchScreen> {
 
   Future<void> _joinWaitlist() async {
     setState(() => _joining = true);
-    await AppScope.of(context).api.joinWaitlist(setup.toRequest());
+    try {
+      await AppScope.of(context).api.joinWaitlist(setup.toRequest());
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() => _joining = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      return;
+    }
     if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     Navigator.of(context).pushAndRemoveUntil(
@@ -136,9 +153,11 @@ class _MatchScreenState extends State<MatchScreen> {
             Expanded(
               child: _searching
                   ? _searchingView()
-                  : found
-                      ? _foundView(m!)
-                      : _noMatchView(),
+                  : _error != null
+                      ? _errorView()
+                      : found
+                          ? _foundView(m!)
+                          : _noMatchView(),
             ),
             if (found && m != null)
               BottomActions(
@@ -162,6 +181,21 @@ class _MatchScreenState extends State<MatchScreen> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _errorView() {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        key: const Key('match.error'),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(_error!, textAlign: TextAlign.center, style: AppText.body(15, color: AppColors.muted, height: 1.45)),
+          const SizedBox(height: 16),
+          PrimaryButton(key: const Key('match.retry'), label: 'Try again', onPressed: () => _retry(() {})),
+        ],
       ),
     );
   }

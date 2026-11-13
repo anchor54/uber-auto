@@ -7,6 +7,22 @@ import '../../core/schedule.dart';
 class CommuteSetup extends ChangeNotifier {
   CommuteSetup({required this.today});
 
+  /// The choices from an earlier commute, e.g. to find another driver after
+  /// one declined. The start date is worked out again from [today].
+  factory CommuteSetup.fromRequest(CommuteRequest r, {required DateTime today}) {
+    return CommuteSetup(today: today)
+      ..pickup = r.pickup
+      ..drop = r.drop
+      ..repeat = r.repeat
+      ..chosenDays = {...r.weekdays}
+      ..timing = r.timing
+      ..time = r.time
+      ..returnTrip = r.returnTrip
+      ..returnTime = r.returnTime
+      ..rideType = r.rideType
+      ..preferences = {...r.preferences};
+  }
+
   final DateTime today;
 
   Place? pickup;

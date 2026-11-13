@@ -225,10 +225,15 @@ class Driver {
     required this.plate,
     required this.rating,
     required this.upiId,
+    this.phone,
   });
 
   final String id;
   final String name;
+
+  /// For the rider's Call button once a ride is under way. Null when the
+  /// backend doesn't share it (before the driver accepts).
+  final String? phone;
 
   /// e.g. "White Dzire · AC · 4 seats"
   final String vehicle;
@@ -247,6 +252,9 @@ class Driver {
 
   /// "White Dzire" from "White Dzire · AC · 4 seats".
   String get car => vehicle.split(' · ').first;
+
+  Driver withPhone(String? value) =>
+      Driver(id: id, name: name, vehicle: vehicle, plate: plate, rating: rating, upiId: upiId, phone: value);
 }
 
 class DriverMatch {
@@ -255,6 +263,8 @@ class DriverMatch {
     required this.fare,
     required this.trip,
     required this.reasons,
+    this.proposalId,
+    this.expiresAt,
   });
 
   final Driver driver;
@@ -263,9 +273,22 @@ class DriverMatch {
 
   /// Why this driver fits, shown as check lines.
   final List<String> reasons;
+
+  /// The backend's id for this offer; confirming sends it back. Null in the
+  /// demo backend, which confirms from the match itself.
+  final String? proposalId;
+
+  /// When the backend stops honouring this offer.
+  final DateTime? expiresAt;
 }
 
-enum CommuteStatus { awaitingDriver, active, paused, cancelled }
+/// `awaitingDriver`: confirmed by the rider, waiting for the driver to accept
+/// (flow D2). `declined`: the driver said no or didn't answer in time; the
+/// rider is asked to pick another driver.
+enum CommuteStatus { awaitingDriver, active, paused, cancelled, declined }
+
+/// Why a commute ended up [CommuteStatus.declined].
+enum DeclineReason { declined, noAnswer }
 
 class Commute {
   const Commute({
@@ -275,6 +298,8 @@ class Commute {
     required this.fare,
     required this.usualPayment,
     required this.status,
+    this.respondBy,
+    this.declineReason,
   });
 
   final String id;
@@ -283,6 +308,23 @@ class Commute {
   final int fare;
   final PaymentMethod usualPayment;
   final CommuteStatus status;
+
+  /// While awaiting the driver: when the request lapses if they don't answer.
+  final DateTime? respondBy;
+
+  /// Set when [status] is [CommuteStatus.declined].
+  final DeclineReason? declineReason;
+
+  Commute withStatus(CommuteStatus s, {DeclineReason? reason}) => Commute(
+        id: id,
+        request: request,
+        driver: driver,
+        fare: fare,
+        usualPayment: usualPayment,
+        status: s,
+        respondBy: respondBy,
+        declineReason: reason,
+      );
 }
 
 class RiderProfile {
@@ -320,4 +362,169 @@ class ApiException implements Exception {
 
   @override
   String toString() => 'ApiException($code): $message';
+}
+
+// ---------------------------------------------------------------- flow R2
+
+/// Where a day's ride is. Only the server moves it.
+enum RideState { scheduled, onTheWay, arrived, inRide, completed, noShow, skipped, cancelled }
+
+extension RideStateInfo on RideState {
+  /// The driver is on the way, waiting, or driving: the ride screens are live.
+  bool get isLive => this == RideState.onTheWay || this == RideState.arrived || this == RideState.inRide;
+
+  /// Nothing more will happen to this ride.
+  bool get isOver => !isLive && this != RideState.scheduled;
+}
+
+enum RideDirection { outbound, returnLeg }
+
+/// How the driver says the fare was paid.
+enum DriverPaymentMark { upi, cash, notPaid }
+
+/// Worked out by the server from both marks.
+enum PaymentStatus { paid, paidByRider, unpaid, disputed, unmarked }
+
+class RideRating {
+  const RideRating({required this.stars, this.tags = const [], this.note, this.dontMatch = false});
+  final int stars;
+  final List<String> tags;
+  final String? note;
+
+  /// "Don't match me with this driver again."
+  final bool dontMatch;
+}
+
+/// One leg of a commute on one day.
+class Ride {
+  const Ride({
+    required this.id,
+    required this.date,
+    required this.direction,
+    required this.state,
+    required this.pickup,
+    required this.drop,
+    required this.pickupAt,
+    required this.windowStart,
+    required this.windowEnd,
+    required this.tripMinutes,
+    required this.fare,
+    required this.rideType,
+    required this.driver,
+    this.pin,
+    this.pinLocked = false,
+    this.waitEndsAt,
+    this.riderLateUsed = false,
+    this.late = false,
+    this.riderPayment,
+    this.driverPayment,
+    this.paymentStatus = PaymentStatus.unmarked,
+    this.rating,
+    this.endedAt,
+  });
+
+  final String id;
+  final DateTime date;
+  final RideDirection direction;
+  final RideState state;
+  final Place pickup;
+  final Place drop;
+  final DateTime pickupAt;
+  final DateTime windowStart;
+  final DateTime windowEnd;
+  final int tripMinutes;
+  final int fare;
+  final RideType rideType;
+  final Driver driver;
+
+  /// The 4-digit code the rider tells the driver. Shown once the driver departs.
+  final String? pin;
+
+  /// Three wrong PINs: the ride can't start without support.
+  final bool pinLocked;
+  final DateTime? waitEndsAt;
+  final bool riderLateUsed;
+
+  /// The system flagged the driver as running late.
+  final bool late;
+  final PaymentMethod? riderPayment;
+  final DriverPaymentMark? driverPayment;
+  final PaymentStatus paymentStatus;
+  final RideRating? rating;
+  final DateTime? endedAt;
+
+  Ride copyWith({
+    RideState? state,
+    String? pin,
+    bool? pinLocked,
+    DateTime? waitEndsAt,
+    bool? riderLateUsed,
+    bool? late,
+    PaymentMethod? riderPayment,
+    DriverPaymentMark? driverPayment,
+    PaymentStatus? paymentStatus,
+    RideRating? rating,
+    DateTime? endedAt,
+    bool clearPin = false,
+  }) =>
+      Ride(
+        id: id,
+        date: date,
+        direction: direction,
+        state: state ?? this.state,
+        pickup: pickup,
+        drop: drop,
+        pickupAt: pickupAt,
+        windowStart: windowStart,
+        windowEnd: windowEnd,
+        tripMinutes: tripMinutes,
+        fare: fare,
+        rideType: rideType,
+        driver: driver,
+        pin: clearPin ? null : (pin ?? this.pin),
+        pinLocked: pinLocked ?? this.pinLocked,
+        waitEndsAt: waitEndsAt ?? this.waitEndsAt,
+        riderLateUsed: riderLateUsed ?? this.riderLateUsed,
+        late: late ?? this.late,
+        riderPayment: riderPayment ?? this.riderPayment,
+        driverPayment: driverPayment ?? this.driverPayment,
+        paymentStatus: paymentStatus ?? this.paymentStatus,
+        rating: rating ?? this.rating,
+        endedAt: endedAt ?? this.endedAt,
+      );
+}
+
+class GeoPoint {
+  const GeoPoint(this.lat, this.lng);
+  final double lat;
+  final double lng;
+}
+
+/// What the rider app polls every 5 seconds while a ride is live.
+class LiveRide {
+  const LiveRide({
+    required this.state,
+    required this.serverTime,
+    this.driverAt,
+    this.positionAt,
+    this.etaMinutes,
+    this.etaAt,
+    this.waitEndsAt,
+    this.late = false,
+    this.pinLocked = false,
+  });
+
+  final RideState state;
+
+  /// The server's clock when it answered, so countdowns don't trust the phone's.
+  final DateTime serverTime;
+
+  /// The driver's latest position, and when they sent it.
+  final GeoPoint? driverAt;
+  final DateTime? positionAt;
+  final int? etaMinutes;
+  final DateTime? etaAt;
+  final DateTime? waitEndsAt;
+  final bool late;
+  final bool pinLocked;
 }
