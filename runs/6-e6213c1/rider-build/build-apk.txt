@@ -1,0 +1,32 @@
+Running Gradle task 'assembleRelease'...                        
+Warning: Flutter support for your project's Gradle version (9.3.1) will soon be dropped. Please upgrade your Gradle version to a version of at least 9.5.0 soon.
+Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+Potential fix: Your project's gradle version is typically defined in the gradle wrapper file. By default, this can be found at /home/runner/work/uber-auto/uber-auto/apps/rider/android/gradle/wrapper/gradle-wrapper.properties. 
+For more information, see https://docs.gradle.org/current/userguide/gradle_wrapper.html.
+
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/home/runner/work/uber-auto/uber-auto/apps/rider/android/app/build.gradle.kts' line: 1
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-plugin']
+> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
+   > Error: Your project's Android Gradle Plugin version (Android Gradle Plugin version 9.1.0) is lower than Flutter's minimum supported version of Android Gradle Plugin version 9.1.1. Please upgrade your Android Gradle Plugin version. 
+     Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check.
+
+     Potential fix: Your project's AGP version is typically defined in the plugins block of the `settings.gradle` file (/home/runner/work/uber-auto/uber-auto/apps/rider/android/settings.gradle), by a plugin with the id of com.android.application. 
+     If you don't see a plugins block, your project was likely created with an older template version. In this case it is most likely defined in the top-level build.gradle file (/home/runner/work/uber-auto/uber-auto/apps/rider/android/build.gradle) by the following line in the dependencies block of the buildscript: "classpath 'com.android.tools.build:gradle:<version>'".
+
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 16s
+Running Gradle task 'assembleRelease'...                           79.1s
+Gradle task assembleRelease failed with exit code 1
