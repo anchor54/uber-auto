@@ -56,3 +56,25 @@ export function alongPath(path: LatLng[]): (f: number) => LatLng {
     return { lat: a.lat + (b.lat - a.lat) * t, lng: a.lng + (b.lng - a.lng) * t };
   };
 }
+
+/** Shortest distance in km from [p] to the path (its segments, not just its points). */
+export function distanceToPathKm(p: LatLng, path: LatLng[]): number {
+  if (path.length === 0) return Infinity;
+  if (path.length === 1) return haversineKm(p.lat, p.lng, path[0]!.lat, path[0]!.lng);
+  // Flat projection around p: plenty accurate over a city.
+  const kx = 111.32 * Math.cos((p.lat * Math.PI) / 180);
+  const ky = 110.57;
+  let best = Infinity;
+  for (let i = 1; i < path.length; i++) {
+    const ax = (path[i - 1]!.lng - p.lng) * kx;
+    const ay = (path[i - 1]!.lat - p.lat) * ky;
+    const bx = (path[i]!.lng - p.lng) * kx;
+    const by = (path[i]!.lat - p.lat) * ky;
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len2 = dx * dx + dy * dy;
+    const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len2));
+    best = Math.min(best, Math.hypot(ax + t * dx, ay + t * dy));
+  }
+  return best;
+}

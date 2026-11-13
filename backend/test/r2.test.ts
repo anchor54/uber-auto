@@ -217,6 +217,77 @@ describe('a normal leg', () => {
   });
 });
 
+describe("the driver's road route to the pickup", () => {
+  it('is asked for once on the way, kept while followed, refreshed when left (at most once a minute)', async () => {
+    const { rider, first } = await commuter();
+    const asked: Array<{ lat: number; lng: number }> = [];
+    t.ctx.maps = {
+      name: 'fake',
+      async searchPlaces() {
+        return [];
+      },
+      async estimateTrip(from) {
+        asked.push(from);
+        // A road due south from wherever the driver is to the pickup.
+        return { distanceKm: 3, minutes: 12, polyline: encode([from, { lat: first.pickup.lat, lng: from.lng }, first.pickup]) };
+      },
+    };
+    const driver = await departed(first.id, first.pickup); // starts ~2 km north
+    expect(asked).toHaveLength(0);
+
+    t.clock.now = thu('08:21');
+    const start = { lat: first.pickup.lat + 0.018, lng: first.pickup.lng + 0.001 };
+    await sendLocation(driver, start.lat, start.lng);
+    expect(asked).toHaveLength(1);
+    const live = (await get(`/v1/rides/${first.id}/live`, rider)).json();
+    expect(live.approachRoute).toBeTypeOf('string');
+    expect(live.etaMinutes).toBe(12); // Ola's drive time, not the straight-line guess
+
+    // Further down the same road: the route is kept, and the ETA falls with distance.
+    t.clock.now = thu('08:24');
+    await sendLocation(driver, first.pickup.lat + 0.009, start.lng);
+    expect(asked).toHaveLength(1);
+    expect((await get(`/v1/rides/${first.id}/live`, rider)).json().etaMinutes).toBe(6);
+
+    // Off the route by ~1 km: asked again...
+    t.clock.now = thu('08:26');
+    await sendLocation(driver, first.pickup.lat + 0.009, start.lng + 0.01);
+    expect(asked).toHaveLength(2);
+    // ...but not again within a minute, wherever the driver goes.
+    t.clock.now = new Date(thu('08:26').getTime() + 30_000);
+    await sendLocation(driver, first.pickup.lat + 0.009, start.lng - 0.01);
+    expect(asked).toHaveLength(2);
+  });
+
+  it('is shown only while the driver is on the way', async () => {
+    const { rider, first } = await commuter();
+    const driver = await arrivedAt(first.id, first.pickup, '08:38');
+    expect((await get(`/v1/rides/${first.id}/live`, rider)).json().approachRoute).toBeNull();
+    expect(driver).toBeTypeOf('string');
+  });
+
+  it('the simulator drives that same route', async () => {
+    const { first } = await commuter();
+    const bend = { lat: first.pickup.lat + 0.009, lng: first.pickup.lng + 0.02 }; // well east of the straight line
+    t.ctx.maps = {
+      name: 'fake',
+      async searchPlaces() {
+        return [];
+      },
+      async estimateTrip(from) {
+        return { distanceKm: 4, minutes: 10, polyline: encode([from, bend, first.pickup]) };
+      },
+    };
+    t.clock.now = thu('08:25');
+    const sleep = async (ms: number) => void (t.clock.now = new Date(t.clock.now.getTime() + ms * 600));
+    await simPlay(t.ctx, first.id, { speed: 600, sleep });
+    const approach = (
+      await t.db.query<{ lng: number }>(`select lng from ride_track where ride_id = $1 and at < (select arrived_at from rides where id = $1)`, [first.id])
+    ).rows;
+    expect(Math.max(...approach.map((p) => p.lng))).toBeGreaterThan(first.pickup.lng + 0.015);
+  });
+});
+
 describe('in-ride ETA', () => {
   it('scales the booked trip time by the distance left, so it never exceeds the trip', async () => {
     const { rider, first } = await commuter();

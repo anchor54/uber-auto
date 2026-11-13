@@ -1,7 +1,7 @@
-import { mapsOf, type AppContext } from '../context.js';
+import type { AppContext } from '../context.js';
 import { alongPath, decodePolyline, type LatLng } from '../domain/polyline.js';
 import { ApiError } from '../domain/types.js';
-import { applyMove, loadRide, logContact, recordLocation, setDuty, type RideRow } from './rides.js';
+import { applyMove, loadRide, logContact, recordLocation, refreshApproachRoute, setDuty, type RideRow } from './rides.js';
 
 /**
  * Dev-only driver for R2 rides. Every move goes through the same service
@@ -88,8 +88,11 @@ async function playRide(ctx: AppContext, rideId: string, o: PlayOptions) {
     }
   };
 
-  // Along the roads when the maps provider gives routes; else a straight line.
-  await drive(await approachRoute(ctx, start, r.pickup), o.approachMinutes ?? 6);
+  // The same road route the rider's map shows (asked for at departure), so
+  // the marker and the line agree; a straight line in the demo city.
+  await refreshApproachRoute(ctx, (await loadRide(ctx.db, rideId))!, start, { force: true });
+  const departed = (await loadRide(ctx.db, rideId))!;
+  await drive(routeOf(departed.approach_route, start, r.pickup), o.approachMinutes ?? 6);
   await simStep(ctx, rideId, 'arrive');
   await sleep(((o.waitMinutes ?? 1) * 60_000) / o.speed);
   await simStep(ctx, rideId, 'start');
@@ -108,13 +111,4 @@ export function routeOf(encoded: string | null, from: LatLng, to: LatLng): LatLn
     }
   }
   return [from, to];
-}
-
-/** The road from where the simulated driver starts to the pickup, asked for once. */
-async function approachRoute(ctx: AppContext, from: LatLng, to: LatLng): Promise<LatLng[]> {
-  try {
-    return routeOf((await mapsOf(ctx).estimateTrip(from, to)).polyline ?? null, from, to);
-  } catch {
-    return [from, to];
-  }
 }

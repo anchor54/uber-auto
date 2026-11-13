@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { alongPath, decodePolyline } from '../../src/domain/polyline.js';
+import { alongPath, decodePolyline, distanceToPathKm } from '../../src/domain/polyline.js';
 
 describe('polylines', () => {
   it("decodes Google's example", () => {
@@ -28,5 +28,17 @@ describe('polylines', () => {
     expect(half.lat).toBeCloseTo(12.909, 3);
     expect(half.lng).toBeCloseTo(77.6, 3);
     expect(at(0.25).lng).toBe(77.6); // still on the first leg
+  });
+});
+
+describe('distance to a route', () => {
+  const path = [
+    { lat: 12.9, lng: 77.6 },
+    { lat: 12.91, lng: 77.6 },
+  ];
+  it('is zero on the route and grows away from it, measured to the segment', () => {
+    expect(distanceToPathKm({ lat: 12.905, lng: 77.6 }, path)).toBeCloseTo(0, 3);
+    // 0.003° of longitude at 12.9°N is about 325 m, beside the middle of the segment.
+    expect(distanceToPathKm({ lat: 12.905, lng: 77.603 }, path)).toBeCloseTo(0.325, 2);
   });
 });

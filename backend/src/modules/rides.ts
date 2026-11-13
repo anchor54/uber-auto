@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type pg from 'pg';
 import { z } from 'zod';
-import type { AppContext } from '../context.js';
+import { mapsOf, type AppContext } from '../context.js';
 import { addDays, CREATE_DAYS_AHEAD, planRides } from '../domain/ride_plan.js';
 import {
   etaMinutes,
@@ -20,6 +20,7 @@ import {
   type RideState,
   type RiderMark,
 } from '../domain/rides.js';
+import { decodePolyline, distanceToPathKm } from '../domain/polyline.js';
 import { localDateString } from '../domain/schedule.js';
 import { haversineKm } from '../domain/trips.js';
 import { ApiError, type Place } from '../domain/types.js';
@@ -60,6 +61,10 @@ export interface RideRow {
   driver_payment: DriverMark;
   driver_marked_at: Date | null;
   route: string | null;
+  approach_route: string | null;
+  approach_minutes: number | null;
+  approach_km: string | null;
+  approach_at: Date | null;
 }
 
 const RIDE_COLUMNS = `r.*, to_char(r.ride_date, 'YYYY-MM-DD') as ride_date`;
@@ -268,6 +273,8 @@ export interface LiveView {
   waitEndsAt: string | null;
   late: boolean;
   pinLocked: boolean;
+  /** While on the way: the driver's road route to the pickup (encoded), or null. */
+  approachRoute: string | null;
   updatedAt: string | null;
   /** The server's clock, so the app's countdowns don't depend on the phone's. */
   serverTime: string;
@@ -289,7 +296,7 @@ export async function liveView(ctx: AppContext, ride: RideRow): Promise<LiveView
       ).rows[0]
     : undefined;
   let eta: number | null = null;
-  if (loc && ride.state === 'on_the_way') eta = etaMinutes(haversineKm(loc.lat, loc.lng, ride.pickup.lat, ride.pickup.lng));
+  if (loc && ride.state === 'on_the_way') eta = approachEta(ride, loc);
   if (loc && ride.state === 'in_ride') eta = inRideEta(ride, loc);
   if (ride.state === 'arrived') eta = 0;
   const late = ride.late_flagged_at !== null || (eta !== null && (await flagIfLate(ctx, ride, eta)));
@@ -301,6 +308,7 @@ export async function liveView(ctx: AppContext, ride: RideRow): Promise<LiveView
     waitEndsAt: ride.wait_ends_at?.toISOString() ?? null,
     late,
     pinLocked: ride.pin_tries >= 3,
+    approachRoute: ride.state === 'on_the_way' ? ride.approach_route : null,
     updatedAt: loc?.at.toISOString() ?? null,
     serverTime: now.toISOString(),
   };
@@ -317,6 +325,61 @@ export function inRideEta(ride: Pick<RideRow, 'pickup' | 'drop_off' | 'trip_minu
   const left = haversineKm(at.lat, at.lng, ride.drop_off.lat, ride.drop_off.lng);
   if (total < 0.05) return 1;
   return Math.max(1, Math.round(ride.trip_minutes * Math.min(1, left / total)));
+}
+
+/**
+ * Minutes until the driver reaches the pickup: the drive time of their road
+ * route (from the maps provider) scaled by how much of the straight-line
+ * distance is left; the straight-line estimate before there is a route.
+ */
+export function approachEta(
+  ride: Pick<RideRow, 'pickup' | 'approach_minutes' | 'approach_km'>,
+  at: { lat: number; lng: number },
+): number {
+  const now = haversineKm(at.lat, at.lng, ride.pickup.lat, ride.pickup.lng);
+  const start = Number(ride.approach_km ?? 0);
+  if (ride.approach_minutes == null || start <= 0.05) return etaMinutes(now);
+  return Math.max(1, Math.round(ride.approach_minutes * Math.min(1, now / start)));
+}
+
+export const APPROACH_OFF_ROUTE_KM = 0.3;
+export const APPROACH_REFRESH_MS = 60_000;
+
+/**
+ * Keeps the driver's road route to the pickup current while they're on the
+ * way: asked for once when there is none, and again when they've left it by
+ * more than 300 m (at most once a minute). Errors leave the old route.
+ */
+export async function refreshApproachRoute(
+  ctx: AppContext,
+  ride: RideRow,
+  at: { lat: number; lng: number },
+  opts: { force?: boolean } = {},
+): Promise<void> {
+  if (ride.state !== 'on_the_way') return;
+  const now = ctx.clock().getTime();
+  const recent = ride.approach_at !== null && now - ride.approach_at.getTime() < APPROACH_REFRESH_MS;
+  if (!opts.force) {
+    if (recent) return;
+    if (ride.approach_route) {
+      try {
+        if (distanceToPathKm(at, decodePolyline(ride.approach_route)) < APPROACH_OFF_ROUTE_KM) return;
+      } catch {
+        // A damaged route: ask again.
+      }
+    }
+    // No route (the demo city gives none): the drive time is refreshed once a minute.
+  }
+  let trip;
+  try {
+    trip = await mapsOf(ctx).estimateTrip(at, ride.pickup);
+  } catch {
+    return;
+  }
+  await ctx.db.query(
+    'update rides set approach_route = $2, approach_minutes = $3, approach_km = $4, approach_at = $5 where id = $1',
+    [ride.id, trip.polyline ?? null, trip.minutes, haversineKm(at.lat, at.lng, ride.pickup.lat, ride.pickup.lng), new Date(now)],
+  );
 }
 
 /** Sets late_flagged_at once and queues the push. Returns whether the ride is late. */
@@ -454,7 +517,7 @@ export async function recordLocation(ctx: AppContext, driverId: string, points: 
   }
   const latest = points.reduce((a, b) => (Date.parse(b.at) > Date.parse(a.at) ? b : a));
   const current = (
-    await ctx.db.query<{ id: string }>(`select id from rides where driver_id = $1 and state = any($2) order by pickup_at limit 1`, [
+    await ctx.db.query<RideRow>(`select ${RIDE_COLUMNS} from rides r where r.driver_id = $1 and r.state = any($2) order by r.pickup_at limit 1`, [
       driverId,
       OPEN_STATES,
     ])
@@ -467,6 +530,7 @@ export async function recordLocation(ctx: AppContext, driverId: string, points: 
     [driverId, latest.lat, latest.lng, latest.heading ?? null, latest.speed ?? null, new Date(latest.at), current?.id ?? null],
   );
   if (current) {
+    await refreshApproachRoute(ctx, current, latest);
     const last = (await ctx.db.query<{ at: Date }>('select max(at) as at from ride_track where ride_id = $1', [current.id])).rows[0]?.at;
     if (!last || Date.parse(latest.at) - last.getTime() >= TRACK_EVERY_MS) {
       await ctx.db.query('insert into ride_track (ride_id, lat, lng, at) values ($1, $2, $3, $4)', [
