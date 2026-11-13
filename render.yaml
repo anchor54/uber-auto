@@ -1,0 +1,76 @@
+# Render blueprint: the backend's API, its worker and a Postgres database.
+#
+# In Render: New → Blueprint → connect this repository. Render creates
+# everything below and asks for the values marked `sync: false`:
+#   MSG91_AUTH_KEY, MSG91_OTP_TEMPLATE_ID   (MSG91 dashboard, DLT-approved OTP template)
+#   OLA_MAPS_API_KEY                        (Ola Maps console; optional, else the demo places)
+# Then, once, from the API service's Shell:
+#   npm run seed:config:prod                (fare rules, ride types, places; never deletes)
+# Full checklist: README.md → "Going live".
+#
+# Singapore is Render's closest region to India.
+
+databases:
+  - name: commute-db
+    databaseName: commute
+    user: commute
+    region: singapore
+    plan: basic-256mb
+
+services:
+  - type: web
+    name: commute-api
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: backend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: commute-db
+          property: connectionString
+      - key: OTP_SECRET
+        generateValue: true
+      - key: MSG91_AUTH_KEY
+        sync: false
+      - key: MSG91_OTP_TEMPLATE_ID
+        sync: false
+      - key: OLA_MAPS_API_KEY
+        sync: false
+      # The web build on GitHub Pages calls the API from this origin.
+      - key: CORS_ORIGINS
+        value: https://anchor54.github.io
+
+  # Everything that runs on a clock: rides 14 days ahead, "Leg is on",
+  # late drivers, payment reminders, stale rides, sending notifications.
+  - type: worker
+    name: commute-worker
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: backend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run worker:prod
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: commute-db
+          property: connectionString
+      - key: OTP_SECRET
+        fromService:
+          type: web
+          name: commute-api
+          envVarKey: OTP_SECRET

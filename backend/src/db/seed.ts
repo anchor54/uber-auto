@@ -18,10 +18,13 @@ export const demoPlaces = [
   { id: 'airport', title: 'Kempegowda Airport', detail: 'Terminal 2', lat: 13.1989, lng: 77.7068 },
 ];
 
+/** Demo drivers sign in as 9000000001, 9000000002, ... in the order below. */
+export const demoDriverPhone = (index: number) => `90000000${String(index + 1).padStart(2, '0')}`;
+
 type SeedDriver = [id: string, name: string, rideType: string, vehicle: string, plate: string, rating: number, upi: string, lat: number, lng: number];
 
 /** Same drivers as the app's demo data, based around south-east Bengaluru. */
-const drivers: SeedDriver[] = [
+export const demoDrivers: SeedDriver[] = [
   ['d_arjun', 'Arjun Rao', 'bike', 'Black Splendor · helmet', 'KA 51 EX 2210', 4.8, 'arjun.rao@okhdfc', 12.914, 77.638],
   ['d_vinay', 'Vinay S', 'bike', 'Red Pulsar · helmet', 'KA 03 HY 7781', 4.7, 'vinay.s@ybl', 12.925, 77.65],
   ['d_kiran', 'Kiran Gowda', 'bike', 'Blue Activa · helmet', 'KA 05 KP 9012', 4.6, 'kiran.g@okaxis', 12.93, 77.62],
@@ -43,7 +46,9 @@ const drivers: SeedDriver[] = [
 export async function seedDemoData(db: Db): Promise<void> {
   await migrate(db);
   await db.query(
-    'truncate waitlist, match_proposals, commutes, drivers, ride_type_config, fare_rules, places, sessions, otp_codes, riders cascade',
+    `truncate job_runs, holidays, devices, notifications, ride_ratings, ride_track, driver_locations, ride_contacts,
+     ride_events, rides, waitlist, match_proposals, commutes, drivers, ride_type_config, fare_rules, places, sessions,
+     otp_codes, riders cascade`,
   );
   for (const p of demoPlaces) {
     await db.query('insert into places (id, city, title, detail, lat, lng) values ($1, $2, $3, $4, $5, $6)', [
@@ -61,12 +66,12 @@ export async function seedDemoData(db: Db): Promise<void> {
       DEMO_CITY, flow, [...rideTypes], flow === 'one_time' ? 'auto' : 'cab_sedan',
     ]);
   }
-  for (const [id, name, rideType, vehicle, plate, rating, upi, lat, lng] of drivers) {
+  for (const [i, [id, name, rideType, vehicle, plate, rating, upi, lat, lng]] of demoDrivers.entries()) {
     await db.query(
       `insert into drivers (id, city, name, ride_type, vehicle, plate, rating, upi_id, has_ac, base_lat, base_lng,
-                            service_radius_km, work_start, work_end)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 8, 420, 1290)`,
-      [id, DEMO_CITY, name, rideType, vehicle, plate, rating, upi, rideType.startsWith('cab_'), lat, lng],
+                            service_radius_km, work_start, work_end, phone)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 8, 420, 1290, $12)`,
+      [id, DEMO_CITY, name, rideType, vehicle, plate, rating, upi, rideType.startsWith('cab_'), lat, lng, demoDriverPhone(i)],
     );
   }
 }

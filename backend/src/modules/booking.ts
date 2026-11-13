@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import type { AppContext } from '../context.js';
-import { estimateTrip, haversineKm, suggestedFare, type FareRule } from '../domain/trips.js';
+import { cityArea, mapsOf, type AppContext } from '../context.js';
+import { haversineKm, suggestedFare, type FareRule } from '../domain/trips.js';
 import { bookingFlows, placeSchema, type BookingFlow, type Place, type RideType } from '../domain/types.js';
 import { requireRider } from './auth.js';
 
@@ -43,7 +43,7 @@ export async function bookingOptions(
   ).rows[0];
   if (!cfg) return { flow, defaultType: null, options: [] };
   const rules = await fareRules(ctx);
-  const trip = estimateTrip(pickup, drop);
+  const trip = await mapsOf(ctx).estimateTrip(pickup, drop);
   const drivers = (
     await ctx.db.query<{ ride_type: RideType; base_lat: number; base_lng: number; service_radius_km: string; work_start: number; work_end: number }>(
       'select ride_type, base_lat, base_lng, service_radius_km, work_start, work_end from drivers where city = $1 and active',
@@ -70,23 +70,14 @@ export async function bookingOptions(
 export function bookingRoutes(app: FastifyInstance, ctx: AppContext) {
   app.get('/v1/places', async (req) => {
     await requireRider(ctx, req);
-    const { q } = z.object({ q: z.string().default('') }).parse(req.query);
-    const like = `%${q.trim().replace(/[%_\\]/g, (c) => `\\${c}`)}%`;
-    const rows = (
-      await ctx.db.query(
-        `select id, title, detail, lat, lng from places
-         where city = $1 and (title ilike $2 or detail ilike $2)
-         order by title limit 20`,
-        [ctx.config.city, like],
-      )
-    ).rows;
-    return { places: rows };
+    const { q } = z.object({ q: z.string().max(100).default('') }).parse(req.query);
+    return { places: await mapsOf(ctx).searchPlaces(q, cityArea(ctx)) };
   });
 
   app.post('/v1/trips/estimate', async (req) => {
     await requireRider(ctx, req);
     const { pickup, drop } = z.object({ pickup: placeSchema, drop: placeSchema }).parse(req.body);
-    return estimateTrip(pickup, drop);
+    return mapsOf(ctx).estimateTrip(pickup, drop);
   });
 
   app.post('/v1/booking-options', async (req) => {

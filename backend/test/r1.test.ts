@@ -190,7 +190,7 @@ describe('R1.5 confirm and R1.6 Home', () => {
     const res = await post('/v1/commutes', { proposalId: ravi!.id, usualPayment: 'cash' }, token);
     expect(res.statusCode).toBe(201);
     expect(res.json()).toMatchObject({
-      status: 'active',
+      status: 'awaiting_driver',
       startDate: '2026-10-22',
       pickupTime: 520,
       fare: 250,
@@ -204,13 +204,15 @@ describe('R1.5 confirm and R1.6 Home', () => {
     expect(home.rider.usualPayment).toBe('cash');
   });
 
-  it('without auto-accept the commute waits for the driver', async () => {
+  it('with auto-accept (demos only) the commute is active straight away', async () => {
     await t.close();
-    t = await startTestApp({ autoAcceptCommutes: false });
+    t = await startTestApp({ autoAcceptCommutes: true });
     const token = await t.signIn();
     const [ravi] = await propose(token);
     const res = await post('/v1/commutes', { proposalId: ravi!.id, usualPayment: 'upi' }, token);
-    expect(res.json().status).toBe('awaiting_driver');
+    expect(res.json().status).toBe('active');
+    expect(res.json().respondBy).toBeNull();
+    expect(res.json().driver.phone).toBe('9000000010');
   });
 
   it('a hold that ran out must be searched again', async () => {

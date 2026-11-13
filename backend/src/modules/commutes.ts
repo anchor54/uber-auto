@@ -1,12 +1,14 @@
 import type { FastifyInstance } from 'fastify';
 import type pg from 'pg';
 import { z } from 'zod';
-import type { AppContext } from '../context.js';
+import { mapsOf, type AppContext } from '../context.js';
 import { firstRideDate, legsClash, localDateString, pickupForArrival, weeklyLegs } from '../domain/schedule.js';
-import { estimateTrip, haversineKm, suggestedFare, type TripEstimate } from '../domain/trips.js';
+import { haversineKm, suggestedFare, type TripEstimate } from '../domain/trips.js';
 import { ApiError, commuteRequestSchema, flowFor, paymentMethods, type CommuteRequest, type Place } from '../domain/types.js';
 import { requireRider } from './auth.js';
 import { bookingOptions, fareRules } from './booking.js';
+import { expireUnanswered, respondByFor } from './driver_requests.js';
+import { createRides, nextRideFor } from './rides.js';
 
 interface DriverRow {
   id: string;
@@ -39,8 +41,8 @@ export interface ResolvedCommute extends CommuteRequest {
   trip: TripEstimate;
 }
 
-export function resolveRequest(ctx: AppContext, req: CommuteRequest): ResolvedCommute {
-  const trip = estimateTrip(req.pickup, req.drop);
+export async function resolveRequest(ctx: AppContext, req: CommuteRequest): Promise<ResolvedCommute> {
+  const trip = await mapsOf(ctx).estimateTrip(req.pickup, req.drop);
   const pickupTime = req.timing === 'pickup_at' ? req.time : pickupForArrival(req.time, trip.minutes);
   const today = localDateString(ctx.clock(), ctx.config.utcOffsetMinutes);
   return { ...req, pickupTime, startDate: firstRideDate(today, req.weekdays), trip };
@@ -73,14 +75,24 @@ export async function canInsert(db: Queryable, driver: DriverRow, c: ResolvedCom
   return true;
 }
 
-/** Drivers who can serve the commute, best first (nearest base, then rating). */
-export async function findCandidates(ctx: AppContext, c: ResolvedCommute, limit = 3): Promise<Candidate[]> {
+/**
+ * Drivers who can serve the commute, best first (nearest base, then rating).
+ * A driver who turned this rider down (or didn't answer) in the last 30 days
+ * isn't offered again.
+ */
+export async function findCandidates(ctx: AppContext, c: ResolvedCommute, riderId: string | null, limit = 3): Promise<Candidate[]> {
   const rows = (
     await ctx.db.query<DriverRow>(
       `select id, name, ride_type, vehicle, plate, rating, upi_id, gender, has_ac, base_lat, base_lng,
               service_radius_km, work_start, work_end
-       from drivers where city = $1 and active and ride_type = $2`,
-      [ctx.config.city, c.rideType],
+       from drivers d where city = $1 and active and ride_type = $2
+         and not exists (
+           select 1 from commutes x where x.driver_id = d.id and x.rider_id = $3 and x.status = 'declined'
+             and x.responded_at > $4::timestamptz - interval '30 days')
+         and not exists (
+           select 1 from ride_ratings rr join rides rd on rd.id = rr.ride_id
+           where rd.driver_id = d.id and rd.rider_id = $3 and rr.dont_match)`,
+      [ctx.config.city, c.rideType, riderId, ctx.clock()],
     )
   ).rows;
   const candidates: Candidate[] = [];
@@ -113,13 +125,13 @@ export function commuteRoutes(app: FastifyInstance, ctx: AppContext) {
   app.post('/v1/commutes/proposals', async (req) => {
     const riderId = await requireRider(ctx, req);
     const { request } = z.object({ request: commuteRequestSchema }).parse(req.body);
-    const c = resolveRequest(ctx, request);
+    const c = await resolveRequest(ctx, request);
 
     const options = await bookingOptions(ctx, flowFor(c.repeat), c.pickup, c.drop, c.pickupTime);
     const option = options.options.find((o) => o.type === c.rideType);
     if (!option) throw new ApiError(422, 'ride_type_not_allowed', 'That ride type is not offered for this booking in your city');
 
-    const candidates = await findCandidates(ctx, c);
+    const candidates = await findCandidates(ctx, c, riderId);
     const expiresAt = new Date(ctx.clock().getTime() + ctx.config.proposalHoldMinutes * 60_000);
     const proposals = [];
     for (const [rank, cand] of candidates.entries()) {
@@ -176,24 +188,27 @@ export function commuteRoutes(app: FastifyInstance, ctx: AppContext) {
         throw new ApiError(409, 'driver_unavailable', 'That driver just filled this slot. Pick another driver.');
       }
       const c = p.request;
-      const status = ctx.config.autoAcceptCommutes ? 'active' : 'awaiting_driver';
+      const auto = ctx.config.autoAcceptCommutes;
+      const status = auto ? 'active' : 'awaiting_driver';
+      const respondBy = auto ? null : respondByFor(ctx, c.startDate, c.pickupTime);
       const row = (
         await client.query<{ id: string }>(
           `insert into commutes (rider_id, driver_id, city, pickup, drop_off, repeat, weekdays, timing, time_min, pickup_time,
                                  return_trip, return_time, start_date, ride_type, preferences, fare, trip_minutes, distance_km,
-                                 usual_payment, status)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+                                 usual_payment, status, respond_by, responded_at)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
            returning id`,
           [
             riderId, driver.id, ctx.config.city, JSON.stringify(c.pickup), JSON.stringify(c.drop), c.repeat, c.weekdays,
             c.timing, c.time, c.pickupTime, c.returnTrip, c.returnTime, c.startDate, c.rideType, c.preferences, p.fare,
-            c.trip.minutes, c.trip.distanceKm, body.usualPayment, status,
+            c.trip.minutes, c.trip.distanceKm, body.usualPayment, status, respondBy, auto ? ctx.clock() : null,
           ],
         )
       ).rows[0]!;
       await client.query('update riders set usual_payment = $2 where id = $1', [riderId, body.usualPayment]);
       await client.query('delete from match_proposals where rider_id = $1', [riderId]);
       await client.query('commit');
+      if (auto) await createRides(ctx, row.id);
       return reply.code(201).send(await loadCommute(ctx, row.id));
     } catch (e) {
       await client.query('rollback');
@@ -219,6 +234,7 @@ export function commuteRoutes(app: FastifyInstance, ctx: AppContext) {
   /** R1.6 / R1.6b: what Home shows. */
   app.get('/v1/home', async (req) => {
     const riderId = await requireRider(ctx, req);
+    await expireUnanswered(ctx);
     const rider = (await ctx.db.query('select id, phone, name, usual_payment from riders where id = $1', [riderId])).rows[0];
     const current = (
       await ctx.db.query<{ id: string }>(
@@ -229,6 +245,8 @@ export function commuteRoutes(app: FastifyInstance, ctx: AppContext) {
     return {
       rider: { id: rider.id, phone: rider.phone, name: rider.name, usualPayment: rider.usual_payment },
       commute: current ? await loadCommute(ctx, current.id) : null,
+      // R2: the next pickup comes from the ride records, not the commute.
+      nextRide: await nextRideFor(ctx, riderId),
       recentRides: [],
     };
   });
@@ -238,7 +256,8 @@ export async function loadCommute(ctx: AppContext, id: string) {
   const r = (
     await ctx.db.query(
       `select c.*, to_char(c.start_date, 'YYYY-MM-DD') as start_date_text,
-              d.id as d_id, d.name as d_name, d.vehicle as d_vehicle, d.plate as d_plate, d.rating as d_rating, d.upi_id as d_upi
+              d.id as d_id, d.name as d_name, d.vehicle as d_vehicle, d.plate as d_plate, d.rating as d_rating, d.upi_id as d_upi,
+              d.phone as d_phone
        from commutes c join drivers d on d.id = c.driver_id where c.id = $1`,
       [id],
     )
@@ -261,7 +280,18 @@ export async function loadCommute(ctx: AppContext, id: string) {
     fare: r.fare,
     usualPayment: r.usual_payment,
     trip: { minutes: r.trip_minutes, distanceKm: Number(r.distance_km) },
-    driver: { id: r.d_id, name: r.d_name, vehicle: r.d_vehicle, plate: r.d_plate, rating: Number(r.d_rating), upiId: r.d_upi },
+    respondBy: r.respond_by ? (r.respond_by as Date).toISOString() : null,
+    declineReason: r.decline_reason,
+    driver: {
+      id: r.d_id,
+      name: r.d_name,
+      vehicle: r.d_vehicle,
+      plate: r.d_plate,
+      rating: Number(r.d_rating),
+      upiId: r.d_upi,
+      // The driver's number is shared once they've accepted the rider.
+      phone: r.status === 'active' ? r.d_phone : null,
+    },
   };
 }
 

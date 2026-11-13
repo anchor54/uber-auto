@@ -52,8 +52,10 @@ export async function startTestApp(config: Partial<AppConfig> = {}): Promise<Tes
   const ctx: AppContext = {
     db,
     clock: () => clock.now,
+    setClock: (now) => void (clock.now = now),
     otpSender: { send: async (phone, code) => void sentCodes.push({ phone, code }) },
-    config: { ...defaultConfig, fixedOtp: DEMO_OTP, ...config },
+    // Tests sign the same phone in many times; the send limits have their own tests.
+    config: { ...defaultConfig, fixedOtp: DEMO_OTP, otpResendSeconds: 0, otpMaxSendsPerHour: 1000, ...config },
   };
   const app = buildApp(ctx);
   await app.ready();
