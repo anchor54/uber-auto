@@ -1,0 +1,20 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend (setUpAll)
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend rejects a non-mobile number with invalid_phone
+00:00 +1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend a wrong code is invalid_code
+00:00 +2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend place search finds the demo places by area
+00:00 +3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend trip estimate and fares agree between app and backend
+00:00 +4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend a woman-driver request finds nobody; the waitlist takes it
+00:00 +5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend match, confirm, and Home shows the commute
+00:00 +6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend R2: the active commute has rides; a scheduled ride shows no PIN and takes no payment
+00:00 +7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: demo backend (tearDownAll)
+00:00 +7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) (setUpAll)
+00:00 +7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) rejects a non-mobile number with invalid_phone
+00:00 +8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) a wrong code is invalid_code
+00:00 +9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) place search finds the demo places by area
+00:00 +10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) trip estimate and fares agree between app and backend
+00:00 +11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) a woman-driver request finds nobody; the waitlist takes it
+00:00 +12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) match, confirm, and Home shows the commute
+00:00 +13: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) R2: the active commute has rides; a scheduled ride shows no PIN and takes no payment
+00:00 +14: /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: real backend (http://localhost:8080) (tearDownAll)
+00:07 +14: All tests passed!
