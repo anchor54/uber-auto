@@ -1,0 +1,7 @@
+?   	commute-backend/cmd/db	[no test files]
+?   	commute-backend/cmd/server	[no test files]
+?   	commute-backend/cmd/sim	[no test files]
+?   	commute-backend/cmd/worker	[no test files]
+ok  	commute-backend/internal/app	8.032s
+ok  	commute-backend/internal/db	0.193s
+ok  	commute-backend/internal/domain	0.005s
