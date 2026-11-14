@@ -116,7 +116,10 @@ func (a *App) devSimRoutes(handle func(string, handler)) {
 	})
 
 	handle("POST /dev/sim/rides/{id}/play", func(w http.ResponseWriter, r *http.Request) error {
-		body := struct{ Speed *float64 }{}
+		// approachMinutes (default 6) and waitMinutes (default 1) are in
+		// simulated time: a test on a slow device can give the rider's app
+		// longer to see "on the way" at a high speed.
+		body := struct{ Speed, ApproachMinutes, WaitMinutes *float64 }{}
 		if err := decode(r, &body); err != nil {
 			return err
 		}
@@ -124,8 +127,17 @@ func (a *App) devSimRoutes(handle func(string, handler)) {
 		if body.Speed != nil {
 			speed = *body.Speed
 		}
+		opts := PlayOptions{Speed: speed}
 		var c domain.Check
 		c.Range(speed, 1, 600, "speed")
+		if body.ApproachMinutes != nil {
+			opts.ApproachMinutes = *body.ApproachMinutes
+			c.Range(opts.ApproachMinutes, 1, 120, "approachMinutes")
+		}
+		if body.WaitMinutes != nil {
+			opts.WaitMinutes = *body.WaitMinutes
+			c.Range(opts.WaitMinutes, 0.1, 15, "waitMinutes")
+		}
 		if err := c.Err(); err != nil {
 			return err
 		}
@@ -135,7 +147,7 @@ func (a *App) devSimRoutes(handle func(string, handler)) {
 		}
 		// Plays in the background, past the end of this request.
 		go func() {
-			if err := a.SimPlay(context.Background(), id, PlayOptions{Speed: speed}); err != nil {
+			if err := a.SimPlay(context.Background(), id, opts); err != nil {
 				a.log().Warn("[sim] ride stopped", "ride", id, "err", err)
 			}
 		}()
@@ -163,7 +175,7 @@ func (a *App) devSimRoutes(handle func(string, handler)) {
 	})
 
 	handle("POST /dev/sim/jobs", func(w http.ResponseWriter, r *http.Request) error {
-		did, err := a.RunJobs(r.Context(), LogPushSender(a.log()))
+		did, err := a.RunJobs(r.Context(), a.pushSender())
 		if err != nil {
 			return err
 		}

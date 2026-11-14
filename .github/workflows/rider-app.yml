@@ -81,7 +81,7 @@ jobs:
         # Release build signed with the debug key: small, fast, installable on any phone.
         # Real mode when the repository variable API_BASE_URL is set (Settings →
         # Variables → Actions, e.g. https://commute-api.onrender.com); demo mode otherwise.
-        run: flutter build apk --release --dart-define=API_BASE_URL=${{ vars.API_BASE_URL }} 2>&1 | tee "$OUT/build-apk.txt"
+        run: flutter build apk --release --dart-define=API_BASE_URL=${{ vars.API_BASE_URL }} --dart-define=FIREBASE_API_KEY=${{ vars.FIREBASE_API_KEY }} --dart-define=FIREBASE_APP_ID=${{ vars.FIREBASE_APP_ID }} --dart-define=FIREBASE_SENDER_ID=${{ vars.FIREBASE_SENDER_ID }} --dart-define=FIREBASE_PROJECT_ID=${{ vars.FIREBASE_PROJECT_ID }} 2>&1 | tee "$OUT/build-apk.txt"
       - name: Build web
         run: flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define=API_BASE_URL=${{ vars.API_BASE_URL }} 2>&1 | tee "$OUT/build-web.txt"
       - name: Publish APK as the "rider-latest" download

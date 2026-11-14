@@ -121,7 +121,17 @@ type App struct {
 	Maps MapsProvider
 	// The map the app draws (Ola Maps' style); none in the demo city.
 	MapStyle MapStyle
-	Log      *slog.Logger
+	// Sends push notifications for jobs run from this process (the dev
+	// simulator's /dev/sim/jobs); logs them when nil.
+	Push PushSender
+	Log  *slog.Logger
+}
+
+func (a *App) pushSender() PushSender {
+	if a.Push == nil {
+		return LogPushSender(a.log())
+	}
+	return a.Push
 }
 
 func (a *App) maps() MapsProvider {

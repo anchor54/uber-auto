@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 
 import 'app.dart';
 import 'core/fake_api.dart';
+import 'core/fcm_push.dart';
 import 'core/http_api.dart';
+import 'core/push.dart';
 import 'core/session_store.dart';
 
 /// The backend to use, chosen when the app is built:
@@ -19,7 +21,7 @@ const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 /// Bump when the backend's map style changes in a way the app must see at once.
 const mapStyleVersion = 2;
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Draw under the system bars (screens keep clear of them with SafeArea),
   // so a screen can run its colour or map up under the status bar.
@@ -36,9 +38,12 @@ void main() {
       ),
     ));
   } else {
+    // Push through Firebase when the build names a project (lib/core/fcm_push.dart).
+    final push = await FcmPushService.start();
     runApp(RiderApp(
       api: HttpRiderApi(baseUrl: apiBaseUrl, store: SecureSessionStore()),
       demoMode: false,
+      push: push ?? const NoPush(),
       // Real maps (Ola Maps through the backend) when it serves a style.
       // The version makes map views fetch the style afresh when it changes.
       mapStyleUrl: '$apiBaseUrl/v1/map/style.json?v=$mapStyleVersion',

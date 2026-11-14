@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../core/models.dart';
+import '../../core/push.dart';
 import '../../core/schedule.dart';
 import '../../ui/icons.dart';
 import '../../ui/tab_bar.dart';
@@ -43,17 +44,35 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Finished rides the rider hasn't marked or rated.
   List<Ride> _unsettled = const [];
   bool _pushRegistered = false;
+  StreamSubscription<PushEvent>? _pushEvents;
+
+  /// The ride whose screen Home has open, so a second tap doesn't stack it.
+  String? _openRideId;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _pushEvents ??= AppScope.of(context).push.events.listen(_onPush);
     if (_data == null) _load();
   }
 
   @override
   void dispose() {
     _poll?.cancel();
+    _pushEvents?.cancel();
     super.dispose();
+  }
+
+  /// A tapped notification opens its ride; one that arrives while the app is
+  /// open makes Home ask for the latest straight away (the ride screen, if
+  /// open, does the same for its ride).
+  void _onPush(PushEvent e) {
+    if (!mounted) return;
+    if (e.opened && e.rideId != _openRideId) {
+      _openRide(e.rideId);
+    } else if (!e.opened && _openRideId == null) {
+      _reload();
+    }
   }
 
   void _load() {
@@ -97,6 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _pushRegistered = false; // Try again on the next load.
         }
       }
+      // The app was opened from a notification: go to its ride.
+      final launch = await scope.push.takeLaunchEvent();
+      if (launch != null && mounted) {
+        _openRide(launch.rideId);
+        return;
+      }
     }
     // A finished ride the rider hasn't marked or rated opens R2.3, once.
     if (!mounted) return;
@@ -110,7 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _openRide(String id) async {
     _poll?.cancel();
     _clearMessages();
+    _openRideId = id;
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RideScreen(rideId: id)));
+    if (_openRideId == id) _openRideId = null;
     if (mounted) _reload();
   }
 

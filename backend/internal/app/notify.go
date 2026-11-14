@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -148,7 +149,15 @@ func (a *App) SendDueNotifications(ctx context.Context, sender PushSender) (int,
 			title, body := MessageFor(n.kind, n.payload)
 			var sendErr error
 			for _, token := range tokens {
-				if sendErr = sender.Send(ctx, token, PushMessage{title, body, PushData{n.kind, n.rideID}}); sendErr != nil {
+				sendErr = sender.Send(ctx, token, PushMessage{title, body, PushData{n.kind, n.rideID}})
+				if errors.Is(sendErr, ErrUnregistered) {
+					// The app is gone from that device: forget it and carry on.
+					if _, err := tx.Exec(ctx, "delete from devices where push_token = $1", token); err != nil {
+						return err
+					}
+					sendErr = nil
+				}
+				if sendErr != nil {
 					break
 				}
 			}

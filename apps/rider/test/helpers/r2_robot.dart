@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rider/core/fake_api.dart';
 import 'package:rider/core/fake_ride_script.dart';
+import 'package:rider/core/push.dart';
 
 import 'app_harness.dart';
 import 'r1_robot.dart';
@@ -21,11 +22,12 @@ class R2Robot extends R1Robot {
     WidgetTester tester, {
     Size size = phoneSize,
     FakeRiderApi Function(DateTime Function() now)? backend,
+    PushService push = const NoPush(),
   }) async {
     final clock = _MutableNow(testNow);
     DateTime now() => clock.value;
     final api = backend?.call(now) ?? FakeRiderApi(now: now);
-    await pumpRiderApp(tester, api: api, size: size);
+    await pumpRiderApp(tester, api: api, size: size, push: push);
     final robot = R2Robot._(tester, api, clock);
     await robot.completeR1();
     return robot;

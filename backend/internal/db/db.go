@@ -42,15 +42,34 @@ func Open(ctx context.Context, url string) (*pgxpool.Pool, error) {
 //go:embed migrations/*.sql
 var migrations embed.FS
 
+// migrateLock is the Postgres advisory lock key that lets one process
+// migrate at a time: the API and the worker both migrate on start, and on a
+// first deploy they start together.
+const migrateLock = 7_200_312_001
+
 // Migrate applies every migration in migrations/ that hasn't run yet, in
 // order, each in its own transaction. Returns the files it applied.
 func Migrate(ctx context.Context, pool *pgxpool.Pool) ([]string, error) {
-	if _, err := pool.Exec(ctx, `create table if not exists schema_migrations (
+	conn, err := pool.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+	if _, err := conn.Exec(ctx, "select pg_advisory_lock($1)", migrateLock); err != nil {
+		return nil, err
+	}
+	// Released with a fresh context, so a cancelled start still frees the lock.
+	defer conn.Exec(context.Background(), "select pg_advisory_unlock($1)", migrateLock)
+	return migrate(ctx, conn)
+}
+
+func migrate(ctx context.Context, conn *pgxpool.Conn) ([]string, error) {
+	if _, err := conn.Exec(ctx, `create table if not exists schema_migrations (
 		name text primary key, applied_at timestamptz not null default now())`); err != nil {
 		return nil, err
 	}
 	done := map[string]bool{}
-	rows, err := pool.Query(ctx, "select name from schema_migrations")
+	rows, err := conn.Query(ctx, "select name from schema_migrations")
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +95,7 @@ func Migrate(ctx context.Context, pool *pgxpool.Pool) ([]string, error) {
 		if err != nil {
 			return applied, err
 		}
-		err = pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
+		err = pgx.BeginFunc(ctx, conn, func(tx pgx.Tx) error {
 			// No arguments: sent as a simple query, so a file can hold many statements.
 			if _, err := tx.Exec(ctx, string(sql)); err != nil {
 				return err

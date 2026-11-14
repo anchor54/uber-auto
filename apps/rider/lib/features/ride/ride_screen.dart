@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../core/models.dart';
+import '../../core/push.dart';
 import '../../core/schedule.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
@@ -30,6 +31,7 @@ class RideScreen extends StatefulWidget {
 
 class _RideScreenState extends State<RideScreen> {
   RideTracker? _tracker;
+  StreamSubscription<PushEvent>? _pushEvents;
 
   @override
   void didChangeDependencies() {
@@ -38,11 +40,15 @@ class _RideScreenState extends State<RideScreen> {
       final scope = AppScope.of(context);
       _tracker = widget.tracker ?? RideTracker(api: scope.api, rideId: widget.rideId, clock: scope.clock);
       _tracker!.start();
+      // A push about this ride ("Driver arrived", …) means it moved: ask now
+      // rather than at the next 5-second poll.
+      _pushEvents = scope.push.events.where((e) => e.rideId == widget.rideId).listen((_) => _tracker?.poll());
     }
   }
 
   @override
   void dispose() {
+    _pushEvents?.cancel();
     if (widget.tracker == null) _tracker?.dispose();
     super.dispose();
   }

@@ -62,7 +62,10 @@ void main() {
 
     // Move the server to 20 minutes before that pickup and let the driver go.
     await sim('clock', {'now': ride.pickupAt.subtract(const Duration(minutes: 20)).toUtc().toIso8601String()});
-    await sim('rides/${ride.id}/play', {'speed': 120});
+    // At 120x a 6-minute approach is 3 s of real time, too short for a slow
+    // emulator to reach R2.1 while the driver is still on the way: give it 40
+    // simulated minutes (20 s).
+    await sim('rides/${ride.id}/play', {'speed': 120, 'approachMinutes': 40});
 
     // Home → R2.1 once the driver is on the way.
     await waitFor(tester, find.byKey(const Key('home.commute')));

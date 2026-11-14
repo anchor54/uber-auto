@@ -42,6 +42,10 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	push, err := app.PushSenderFromEnv(os.Getenv, log)
+	if err != nil {
+		return err
+	}
 	if applied, err := db.Migrate(ctx, pool); err != nil {
 		return err
 	} else if len(applied) > 0 {
@@ -58,6 +62,7 @@ func run(log *slog.Logger) error {
 		OTPSender: providers.OTPSender,
 		Maps:      providers.Maps,
 		MapStyle:  providers.MapStyle,
+		Push:      push,
 		Log:       log,
 	}
 	if config.EnableDriverSim {
@@ -75,7 +80,7 @@ func run(log *slog.Logger) error {
 		if err != nil {
 			return err
 		}
-		go a.StartJobLoop(ctx, app.LogPushSender(log), every, log)
+		go a.StartJobLoop(ctx, a.Push, every, log)
 	}
 
 	port := os.Getenv("PORT")

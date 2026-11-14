@@ -172,6 +172,24 @@ type JobCounts struct {
 	PaymentReminders int `json:"paymentReminders"`
 	StaleClosed      int `json:"staleClosed"`
 	Sent             int `json:"sent"`
+	TrackPruned      int `json:"trackPruned"`
+}
+
+// TrackKeptFor is how long ride_track points are kept, to settle disputes.
+const TrackKeptFor = 30 * 24 * time.Hour
+
+// PruneRideTrack deletes ride_track points older than 30 days, once a day.
+func (a *App) PruneRideTrack(ctx context.Context) (int, error) {
+	now := a.now()
+	today := domain.LocalDateString(now, a.Config.UTCOffsetMinutes)
+	// Claim today's run; a second worker gets no row back and skips.
+	tag, err := a.DB.Exec(ctx, `insert into job_runs (name, last_run_on) values ('prune_track', $1::text::date)
+		on conflict (name) do update set last_run_on = excluded.last_run_on where job_runs.last_run_on < excluded.last_run_on`, today)
+	if err != nil || tag.RowsAffected() == 0 {
+		return 0, err
+	}
+	tag, err = a.DB.Exec(ctx, "delete from ride_track where at < $1", now.Add(-TrackKeptFor))
+	return int(tag.RowsAffected()), err
 }
 
 func (c JobCounts) any() bool { return c != JobCounts{} }
@@ -190,6 +208,7 @@ func (a *App) RunJobs(ctx context.Context, sender PushSender) (JobCounts, error)
 		{&c.PaymentReminders, a.QueuePaymentReminders},
 		{&c.StaleClosed, a.CloseStaleRides},
 		{&c.Sent, func(ctx context.Context) (int, error) { return a.SendDueNotifications(ctx, sender) }},
+		{&c.TrackPruned, a.PruneRideTrack},
 	}
 	for _, s := range steps {
 		if *s.n, err = s.f(ctx); err != nil {

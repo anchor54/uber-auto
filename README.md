@@ -86,10 +86,11 @@ Layout: `cmd/` holds the four programs; `internal/domain` the pure rules (dates,
 | `MAPS_PROVIDER` | `demo` keeps the demo places even with an Ola key (the contract and end-to-end tests need them) |
 | `MAP_TILE_CACHE_MB` | Size of the backend's map tile cache (default 64; `0` turns it off) |
 | `CORS_ORIGINS` | Comma-separated web origins allowed to call the API |
+| `FCM_SERVICE_ACCOUNT_JSON` | Worker: a Firebase service account's JSON key, to send push notifications through FCM (else they are logged) |
 
 With `APP_ENV=production` (or `NODE_ENV=production`) the server refuses to start with any of the demo switches on, or without `OTP_SECRET` and SMS.
 
-**Processes.** `cmd/server` is the API. `cmd/worker` is the worker: every 30 seconds it creates rides 14 days ahead (nightly), queues "Leg is on", flags late drivers, queues payment reminders, closes stale rides and sends notifications. Each job is safe to run twice.
+**Processes.** `cmd/server` is the API. `cmd/worker` is the worker: every 30 seconds it creates rides 14 days ahead (nightly), queues "Leg is on", flags late drivers, queues payment reminders, closes stale rides and sends notifications; once a day it deletes ride tracking points older than 30 days. Each job is safe to run twice.
 
 **Playing the driver** (backend running with `ENABLE_DRIVER_SIM=true`):
 
@@ -118,10 +119,14 @@ The ride lifecycle is one pure function (`Transition` in `backend/internal/domai
 
 ## Going live
 
-1. **Render.** Create an account, then *New → Blueprint* and pick this repository: `render.yaml` creates the API, the worker and Postgres in Singapore. Enter the keys it asks for (below). Then, once, open the API's *Shell* and run `./bin/db seed-config` to load fare rules, ride types and places (add `--demo-drivers` for the demo drivers). It never deletes data.
-2. **SMS (MSG91).** Register your sender and an OTP template on DLT through MSG91; the template text must contain `##OTP##`. Put `MSG91_AUTH_KEY` and the template id (`MSG91_OTP_TEMPLATE_ID`) into Render. Codes are limited to one every 30 seconds and five an hour per phone, and wrong guesses count across resends.
+1. **Render.** Create an account, then *New → Blueprint* and pick this repository: `render.yaml` creates the API, the worker and Postgres in Singapore. Enter the keys it asks for (below). Then, once, open the API's *Shell* and run `./bin/db seed-config` to load fare rules, ride types and places (add `--demo-drivers` for the demo drivers). It never deletes data. The blueprint starts as **staging** (`APP_ENV=staging`): there is no SMS yet, so each sign-in code is written to the API's log in Render, where you read it to sign in.
+2. **SMS (MSG91), before real riders.** Register your sender and an OTP template on DLT through MSG91; the template text must contain `##OTP##`. In `render.yaml`, add `MSG91_AUTH_KEY` and `MSG91_OTP_TEMPLATE_ID` to `commute-api` (as `sync: false`) and set `APP_ENV` to `production` on both services; Render then asks for the two keys. Production refuses to start without them. Codes are limited to one every 30 seconds and five an hour per phone, and wrong guesses count across resends.
 3. **Maps (Ola Maps).** Create a project in the Ola Maps console and put its key in `OLA_MAPS_API_KEY`. The backend uses it for place search, road distances and routes, and serves the app's map (`/v1/map/…`: Ola's style trimmed to the base map, with tiles, fonts and sprite passed through and cached), so the key never reaches phones. Check Ola's terms on caching tiles; `MAP_TILE_CACHE_MB=0` turns the cache off.
 4. **App.** In GitHub, set the repository variable `API_BASE_URL` to the API's URL (e.g. `https://commute-api.onrender.com`). CI then builds the APK and the web app in real mode.
 5. **Web app.** In GitHub *Settings → Pages*, choose *Deploy from a branch* → `gh-pages`. CI publishes the web build there on every push to `main`.
-6. **Push notifications** (later): create a Firebase project, add the Android app, and implement `PushService` (`lib/core/push.dart`) and an FCM `PushSender` (`backend/internal/app/notify.go`). Until then notifications are logged and riders see changes in the app within 5 seconds.
+6. **Push notifications** through the Firebase project `recurring-ride-share` (Android app `com.uberauto.rider`).
+   - **App:** nothing to do. The project's client settings are built in (`lib/core/fcm_push.dart`); they aren't secrets, and no `google-services.json` is needed. To use another project, set the GitHub repository variables `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_SENDER_ID` and `FIREBASE_PROJECT_ID` (or pass them as `--dart-define`s locally).
+   - **Worker:** in the Firebase console, *Project settings → Service accounts → Generate new private key*, and paste the whole JSON file into the worker's `FCM_SERVICE_ACCOUNT_JSON` on Render. This one is a secret: never commit it.
+
+   Riders are asked to allow notifications once they have a commute. Tapping one opens that ride. Without Firebase, notifications are only logged and riders see changes in the app within 5 seconds.
 7. **Driver app.** Real riders shouldn't get "Driver confirmed" from a stand-in: drivers need the driver app (or ops acting through `/v1/driver/*`) before launch.

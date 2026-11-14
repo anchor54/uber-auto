@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rider/app.dart';
 import 'package:rider/core/clock.dart';
 import 'package:rider/core/fake_api.dart';
+import 'package:rider/core/push.dart';
 import 'package:rider/ui/widgets.dart';
 
 /// Wednesday 21 Oct 2026, 9:00 AM. Every widget test runs at this time so
@@ -17,6 +18,7 @@ Future<FakeRiderApi> pumpRiderApp(
   FakeRiderApi? api,
   Size size = phoneSize,
   DateTime? now,
+  PushService push = const NoPush(),
 }) async {
   tester.view.physicalSize = size * 3;
   tester.view.devicePixelRatio = 3;
@@ -24,7 +26,7 @@ Future<FakeRiderApi> pumpRiderApp(
   final fake = api ?? FakeRiderApi();
   final clock = FixedClock(now ?? testNow);
   fake.syncClock(clock.now);
-  await tester.pumpWidget(RiderApp(api: fake, clock: clock));
+  await tester.pumpWidget(RiderApp(api: fake, clock: clock, push: push));
   await tester.pumpAndSettle();
   return fake;
 }

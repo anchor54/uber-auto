@@ -40,6 +40,10 @@ func run(log *slog.Logger) error {
 	if err != nil {
 		return err
 	}
+	push, err := app.PushSenderFromEnv(os.Getenv, log)
+	if err != nil {
+		return err
+	}
 	pool, err := db.Open(ctx, "")
 	if err != nil {
 		return err
@@ -50,8 +54,8 @@ func run(log *slog.Logger) error {
 	}
 	// Real time only. When the dev simulator moves the API's clock, run the
 	// jobs inside the API instead (RUN_JOBS_IN_API=true) so both share it.
-	a := &app.App{DB: pool, Config: config, Clock: app.RealClock, OTPSender: app.ConsoleOTPSender, Log: log}
+	a := &app.App{DB: pool, Config: config, Clock: app.RealClock, OTPSender: app.ConsoleOTPSender, Push: push, Log: log}
 	log.Info("[worker] running jobs", "every", every.String())
-	a.StartJobLoop(ctx, app.LogPushSender(log), every, log)
+	a.StartJobLoop(ctx, push, every, log)
 	return nil
 }
