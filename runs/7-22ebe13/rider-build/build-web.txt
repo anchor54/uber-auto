@@ -1,0 +1,20 @@
+Compiling lib/main.dart for the Web...                          
+Wasm dry run findings:
+Found incompatibilities with WebAssembly.
+
+package:flutter_secure_storage_web/flutter_secure_storage_web.dart 5:1 - dart:html unsupported (0)
+package:flutter_secure_storage_web/flutter_secure_storage_web.dart 6:1 - dart:js_util unsupported (15)
+package:flutter_secure_storage_web/src/subtle.dart 21:1 - dart:html unsupported (0)
+package:flutter_secure_storage_web/src/subtle.dart 22:1 - dart:js_util unsupported (15)
+package:flutter_secure_storage_web/src/subtle.dart 26:1 - package:js/js.dart unsupported (14)
+
+Consider addressing these issues to enable wasm builds. dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.
+See docs for more info: https://docs.flutter.dev/platform-integration/web/wasm
+
+Note: WebAssembly compilation failed due to legacy web imports.
+dart:html, dart:js, and legacy JS interop libraries are deprecated and planned for removal from the Dart SDK in a future release. Migrate your project to package:web and dart:js_interop.
+See https://flutter.dev/to/wasm-errors for diagnostic and migration guidance.
+Use --no-wasm-dry-run to disable these warnings.
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 1468 bytes (99.9% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Compiling lib/main.dart for the Web...                             35.3s
+✓ Built build/web
