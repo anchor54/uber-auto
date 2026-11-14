@@ -1,0 +1,27 @@
+Resolving dependencies...
+Downloading packages...
+  archive 4.7.0 (4.7.1 available)
+  code_assets 1.2.1 (2.2.0 available)
+  flutter_lints 4.0.0 (6.0.0 available)
+  flutter_secure_storage 9.2.4 (11.2.0 available)
+  flutter_secure_storage_linux 1.2.3 (3.0.3 available)
+  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
+  flutter_secure_storage_platform_interface 1.1.2 (2.1.1 available)
+  flutter_secure_storage_web 1.2.1 (2.1.1 available)
+  flutter_secure_storage_windows 3.1.2 (4.2.2 available)
+  hooks 2.0.2 (2.2.0 available)
+  image 4.12.0 (4.13.0 available)
+  js 0.6.7 (0.7.2 available)
+  lints 4.0.0 (6.1.0 available)
++ listen 1.0.1
+  material_color_utilities 0.13.0 (0.13.1 available)
+> meta 1.19.0 (was 1.18.3)
+  objective_c 9.5.0 (9.6.4 available)
+  record_use 0.6.0 (1.1.1 available)
+> test_api 0.7.14 (was 0.7.12) (0.7.15 available)
+  url_launcher 6.3.1 (6.3.3 available)
+> vector_math 2.4.4 (was 2.4.0)
+  win32 5.15.0 (6.4.0 available)
+Changed 4 dependencies!
+19 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
