@@ -1,0 +1,505 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart
+test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+  Future<void> advance(int minutes) async {
+               ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+ - 'Duration' is from 'dart:core'.
+Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+  Future<void> advance(int minutes) async {
+                           ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+00:00 +0 -1: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+    Future<void> advance(int minutes) async {
+                 ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+   - 'Duration' is from 'dart:core'.
+  Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+    Future<void> advance(int minutes) async {
+                             ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  .
+00:00 +0 -2: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+00:00 +0 -2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 request → finding → driver confirmed on small phone 360x640
+test/contract/rider_api_contract_test.dart:11:8: Error: Error when reading 'lib/core/b.api.dart': No such file or directory
+import 'package:rider/core/b.api.dart';
+       ^
+test/contract/rider_api_contract_test.dart:216:3: Error: Type 'RiderApi' not found.
+  RiderApi get api;
+  ^^^^^^^^
+test/contract/rider_api_contract_test.dart:231:3: Error: Type 'RiderApi' not found.
+  RiderApi get api => fake;
+  ^^^^^^^^
+test/contract/rider_api_contract_test.dart:253:9: Error: Type 'RiderApi' not found.
+  final RiderApi api;
+        ^^^^^^^^
+test/contract/rider_api_contract_test.dart:253:9: Error: 'RiderApi' isn't a type.
+  final RiderApi api;
+        ^^^^^^^^
+00:00 +0 -3: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: test/contract/rider_api_contract_test.dart:11:8: Error: Error when reading 'lib/core/b.api.dart': No such file or directory
+  import 'package:rider/core/b.api.dart';
+         ^
+  test/contract/rider_api_contract_test.dart:216:3: Error: Type 'RiderApi' not found.
+    RiderApi get api;
+    ^^^^^^^^
+  test/contract/rider_api_contract_test.dart:231:3: Error: Type 'RiderApi' not found.
+    RiderApi get api => fake;
+    ^^^^^^^^
+  test/contract/rider_api_contract_test.dart:253:9: Error: Type 'RiderApi' not found.
+    final RiderApi api;
+          ^^^^^^^^
+  test/contract/rider_api_contract_test.dart:253:9: Error: 'RiderApi' isn't a type.
+    final RiderApi api;
+          ^^^^^^^^
+  .
+00:00 +0 -3: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+00:02 +1 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 header, route, repeat and timing copy
+00:03 +2 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 header, route, repeat and timing copy
+00:04 +3 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 request → finding → driver confirmed on Pixel 7 412x915
+00:04 +4 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 request → finding → driver confirmed on Pixel 7 412x915
+00:04 +5 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 turning "Same time every day" off shows one row per chosen weekday
+00:05 +6 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Bike driver
+00:05 +7 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Bike driver
+00:05 +8 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 a day whose time differs from the first chosen day is tagged "Different"
+00:06 +9 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 a day whose time differs from the first chosen day is tagged "Different"
+00:07 +10 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 a day whose time differs from the first chosen day is tagged "Different"
+00:07 +11 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Cab · Sedan driver
+00:08 +12 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 the time picker moves in 5-minute steps
+00:08 +13 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Cab · SUV driver
+00:08 +14 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 the return trip row reads "{time} every day from {drop-off}"
+00:08 +15 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 per-day times: Friday later than the other days
+00:09 +16 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 per-day times: Friday later than the other days
+00:10 +17 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 per-day times: Friday later than the other days
+00:10 +18 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 "× 2" only with a return trip
+00:10 +19 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 a Saturday-only ride, one way, cash
+00:10 +20 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 a Saturday-only ride, one way, cash
+00:11 +21 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 "Choose ride type" needs a pickup, a drop-off and at least one day
+00:11 +22 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 no-driver path: three empty rounds, R1.7, try again, then cancel
+00:11 +23 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 per-day times still need only a time for every chosen day
+00:11 +24 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 cancel during a round: no driver is ever assigned
+00:12 +25 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 cancel during a round: no driver is ever assigned
+00:12 +26 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 cancel during a round: no driver is ever assigned
+00:12 +27 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 per-day times reach R1.4 grouped by equal times
+00:13 +28 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:13 +29 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:14 +30 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 survives the slow network used in demo mode
+00:14 +31 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 header and copy
+00:16 +32 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home, no ride R1.6b greets the rider and offers to set up a ride
+00:16 +33 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 lists every allowed type with its description and fare
+00:17 +34 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 the request card, with no rounds, names or counts
+00:17 +35 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 the request card, with no rounds, names or counts
+00:18 +36 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 the footer shows "{ride type} · per ride" and the fare
+00:18 +37 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 per-day exceptions show in the time line
+00:19 +38 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 per-day exceptions show in the time line
+00:19 +39 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 per-day exceptions show in the time line
+00:20 +40 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 the schedule table groups days with the same times
+00:20 +41 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:21 +42 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 a one-way ride shows → instead of ⇄
+00:21 +43 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 "View request" opens R1.4 read-only
+00:21 +44 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 "View request" opens R1.4 read-only
+00:21 +45 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 "What happens next" panel
+00:22 +46 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 "Cancel request" asks first; keeping it changes nothing
+00:22 +47 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 usual payment: UPI or Cash, UPI selected
+00:22 +48 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 cancelling ends the series and Home offers set-up again
+00:23 +49 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 cancelling ends the series and Home offers set-up again
+00:23 +50 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 requesting goes Home with the toast and sends the choices
+00:24 +51 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 a cancel that loses the race to the pick says who was assigned
+00:24 +52 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 while the request runs the button spins and cannot be tapped again
+00:24 +53 -3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 while the request runs the button spins and cannot be tapped again
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: false
+  Actual: <true>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart:224:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart line 224
+The test description was:
+  R1.4 while the request runs the button spins and cannot be tapped again
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:25 +53 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home: driver confirmed R1.6 next ride card with the driver per weekday
+00:25 +53 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 while the request runs the button spins and cannot be tapped again [E]
+  Test failed. See exception logs above.
+  The test description was: R1.4 while the request runs the button spins and cannot be tapped again
+  
+00:25 +54 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 a network error keeps the screen and offers to retry
+00:26 +55 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home: driver confirmed R1.6 an active series stays active when Home opens again
+00:26 +56 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 a 422 shows its message
+00:26 +57 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 is still finding after one and two empty rounds
+00:27 +58 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 back keeps everything chosen so far
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Choose your ride type": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart:255:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart line 255
+The test description was:
+  R1.4 back keeps everything chosen so far
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:27 +58 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 back keeps everything chosen so far [E]
+  Test failed. See exception logs above.
+  The test description was: R1.4 back keeps everything chosen so far
+  
+00:27 +58 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 after three empty rounds: "No driver yet" with its three actions
+00:28 +59 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1 Welcome shows the promise and the phone field
+00:28 +60 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1 Welcome shows the promise and the phone field
+00:28 +61 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Change times or ride type" goes R1.2 → R1.3 → R1.4 and tries again with the changes
+00:29 +62 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Change times or ride type" goes R1.2 → R1.3 → R1.4 and tries again with the changes
+00:29 +63 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Change times or ride type" goes R1.2 → R1.3 → R1.4 and tries again with the changes
+00:29 +64 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1 Welcome a number that is not a mobile says why, without asking the server
+00:29 +65 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Cancel request" ends the series
+00:29 +66 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Cancel request" ends the series
+00:29 +67 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Cancel request" ends the series
+00:30 +68 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Cancel request" ends the series
+00:30 +69 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Cancel request" ends the series
+00:30 +70 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1b Enter the code the right code signs in and lands on Home with no regular ride
+00:30 +71 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: a type with no eligible driver goes straight to R1.7, with no waiting
+00:30 +72 -5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: a type with no eligible driver goes straight to R1.7, with no waiting
+test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+  Future<void> advance(int minutes) async {
+               ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+ - 'Duration' is from 'dart:core'.
+Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+  Future<void> advance(int minutes) async {
+                           ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+      repeat: CommuteRepeat.everyWeekday,
+      ^^^^^^
+lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+  const CommuteRequest({
+        ^^^^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+    final match = (await api.findDrivers(request)).first;
+                             ^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+    await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+              ^^^^^^^^^^^^^^
+00:30 +73 -6: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+    Future<void> advance(int minutes) async {
+                 ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+   - 'Duration' is from 'dart:core'.
+  Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+    Future<void> advance(int minutes) async {
+                             ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+        repeat: CommuteRepeat.everyWeekday,
+        ^^^^^^
+  lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+    const CommuteRequest({
+          ^^^^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+      final match = (await api.findDrivers(request)).first;
+                               ^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+      await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+                ^^^^^^^^^^^^^^
+  .
+test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+      repeat: CommuteRepeat.everyWeekday,
+      ^^^^^^
+lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+  const CommuteRequest({
+        ^^^^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+    final match = (await api.findDrivers(request)).first;
+                             ^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+    await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+              ^^^^^^^^^^^^^^
+00:31 +73 -7: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart: test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+        repeat: CommuteRepeat.everyWeekday,
+        ^^^^^^
+  lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+    const CommuteRequest({
+          ^^^^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+      final match = (await api.findDrivers(request)).first;
+                               ^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+      await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+                ^^^^^^^^^^^^^^
+  .
+test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+  Future<void> advance(int minutes) async {
+               ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+ - 'Duration' is from 'dart:core'.
+Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+  Future<void> advance(int minutes) async {
+                           ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+      repeat: CommuteRepeat.everyWeekday,
+      ^^^^^^
+lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+  const CommuteRequest({
+        ^^^^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+    final match = (await api.findDrivers(request)).first;
+                             ^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+    await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+              ^^^^^^^^^^^^^^
+00:33 +73 -8: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart: test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+    Future<void> advance(int minutes) async {
+                 ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+   - 'Duration' is from 'dart:core'.
+  Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+    Future<void> advance(int minutes) async {
+                             ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+        repeat: CommuteRepeat.everyWeekday,
+        ^^^^^^
+  lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+    const CommuteRequest({
+          ^^^^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+      final match = (await api.findDrivers(request)).first;
+                               ^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+      await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+                ^^^^^^^^^^^^^^
+  .
+00:34 +73 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:34 +74 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:34 +75 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:34 +76 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:34 +77 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:34 +78 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:34 +79 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +80 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +81 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +82 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +83 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +84 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +85 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +86 -8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +86 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +86 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: rides per month weekdays with a return trip [E]
+  Expected: 'About 44 (22 days × 2)'
+    Actual: 'About 42 (21 days × 2)'
+     Which: is different.
+            Expected: About 44 (22 days ...
+              Actual: About 42 (21 days ...
+                             ^
+             Differ at offset 7
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/core/schedule_test.dart 45:7                   main.<fn>.<fn>
+  
+00:35 +87 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +88 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +89 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +90 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:35 +91 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +92 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +93 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +94 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +95 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +96 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +97 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +98 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +99 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +100 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +101 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +102 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +103 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +104 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +105 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +106 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +107 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +108 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +109 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +110 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +111 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +112 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:36 +113 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a failed place search shows the reason instead of crashing
+00:37 +114 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a failed place search shows the reason instead of crashing
+00:37 +115 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a failed place search shows the reason instead of crashing
+00:37 +116 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:37 +117 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:37 +118 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:37 +119 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:37 +120 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:38 +121 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +122 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +123 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +124 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +125 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +126 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +127 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +128 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +129 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +130 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +131 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +132 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +133 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +134 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +135 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +136 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +137 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +138 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +139 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +140 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +141 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +142 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:38 +143 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:39 +144 -9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: demo commute is about 12 km and 38 minutes
+00:39 +144 -10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: demo commute is about 12 km and 38 minutes [E]
+  Expected: <11.9>
+    Actual: <9.0>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/core/fares_test.dart 12:5                      main.<fn>
+  
+00:39 +144 -10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares per ride type for the demo commute
+00:39 +144 -11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares per ride type for the demo commute [E]
+  Expected: <90>
+    Actual: <91>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/core/fares_test.dart 17:5                      main.<fn>
+  
+00:39 +144 -11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: short trips pay the minimum fare
+00:39 +145 -11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares are always multiples of five
+00:39 +145 -12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares are always multiples of five [E]
+  Expected: <0>
+    Actual: <1>
+  RideType.bike at 2.5999999999999996 km
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/core/fares_test.dart 32:9                      main.<fn>
+  
+00:39 +145 -12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: cab fares rise with the class
+00:39 +146 -12: Some tests failed.
+
+Failing tests:
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: demo commute is about 12 km and 38 minutes
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares are always multiples of five
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares per ride type for the demo commute
+  ... and 8 more

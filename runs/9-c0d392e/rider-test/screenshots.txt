@@ -1,0 +1,313 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart
+test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+  Future<void> advance(int minutes) async {
+               ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+ - 'Duration' is from 'dart:core'.
+Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+  Future<void> advance(int minutes) async {
+                           ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+00:00 +0 -1: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+    Future<void> advance(int minutes) async {
+                 ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+   - 'Duration' is from 'dart:core'.
+  Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+    Future<void> advance(int minutes) async {
+                             ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  .
+00:00 +0 -2: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart [E]
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 36:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1029:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/future_impl.dart 961:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 990:13               Future._propagateToListeners
+  dart:async/future_impl.dart 874:9                Future._propagateToListeners
+  dart:async/future_impl.dart 732:5                Future._completeWithValue
+  dart:async/future_impl.dart 816:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone.dart 474:14                      Zone.runGuarded
+  dart:async/zone.dart 604:18                      Zone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+test/contract/rider_api_contract_test.dart:11:8: Error: Error when reading 'lib/core/b.api.dart': No such file or directory
+import 'package:rider/core/b.api.dart';
+       ^
+test/contract/rider_api_contract_test.dart:216:3: Error: Type 'RiderApi' not found.
+  RiderApi get api;
+  ^^^^^^^^
+test/contract/rider_api_contract_test.dart:231:3: Error: Type 'RiderApi' not found.
+  RiderApi get api => fake;
+  ^^^^^^^^
+test/contract/rider_api_contract_test.dart:253:9: Error: Type 'RiderApi' not found.
+  final RiderApi api;
+        ^^^^^^^^
+test/contract/rider_api_contract_test.dart:253:9: Error: 'RiderApi' isn't a type.
+  final RiderApi api;
+        ^^^^^^^^
+00:00 +0 -3: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: test/contract/rider_api_contract_test.dart:11:8: Error: Error when reading 'lib/core/b.api.dart': No such file or directory
+  import 'package:rider/core/b.api.dart';
+         ^
+  test/contract/rider_api_contract_test.dart:216:3: Error: Type 'RiderApi' not found.
+    RiderApi get api;
+    ^^^^^^^^
+  test/contract/rider_api_contract_test.dart:231:3: Error: Type 'RiderApi' not found.
+    RiderApi get api => fake;
+    ^^^^^^^^
+  test/contract/rider_api_contract_test.dart:253:9: Error: Type 'RiderApi' not found.
+    final RiderApi api;
+          ^^^^^^^^
+  test/contract/rider_api_contract_test.dart:253:9: Error: 'RiderApi' isn't a type.
+    final RiderApi api;
+          ^^^^^^^^
+  .
+test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+  Future<void> advance(int minutes) async {
+               ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+ - 'Duration' is from 'dart:core'.
+Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+  Future<void> advance(int minutes) async {
+                           ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/screenshots/r2_screenshots_test.dart:27:78: Error: Undefined name 'DemoDriverResponse'.
+    final api = await pumpRiderApp(tester, api: FakeRiderApi(driverResponse: DemoDriverResponse.acceptLater, now: () => testNow));
+                                                                             ^^^^^^^^^^^^^^^^^^
+test/screenshots/r2_screenshots_test.dart:27:62: Error: No named parameter with the name 'driverResponse'.
+    final api = await pumpRiderApp(tester, api: FakeRiderApi(driverResponse: DemoDriverResponse.acceptLater, now: () => testNow));
+                                                             ^^^^^^^^^^^^^^
+lib/core/fake_api.dart:26:3: Context: Found this candidate, but the arguments don't match.
+  FakeRiderApi({
+  ^^^^^^^^^^^^
+test/screenshots/r2_screenshots_test.dart:32:9: Error: The method 'driverDeclines' isn't defined for the type 'FakeRiderApi'.
+ - 'FakeRiderApi' is from 'package:rider/core/fake_api.dart' ('lib/core/fake_api.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'driverDeclines'.
+    api.driverDeclines();
+        ^^^^^^^^^^^^^^
+00:00 +0 -4: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r2_screenshots_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r2_screenshots_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r2_screenshots_test.dart: test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+    Future<void> advance(int minutes) async {
+                 ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+   - 'Duration' is from 'dart:core'.
+  Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+    Future<void> advance(int minutes) async {
+                             ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/screenshots/r2_screenshots_test.dart:27:78: Error: Undefined name 'DemoDriverResponse'.
+      final api = await pumpRiderApp(tester, api: FakeRiderApi(driverResponse: DemoDriverResponse.acceptLater, now: () => testNow));
+                                                                               ^^^^^^^^^^^^^^^^^^
+  test/screenshots/r2_screenshots_test.dart:27:62: Error: No named parameter with the name 'driverResponse'.
+      final api = await pumpRiderApp(tester, api: FakeRiderApi(driverResponse: DemoDriverResponse.acceptLater, now: () => testNow));
+                                                               ^^^^^^^^^^^^^^
+  lib/core/fake_api.dart:26:3: Context: Found this candidate, but the arguments don't match.
+    FakeRiderApi({
+    ^^^^^^^^^^^^
+  test/screenshots/r2_screenshots_test.dart:32:9: Error: The method 'driverDeclines' isn't defined for the type 'FakeRiderApi'.
+   - 'FakeRiderApi' is from 'package:rider/core/fake_api.dart' ('lib/core/fake_api.dart').
+  Try correcting the name to the name of an existing method, or defining a method named 'driverDeclines'.
+      api.driverDeclines();
+          ^^^^^^^^^^^^^^
+  .
+00:00 +0 -4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens
+test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+  Future<void> advance(int minutes) async {
+               ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+ - 'Duration' is from 'dart:core'.
+Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+  Future<void> advance(int minutes) async {
+                           ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+      repeat: CommuteRepeat.everyWeekday,
+      ^^^^^^
+lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+  const CommuteRequest({
+        ^^^^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+    final match = (await api.findDrivers(request)).first;
+                             ^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+    await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+              ^^^^^^^^^^^^^^
+00:03 +0 -5: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+    Future<void> advance(int minutes) async {
+                 ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+   - 'Duration' is from 'dart:core'.
+  Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+    Future<void> advance(int minutes) async {
+                             ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+        repeat: CommuteRepeat.everyWeekday,
+        ^^^^^^
+  lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+    const CommuteRequest({
+          ^^^^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+      final match = (await api.findDrivers(request)).first;
+                               ^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+      await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+                ^^^^^^^^^^^^^^
+  .
+test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+      repeat: CommuteRepeat.everyWeekday,
+      ^^^^^^
+lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+  const CommuteRequest({
+        ^^^^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+    final match = (await api.findDrivers(request)).first;
+                             ^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+    await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+              ^^^^^^^^^^^^^^
+00:04 +0 -6: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart: test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+        repeat: CommuteRepeat.everyWeekday,
+        ^^^^^^
+  lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+    const CommuteRequest({
+          ^^^^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+      final match = (await api.findDrivers(request)).first;
+                               ^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+      await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+                ^^^^^^^^^^^^^^
+  .
+test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+  Future<void> advance(int minutes) async {
+               ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+ - 'Duration' is from 'dart:core'.
+Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+  Future<void> advance(int minutes) async {
+                           ^
+test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+  Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+               ^
+test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+      repeat: CommuteRepeat.everyWeekday,
+      ^^^^^^
+lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+  const CommuteRequest({
+        ^^^^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+    final match = (await api.findDrivers(request)).first;
+                             ^^^^^^^^^^^
+test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+ - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+    await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+              ^^^^^^^^^^^^^^
+00:05 +1 -6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1.7 no driver yet
+00:05 +1 -7: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart [E]
+  Failed to load "/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart":
+  Compilation failed for testPath=/home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart: test/helpers/r2_robot.dart:47:16: Error: The method 'R2Robot.advance' has more required arguments than those of overridden method 'R1Robot.advance'.
+    Future<void> advance(int minutes) async {
+                 ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/helpers/r2_robot.dart:47:28: Error: The parameter 'minutes' of the method 'R2Robot.advance' has type 'int', which does not match the corresponding type, 'Duration', in the overridden method, 'R1Robot.advance'.
+   - 'Duration' is from 'dart:core'.
+  Change to a supertype of 'Duration', or, for a covariant parameter, a subtype.
+    Future<void> advance(int minutes) async {
+                             ^
+  test/helpers/r1_robot.dart:146:16: Context: This is the overridden method ('advance').
+    Future<void> advance([Duration d = const Duration(minutes: 15)]) async {
+                 ^
+  test/features/ride/ride_tracker_test.dart:50:7: Error: No named parameter with the name 'repeat'.
+        repeat: CommuteRepeat.everyWeekday,
+        ^^^^^^
+  lib/core/models.dart:170:9: Context: Found this candidate, but the arguments don't match.
+    const CommuteRequest({
+          ^^^^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:61:30: Error: The method 'findDrivers' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'findDrivers'.
+      final match = (await api.findDrivers(request)).first;
+                               ^^^^^^^^^^^
+  test/features/ride/ride_tracker_test.dart:62:15: Error: The method 'confirmCommute' isn't defined for the type 'CountingApi'.
+   - 'CountingApi' is from 'test/features/ride/ride_tracker_test.dart'.
+  Try correcting the name to the name of an existing method, or defining a method named 'confirmCommute'.
+      await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+                ^^^^^^^^^^^^^^
+  .
+00:07 +2 -7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1.4 on a small phone
+00:08 +3 -7: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart
+00:09 +3 -7: Some tests failed.
+
+Failing tests:
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/contract/rider_api_contract_test.dart
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart
+  /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart
+  ... and 3 more
