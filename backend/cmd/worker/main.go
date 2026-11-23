@@ -1,19 +1,18 @@
-// The worker: everything that runs on a clock, one loop every 30 seconds.
-// In production it is its own process; the API never runs these jobs there.
+// The sweeper as its own process: RunOnce every minute (SWEEP_EVERY_MS).
+// On Cloud Run, Cloud Scheduler calls POST /internal/sweep instead; on
+// Render this worker plays Cloud Scheduler's part.
 package main
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
-	"time"
 
-	"commute-backend/internal/app"
-	"commute-backend/internal/db"
+	"commute-backend/internal/clock"
+	"commute-backend/internal/config"
+	"commute-backend/internal/store"
 )
 
 func main() {
@@ -27,35 +26,23 @@ func main() {
 func run(log *slog.Logger) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-
-	every := 30 * time.Second
-	if v := os.Getenv("WORKER_EVERY_MS"); v != "" {
-		ms, err := strconv.Atoi(v)
-		if err != nil || ms <= 0 {
-			return errors.New("WORKER_EVERY_MS must be a positive number of milliseconds")
-		}
-		every = time.Duration(ms) * time.Millisecond
-	}
-	config, err := app.ConfigFromEnv(os.Getenv)
+	c, err := config.Load(os.Getenv)
 	if err != nil {
 		return err
 	}
-	push, err := app.PushSenderFromEnv(os.Getenv, log)
-	if err != nil {
-		return err
-	}
-	pool, err := db.Open(ctx, "")
+	pool, err := store.Open(ctx, "")
 	if err != nil {
 		return err
 	}
 	defer pool.Close()
-	if _, err := db.Migrate(ctx, pool); err != nil {
+	if _, err := store.Migrate(ctx, pool); err != nil {
 		return err
 	}
-	// Real time only. When the dev simulator moves the API's clock, run the
-	// jobs inside the API instead (RUN_JOBS_IN_API=true) so both share it.
-	a := &app.App{DB: pool, Config: config, Clock: app.RealClock, OTPSender: app.ConsoleOTPSender, Push: push, Log: log}
-	log.Info("[worker] running jobs", "every", every.String())
-	a.StartJobLoop(ctx, push, every, log)
+	app, err := config.Build(ctx, c, os.Getenv, pool, clock.Real{}, log)
+	if err != nil {
+		return err
+	}
+	log.Info("sweeping", "every", c.SweepEvery.String())
+	app.Sweeper.Loop(ctx, c.SweepEvery)
 	return nil
 }

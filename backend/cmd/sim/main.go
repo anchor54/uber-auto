@@ -1,54 +1,63 @@
-// Plays the driver against a running backend started with ENABLE_DRIVER_SIM=true.
+// Plays the drivers against a running backend until the driver app exists.
 //
-//	sim requests                 list commutes waiting for a driver
-//	sim accept  [commuteId]      accept (default: the newest request)
-//	sim decline [commuteId]      decline
-//	sim expire  [commuteId]      act as if the driver never answered
+//	sim offers   --drivers ravi                       a driver's open offers
+//	sim interested --series <id> --drivers ravi,meena,anil
+//	                                                  mark drivers interested in the series' open offer
+//	sim withdraw   --series <id> --drivers ravi       withdraw their interest
+//	sim close-offers [--advance 15]                   move the server clock forward (dev routes) and
+//	                                                  run the sweep at once instead of waiting a minute
+//	sim sweep                                         run the sweep once
 //
-//	sim rides [riderPhone]       open rides, soonest first
-//	sim ride <rideId|next> <depart|arrive|start|end|no_show|contact>
-//	sim play <rideId|next> [speed]   play a whole ride (default 30× real time)
-//	sim clock <ISO time | pickup-<minutes>>   move the server clock
-//	sim jobs                     run the worker jobs once
-//
-// SIM_URL picks the backend (default http://localhost:8080).
+// Drivers are seeded first names (ravi, meena, anil, suresh, vijay) or phone
+// numbers. SIM_URL picks the backend (default http://localhost:8080);
+// FIXED_OTP is the sign-in code (default 123456); SWEEP_TOKEN is sent to
+// /internal/sweep when set. --series accepts an id prefix.
 package main
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"regexp"
-	"strconv"
 	"strings"
-	"time"
+
+	"commute-backend/internal/offers"
+	"commute-backend/internal/seed"
 )
 
-var base = func() string {
-	if v := os.Getenv("SIM_URL"); v != "" {
+func main() {
+	if err := run(os.Args[1:]); err != nil {
+		fmt.Fprintln(os.Stderr, "sim:", err)
+		os.Exit(1)
+	}
+}
+
+func env(k, def string) string {
+	if v := os.Getenv(k); v != "" {
 		return v
 	}
-	return "http://localhost:8080"
-}()
+	return def
+}
 
-func call(method, path string, body any, out any) error {
-	var reader io.Reader
-	if method == "POST" {
-		if body == nil {
-			body = map[string]any{}
-		}
+var base = env("SIM_URL", "http://localhost:8080")
+
+func call(method, path, token string, body, out any) error {
+	var rd io.Reader
+	if body != nil {
 		b, _ := json.Marshal(body)
-		reader = bytes.NewReader(b)
+		rd = bytes.NewReader(b)
 	}
-	req, err := http.NewRequest(method, base+path, reader)
+	req, err := http.NewRequest(method, base+path, rd)
 	if err != nil {
 		return err
 	}
-	if method == "POST" {
-		req.Header.Set("content-type", "application/json")
+	req.Header.Set("content-type", "application/json")
+	if token != "" {
+		req.Header.Set("authorization", "Bearer "+token)
 	}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -57,206 +66,117 @@ func call(method, path string, body any, out any) error {
 	defer res.Body.Close()
 	raw, _ := io.ReadAll(res.Body)
 	if res.StatusCode >= 300 {
-		hint := ""
-		if res.StatusCode == 404 && strings.HasPrefix(path, "/dev/sim") {
-			hint = " (is the backend running with ENABLE_DRIVER_SIM=true?)"
-		}
-		return fmt.Errorf("%s %s → %d %s%s", method, path, res.StatusCode, strings.TrimSpace(string(raw)), hint)
+		return fmt.Errorf("%s %s: %d %s", method, path, res.StatusCode, strings.TrimSpace(string(raw)))
 	}
-	if out != nil {
+	if out != nil && len(raw) > 0 {
 		return json.Unmarshal(raw, out)
 	}
 	return nil
 }
 
-type place struct {
-	Title string `json:"title"`
-}
-
-type request struct {
-	ID         string `json:"id"`
-	DriverID   string `json:"driverId"`
-	Pickup     place  `json:"pickup"`
-	Drop       place  `json:"drop"`
-	PickupTime int    `json:"pickupTime"`
-	StartDate  string `json:"startDate"`
-	Fare       int    `json:"fare"`
-}
-
-type ride struct {
-	ID        string `json:"id"`
-	Date      string `json:"date"`
-	Direction string `json:"direction"`
-	State     string `json:"state"`
-	PickupAt  string `json:"pickupAt"`
-	Pickup    place  `json:"pickup"`
-	Drop      place  `json:"drop"`
-	Driver    struct {
-		Name string `json:"name"`
-	} `json:"driver"`
-}
-
-func requests() ([]request, error) {
-	var out struct{ Requests []request }
-	err := call("GET", "/dev/sim/requests", nil, &out)
-	return out.Requests, err
-}
-
-func rides(riderPhone string) ([]ride, error) {
-	q := ""
-	if riderPhone != "" {
-		q = "?riderPhone=" + riderPhone
+func phoneOf(driver string) (string, error) {
+	for _, p := range seed.SpecPeople {
+		if p.Role == "driver" && strings.EqualFold(offers.FirstName(p.Name), driver) {
+			return p.Phone, nil
+		}
 	}
-	var out struct{ Rides []ride }
-	err := call("GET", "/dev/sim/rides"+q, nil, &out)
-	return out.Rides, err
+	if len(driver) == 10 {
+		return driver, nil
+	}
+	return "", fmt.Errorf("unknown driver %q", driver)
 }
 
-func findRide(arg string) (ride, error) {
-	list, err := rides("")
+func signIn(driver string) (string, error) {
+	phone, err := phoneOf(driver)
 	if err != nil {
-		return ride{}, err
+		return "", err
 	}
-	if arg == "" || arg == "next" {
-		if len(list) == 0 {
-			return ride{}, fmt.Errorf("no open rides")
+	if err := call("POST", "/v1/driver/auth/otp", "", map[string]string{"phone": phone}, nil); err != nil {
+		return "", err
+	}
+	var out struct{ Token string }
+	err = call("POST", "/v1/driver/auth/verify", "", map[string]string{"phone": phone, "code": env("FIXED_OTP", "123456")}, &out)
+	return out.Token, err
+}
+
+func openOffer(token, series string) (string, error) {
+	var list offers.OffersList
+	if err := call("GET", "/v1/offers", token, nil, &list); err != nil {
+		return "", err
+	}
+	for _, o := range list.Offers {
+		if strings.HasPrefix(o.SeriesID.String(), strings.ToLower(series)) {
+			return o.ID.String(), nil
 		}
-		return list[0], nil
 	}
-	for _, r := range list {
-		if r.ID == arg {
-			return r, nil
-		}
-	}
-	return ride{}, fmt.Errorf("no open ride %s", arg)
-}
-
-func printJSON(v any) {
-	b, _ := json.Marshal(v)
-	fmt.Println(string(b))
-}
-
-func arg(args []string, i int) string {
-	if i < len(args) {
-		return args[i]
-	}
-	return ""
-}
-
-func main() {
-	if err := run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	return "", fmt.Errorf("no open offer for series %s", series)
 }
 
 func run(args []string) error {
-	command := arg(args, 0)
-	if command == "" {
-		command = "requests"
+	if len(args) == 0 {
+		return errors.New("usage: sim offers | interested | withdraw | close-offers | sweep (see the file comment)")
 	}
-	switch command {
-	case "requests":
-		list, err := requests()
-		if err != nil {
-			return err
-		}
-		if len(list) == 0 {
-			fmt.Println("No commutes waiting for a driver.")
-		}
-		for _, r := range list {
-			fmt.Printf("%s  %s  %s → %s  %02d:%02d from %s  ₹%d\n", r.ID, r.DriverID, r.Pickup.Title, r.Drop.Title,
-				r.PickupTime/60, r.PickupTime%60, r.StartDate, r.Fare)
-		}
-	case "accept", "decline", "expire":
-		target := arg(args, 1)
-		if target == "" {
-			list, err := requests()
+	fs := flag.NewFlagSet(args[0], flag.ContinueOnError)
+	series := fs.String("series", "", "series id (or prefix)")
+	drivers := fs.String("drivers", "", "comma-separated driver first names or phones")
+	advance := fs.Float64("advance", 15, "minutes to move the server clock before sweeping (close-offers)")
+	if err := fs.Parse(args[1:]); err != nil {
+		return err
+	}
+	names := strings.FieldsFunc(*drivers, func(r rune) bool { return r == ',' || r == ' ' })
+	switch args[0] {
+	case "offers":
+		for _, d := range names {
+			token, err := signIn(d)
 			if err != nil {
 				return err
 			}
-			if len(list) == 0 {
-				return fmt.Errorf("no commutes waiting for a driver")
+			var list offers.OffersList
+			if err := call("GET", "/v1/offers", token, nil, &list); err != nil {
+				return err
 			}
-			target = list[len(list)-1].ID
-		}
-		var out any
-		if err := call("POST", "/dev/sim/commutes/"+target+"/"+command, nil, &out); err != nil {
-			return err
-		}
-		printJSON(out)
-	case "rides":
-		list, err := rides(arg(args, 1))
-		if err != nil {
-			return err
-		}
-		if len(list) == 0 {
-			fmt.Println("No open rides.")
-		}
-		for _, r := range list {
-			fmt.Printf("%s  %s %-8s %-10s %s  %s → %s  %s\n", r.ID, r.Date, r.Direction, r.State, r.PickupAt, r.Pickup.Title, r.Drop.Title, r.Driver.Name)
-		}
-	case "ride":
-		r, err := findRide(arg(args, 1))
-		if err != nil {
-			return err
-		}
-		move := arg(args, 2)
-		if move == "" {
-			return fmt.Errorf("say which move: depart, arrive, start, end, no_show or contact")
-		}
-		var out ride
-		if err := call("POST", "/dev/sim/rides/"+r.ID+"/step", map[string]string{"move": move}, &out); err != nil {
-			return err
-		}
-		fmt.Printf("%s: %s\n", out.ID, out.State)
-	case "play":
-		r, err := findRide(arg(args, 1))
-		if err != nil {
-			return err
-		}
-		speed := 30.0
-		if v := arg(args, 2); v != "" {
-			if speed, err = strconv.ParseFloat(v, 64); err != nil {
-				return fmt.Errorf("speed must be a number")
+			fmt.Printf("%s: %d open\n", d, len(list.Offers))
+			for _, o := range list.Offers {
+				fmt.Printf("  offer %s  series %s  round %d  closes %s  interested %v  %s → %s ₹%d\n", o.ID, o.SeriesID, o.Round,
+					o.ExpiresAt.Format("15:04:05"), o.Interested, o.Pickup.Label, o.Drop.Label, o.FarePerRide)
 			}
 		}
-		var out any
-		if err := call("POST", "/dev/sim/rides/"+r.ID+"/play", map[string]float64{"speed": speed}, &out); err != nil {
-			return err
+	case "interested", "withdraw":
+		if *series == "" || len(names) == 0 {
+			return errors.New("--series and --drivers are required")
 		}
-		printJSON(out)
-	case "clock":
-		a := arg(args, 1)
-		if a == "" {
-			return fmt.Errorf("give an ISO time, or pickup-<minutes> to jump to before the next pickup")
+		path := "/mark-interested"
+		if args[0] == "withdraw" {
+			path = "/withdraw-interest"
 		}
-		now := a
-		if m := regexp.MustCompile(`^pickup-(\d+)$`).FindStringSubmatch(a); m != nil {
-			r, err := findRide("next")
+		for _, d := range names {
+			token, err := signIn(d)
 			if err != nil {
 				return err
 			}
-			at, err := time.Parse(time.RFC3339Nano, r.PickupAt)
+			id, err := openOffer(token, *series)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %w", d, err)
 			}
-			mins, _ := strconv.Atoi(m[1])
-			now = at.Add(-time.Duration(mins) * time.Minute).UTC().Format("2006-01-02T15:04:05.000Z")
+			if err := call("POST", "/v1/offers/"+id+path, token, nil, nil); err != nil {
+				return fmt.Errorf("%s: %w", d, err)
+			}
+			fmt.Printf("%s: %s on offer %s\n", d, args[0], id)
 		}
-		var out any
-		if err := call("POST", "/dev/sim/clock", map[string]string{"now": now}, &out); err != nil {
+	case "close-offers", "sweep":
+		if args[0] == "close-offers" && *advance > 0 {
+			if err := call("POST", "/dev/clock/advance", "", map[string]float64{"minutes": *advance}, nil); err != nil {
+				return fmt.Errorf("moving the clock needs ENABLE_DEV_ROUTES=true on the server: %w", err)
+			}
+		}
+		var counts any
+		if err := call("POST", "/internal/sweep", env("SWEEP_TOKEN", ""), nil, &counts); err != nil {
 			return err
 		}
-		printJSON(out)
-	case "jobs":
-		var out any
-		if err := call("POST", "/dev/sim/jobs", nil, &out); err != nil {
-			return err
-		}
-		printJSON(out)
+		b, _ := json.Marshal(counts)
+		fmt.Println("swept:", string(b))
 	default:
-		return fmt.Errorf("unknown command %q: use requests, accept, decline, expire, rides, ride, play, clock or jobs", command)
+		return fmt.Errorf("unknown command %q", args[0])
 	}
 	return nil
 }

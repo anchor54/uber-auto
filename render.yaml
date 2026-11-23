@@ -5,7 +5,7 @@
 #   OLA_MAPS_API_KEY                        (Ola Maps console; optional, else the demo places)
 #   FCM_SERVICE_ACCOUNT_JSON (worker)       (Firebase service account key; optional, else pushes are logged)
 # Then, once, from the API service's Shell:
-#   ./bin/db seed-config                    (fare rules, ride types, places; never deletes)
+#   ./bin/db seed-config                    (fare rules and ride types; never deletes)
 # Full checklist: README.md → "Going live".
 #
 # Singapore is Render's closest region to India.
@@ -54,8 +54,8 @@ services:
       - key: CORS_ORIGINS
         value: https://anchor54.github.io
 
-  # Everything that runs on a clock: rides 14 days ahead, "Leg is on",
-  # late drivers, payment reminders, stale rides, sending notifications.
+  # The sweeper: closes offer rounds and runs the pick, keeps rides 14 days
+  # ahead and sends queued pushes, once a minute (Cloud Scheduler's part).
   - type: worker
     name: commute-worker
     runtime: go
