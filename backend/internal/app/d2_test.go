@@ -44,12 +44,16 @@ func TestRegisteredDriverSignsIn(t *testing.T) {
 	matches(t, v.at("driver"), map[string]any{"id": "d_ravi", "name": "Ravi Kumar"})
 }
 
+// D1: anyone can sign in as a driver and then register.
 func TestUnknownNumberGetsNoCode(t *testing.T) {
 	ta := startTestApp(t)
 	res := ta.post("/v1/driver/auth/otp", map[string]string{"phone": "9886054321"}, "")
-	status(t, res, 403)
-	eq(t, res.errCode(), "not_a_driver")
-	eq(t, len(ta.sentCodes), 0)
+	status(t, res, 204)
+	eq(t, len(ta.sentCodes), 1)
+	v := ta.post("/v1/driver/auth/verify", map[string]string{"phone": "9886054321", "code": demoOTP}, "")
+	status(t, v, 200)
+	eq(t, v.at("hasProfile"), false)
+	eq(t, v.at("driver"), nil)
 }
 
 func TestSessionsOnlyOpenTheirOwnRoutes(t *testing.T) {

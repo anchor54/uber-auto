@@ -29,16 +29,32 @@ type driverRow struct {
 	ServiceRadiusKm float64
 	WorkStart       int
 	WorkEnd         int
+	// D1: offers only go to live drivers whose subscription runs to today
+	// or later, and never on their weekly day off.
+	Status            string
+	SubscriptionUntil *string // YYYY-MM-DD
+	DayOff            *int    // ISO weekday
 }
 
 const driverColumns = `id, name, ride_type, vehicle, plate, rating, upi_id, gender, has_ac, base_lat, base_lng,
-	service_radius_km, work_start, work_end`
+	service_radius_km, work_start, work_end, status, to_char(subscription_until, 'YYYY-MM-DD'), day_off`
 
 func scanDriver(row pgx.Row) (driverRow, error) {
 	var d driverRow
 	err := row.Scan(&d.ID, &d.Name, &d.RideType, &d.Vehicle, &d.Plate, &d.Rating, &d.UPIID, &d.Gender, &d.HasAC,
-		&d.BaseLat, &d.BaseLng, &d.ServiceRadiusKm, &d.WorkStart, &d.WorkEnd)
+		&d.BaseLat, &d.BaseLng, &d.ServiceRadiusKm, &d.WorkStart, &d.WorkEnd, &d.Status, &d.SubscriptionUntil, &d.DayOff)
 	return d, err
+}
+
+// eligibleDriverSQL is D1's rule for who receives offers, for a drivers
+// table aliased [alias], with today's local date as parameter [param].
+func eligibleDriverSQL(alias, param string) string {
+	return alias + ".status = 'live' and " + alias + ".subscription_until >= " + param + "::text::date"
+}
+
+// liveAndPaid is D1's rule: status live and subscription_until today or later.
+func (d driverRow) liveAndPaid(today string) bool {
+	return d.Status == domain.DriverLive && d.SubscriptionUntil != nil && *d.SubscriptionUntil >= today
 }
 
 type candidate struct {
@@ -70,7 +86,15 @@ func (a *App) resolveRequest(ctx context.Context, req domain.CommuteRequest) (Re
 
 // canInsert tells whether [d] can take every leg of [c] on top of what they
 // already drive. The shared timeline check used by recurring matching.
-func canInsert(ctx context.Context, q db.Q, d driverRow, c ResolvedCommute) (bool, error) {
+// A driver who isn't live and paid up on [today] can take nothing, and a
+// weekly day off on any of the commute's days is a clash.
+func canInsert(ctx context.Context, q db.Q, d driverRow, c ResolvedCommute, today string) (bool, error) {
+	if !d.liveAndPaid(today) {
+		return false, nil
+	}
+	if d.DayOff != nil && slices.Contains(c.Weekdays, *d.DayOff) {
+		return false, nil
+	}
 	legs := domain.WeeklyLegs(domain.WeeklyCommute{Weekdays: c.Weekdays, PickupTime: c.PickupTime, ReturnTrip: c.ReturnTrip,
 		ReturnTime: c.ReturnTime, TripMinutes: c.Trip.Minutes})
 	for _, l := range legs {
@@ -115,14 +139,14 @@ func canInsert(ctx context.Context, q db.Q, d driverRow, c ResolvedCommute) (boo
 // matched with again, isn't offered.
 func (a *App) findCandidates(ctx context.Context, c ResolvedCommute, riderID string, limit int) ([]candidate, error) {
 	rows, err := a.DB.Query(ctx, `select `+driverColumns+`
-		from drivers d where city = $1 and active and ride_type = $2
+		from drivers d where city = $1 and active and ride_type = $2 and `+eligibleDriverSQL("d", "$5")+`
 		  and not exists (
 		    select 1 from commutes x where x.driver_id = d.id and x.rider_id = $3 and x.status = 'declined'
 		      and x.responded_at > $4::timestamptz - interval '30 days')
 		  and not exists (
 		    select 1 from ride_ratings rr join rides rd on rd.id = rr.ride_id
 		    where rd.driver_id = d.id and rd.rider_id = $3 and rr.dont_match)`,
-		a.Config.City, c.RideType, riderID, a.now())
+		a.Config.City, c.RideType, riderID, a.now(), a.today())
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +166,7 @@ func (a *App) findCandidates(ctx context.Context, c ResolvedCommute, riderID str
 		if dist > d.ServiceRadiusKm {
 			continue
 		}
-		ok, err := canInsert(ctx, a.DB, d, c)
+		ok, err := canInsert(ctx, a.DB, d, c, a.today())
 		if err != nil {
 			return nil, err
 		}
@@ -295,7 +319,7 @@ func (a *App) commuteRoutes(handle func(string, handler)) {
 			d, err := scanDriver(tx.QueryRow(ctx, "select "+driverColumns+" from drivers where id = $1 and active for update", driverID))
 			free := false
 			if err == nil {
-				if free, err = canInsert(ctx, tx, d, c); err != nil {
+				if free, err = canInsert(ctx, tx, d, c, a.today()); err != nil {
 					return err
 				}
 			} else if !noRows(err) {

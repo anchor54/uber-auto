@@ -63,6 +63,7 @@ func run(log *slog.Logger) error {
 		Maps:      providers.Maps,
 		MapStyle:  providers.MapStyle,
 		Push:      push,
+		Storage:   providers.Storage,
 		Log:       log,
 	}
 	if config.EnableDriverSim {

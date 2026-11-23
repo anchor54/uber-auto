@@ -57,10 +57,21 @@ func FlowFor(repeat string) string {
 }
 
 // ApiError is an error the API sends as {error: Code, message: Message}.
+// When set, State (the object as it is now, e.g. on a 409), Missing and
+// Items are sent too, as "state", "missing" and "items".
 type ApiError struct {
 	Status  int
 	Code    string
 	Message string
+	State   any
+	Missing []string
+	Items   []string
+}
+
+// WithState is the error with [state] attached.
+func (e *ApiError) WithState(state any) *ApiError {
+	e.State = state
+	return e
 }
 
 func (e *ApiError) Error() string { return e.Message }

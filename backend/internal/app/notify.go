@@ -17,10 +17,13 @@ import (
 // queueing the same one twice does nothing and a restart can't double-send.
 //
 // Kinds: leg_is_on, driver_on_the_way, driver_arrived, driver_running_late,
-// driver_alert, rider_running_late, payment_reminder.
+// driver_alert, rider_running_late, payment_reminder; and D1's, which belong
+// to no ride (ride_id null, so they are never deduplicated): items_rejected,
+// driver_approved, driver_rejected, driver_live, payment_rejected,
+// admin_driver_submitted, admin_payment_claimed.
 
 type Recipient struct {
-	Type string // rider | driver
+	Type string // rider | driver | admin (ID is the admin's phone)
 	ID   string
 }
 
@@ -37,16 +40,30 @@ func queueNotification(ctx context.Context, q db.Q, n notification) error {
 	if payload == nil {
 		payload = map[string]any{}
 	}
+	var rideID *string
+	if n.RideID != "" {
+		rideID = &n.RideID
+	}
 	_, err := q.Exec(ctx, `insert into notifications (recipient_type, recipient_id, kind, ride_id, payload, send_after)
 		values ($1, $2, $3, $4, $5, $6)
 		on conflict (kind, ride_id, recipient_type, recipient_id) do nothing`,
-		n.To.Type, n.To.ID, n.Kind, n.RideID, payload, n.SendAfter)
+		n.To.Type, n.To.ID, n.Kind, rideID, payload, n.SendAfter)
 	return err
+}
+
+// notifyAdmins queues [kind] for every admin phone.
+func (a *App) notifyAdmins(ctx context.Context, q db.Q, kind string, payload map[string]any) error {
+	for _, phone := range a.Config.AdminPhones {
+		if err := queueNotification(ctx, q, notification{To: Recipient{"admin", phone}, Kind: kind, SendAfter: a.now(), Payload: payload}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type PushData struct {
 	Kind   string `json:"kind"`
-	RideID string `json:"rideId"`
+	RideID string `json:"rideId"` // "" for D1's kinds
 }
 
 type PushMessage struct {
@@ -84,10 +101,13 @@ func MessageFor(kind string, p map[string]any) (title, body string) {
 	if v, ok := p["driverFirstName"]; ok && v != nil {
 		driver = fmt.Sprint(v)
 	}
-	time := ""
-	if v, ok := p["pickupTime"]; ok && v != nil {
-		time = fmt.Sprint(v)
+	field := func(k, fallback string) string {
+		if v, ok := p[k]; ok && v != nil && fmt.Sprint(v) != "" {
+			return fmt.Sprint(v)
+		}
+		return fallback
 	}
+	time := field("pickupTime", "")
 	switch kind {
 	case "leg_is_on":
 		return "Your ride is on", fmt.Sprintf("%s picks you up at %s.", driver, time)
@@ -103,6 +123,20 @@ func MessageFor(kind string, p map[string]any) (title, body string) {
 		return "Your rider is 5 min late", "Their wait now runs 10 minutes."
 	case "payment_reminder":
 		return "How was this ride paid?", "Mark the fare as paid so both of you have a record."
+	case "items_rejected":
+		return "A few things need fixing", fmt.Sprintf("A few things need fixing: %s. Open the app to see why.", field("items", "some items"))
+	case "driver_approved":
+		return "You're approved", "You're approved. Choose your plan to go live."
+	case "driver_rejected":
+		return "Application update", "We can't approve your application. Open the app for details."
+	case "driver_live":
+		return "You're live", fmt.Sprintf("You're live. New requests for %s drivers will show up in Requests.", field("vehicleType", "your"))
+	case "payment_rejected":
+		return "Payment not found", "We couldn't find your payment. Open the app to try again."
+	case "admin_driver_submitted":
+		return "Driver waiting", fmt.Sprintf("%s is waiting for review", field("name", "A driver"))
+	case "admin_payment_claimed":
+		return "Payment claimed", fmt.Sprintf("%s says they've paid ₹%s", field("name", "A driver"), field("amount", "?"))
 	}
 	return "Commute", "Open the app for an update."
 }
@@ -123,7 +157,7 @@ func (a *App) SendDueNotifications(ctx context.Context, sender PushSender) (int,
 			payload                    map[string]any
 			tries                      int
 		}
-		rows, err := tx.Query(ctx, `select id, recipient_type, recipient_id, kind, ride_id, payload, tries from notifications
+		rows, err := tx.Query(ctx, `select id, recipient_type, recipient_id, kind, coalesce(ride_id::text, ''), payload, tries from notifications
 			where sent_at is null and send_after <= $1 and tries < $2
 			order by send_after limit $3 for update skip locked`, a.now(), maxTries, 50)
 		if err != nil {

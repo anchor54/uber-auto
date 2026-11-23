@@ -23,7 +23,8 @@ The driver app (`apps/driver/`) arrives with the driver flows; its API exists al
 | D2 Driver accepts or declines a commute | Built: backend API + simulator; rider sees waiting / confirmed / declined |
 | R2 Daily commute ride | Built: rides, lifecycle, live location, payment marks, ratings, worker; push is log-only until a Firebase project exists |
 | R3 Skip or pause, R4 Driver can't make it, R5 Account, R6 One-time ride | To do |
-| D1, D3–D6 Driver app screens | To do (D3's API is built) |
+| D1 Driver registration, verification and subscription | Backend built (driver and admin API, `cmd/admin`, live-and-paid eligibility in matching); driver app screens to do |
+| D3–D6 Driver app screens | To do (D3's API is built) |
 
 ## Rider app
 
@@ -68,10 +69,10 @@ export DATABASE_URL=postgres://app:app@localhost:5432/commute_dev
 go run ./cmd/db seed   # wipe and load the demo city (same places and drivers as the app's demo mode)
 FIXED_OTP=123456 ENABLE_DRIVER_SIM=true RUN_JOBS_IN_API=true go run ./cmd/server
 go test ./...          # needs Postgres: DATABASE_URL, else postgres://app:app@localhost:5432/commute_test
-./build.sh             # the production binaries in bin/: server, worker, db, sim
+./build.sh             # the production binaries in bin/: server, worker, db, sim, admin
 ```
 
-Layout: `cmd/` holds the four programs; `internal/domain` the pure rules (dates, fares, the ride plan, the ride lifecycle, polylines); `internal/db` the pool, migrations (embedded in the binaries) and seeds; `internal/app` the HTTP API, its services and the worker jobs.
+Layout: `cmd/` holds the five programs; `internal/domain` the pure rules (dates, fares, the ride plan, the ride lifecycle, polylines); `internal/db` the pool, migrations (embedded in the binaries) and seeds; `internal/app` the HTTP API, its services and the worker jobs.
 
 | Variable | Meaning |
 |---|---|
@@ -87,8 +88,11 @@ Layout: `cmd/` holds the four programs; `internal/domain` the pure rules (dates,
 | `MAP_TILE_CACHE_MB` | Size of the backend's map tile cache (default 64; `0` turns it off) |
 | `CORS_ORIGINS` | Comma-separated web origins allowed to call the API |
 | `FCM_SERVICE_ACCOUNT_JSON` | Worker: a Firebase service account's JSON key, to send push notifications through FCM (else they are logged) |
+| `ADMIN_PHONES` | Comma-separated phones that may sign in as admin (D1 review and payments) |
+| `PLATFORM_UPI_ID` | Where drivers pay their subscription (default `commute.plans@okaxis`) |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Driver documents in Supabase Storage's private `driver-docs` bucket, through 10-minute signed links; required in production (else an in-memory store served by the API at `/storage/…`, lost on restart) |
 
-With `APP_ENV=production` (or `NODE_ENV=production`) the server refuses to start with any of the demo switches on, or without `OTP_SECRET` and SMS.
+With `APP_ENV=production` (or `NODE_ENV=production`) the server refuses to start with any of the demo switches on, or without `OTP_SECRET`, SMS and Supabase Storage.
 
 **Processes.** `cmd/server` is the API. `cmd/worker` is the worker: every 30 seconds it creates rides 14 days ahead (nightly), queues "Leg is on", flags late drivers, queues payment reminders, closes stale rides and sends notifications; once a day it deletes ride tracking points older than 30 days. Each job is safe to run twice.
 
@@ -103,16 +107,32 @@ go run ./cmd/sim play next 30          # play the next ride at 30× speed
 go run ./cmd/sim ride next depart      # or one move: arrive, start, end, no_show, contact
 ```
 
+**Reviewing drivers (D1)** with the admin tool, against `API_URL` (default `http://localhost:8080`) as a phone listed in `ADMIN_PHONES`:
+
+```sh
+go run ./cmd/admin login 9000000099            # asks for the code; saves the token to ~/.commute-admin-token (or set ADMIN_TOKEN)
+go run ./cmd/admin pending                     # drivers waiting for review and payments claimed, oldest first
+go run ./cmd/admin show drv_…                  # every item, with 10-minute links to the files
+go run ./cmd/admin verify drv_… licence        # or: reject-item drv_… licence "photo blurred" (items: profile_photo, id_proof,
+                                               #   licence, rc, insurance, permit, upi_id, vehicle_front, vehicle_back, vehicle_interior, vehicle)
+go run ./cmd/admin approve drv_…               # or: reject drv_… "<reason>"
+go run ./cmd/admin confirm-payment <payment>   # or: reject-payment <payment> "<reason>"; confirming makes the driver live
+```
+
+Only drivers whose status is `live` and whose `subscription_until` is today or later are proposed to riders, and never for a commute that runs on their weekly day off. Drivers seeded by ops are live and paid until 2099-12-31.
+
 ### API
 
-All JSON; everything except the `auth` routes needs `Authorization: Bearer <token>`. Rider routes need a rider session, driver routes a driver session.
+All JSON; everything except the `auth` routes and `GET /v1/driver/signup-config` needs `Authorization: Bearer <token>`. Rider routes need a rider session, driver routes a driver session, admin routes an admin session. Errors are `{error, message}`, and a 409 also carries `state` (the object as it is now). The D1 contract is in `docs/flows/d1-driver-registration.md`.
 
 | Area | Routes |
 |---|---|
-| Sign-in | `POST /v1/auth/otp`, `/v1/auth/verify`; drivers: `POST /v1/driver/auth/otp`, `/verify` |
+| Sign-in | `POST /v1/auth/otp`, `/v1/auth/verify`; drivers (any phone; verify says `hasProfile`): `POST /v1/driver/auth/otp`, `/verify`; admins (`ADMIN_PHONES` only): `POST /v1/admin/auth/otp`, `/verify` |
+| Driver sign-up (D1) | `GET /v1/driver/signup-config`; `POST /v1/driver/register`; `GET /v1/driver/me`; `POST /v1/driver/items/:kind/upload-url`, `/v1/driver/items/:kind/uploaded`; `PUT /v1/driver/upi`, `/v1/driver/vehicle`, `/v1/driver/day-off`; `POST /v1/driver/submit`; `GET /v1/driver/plan`; `POST /v1/driver/payments` |
+| Admin (D1) | `GET /v1/admin/pending`, `/v1/admin/drivers/:id`; `POST /v1/admin/drivers/:id/items/:item/review`, `/approve`, `/reject`; `POST /v1/admin/payments/:id/confirm`, `/reject` |
 | Booking (R1) | `GET /v1/places?q=`, `POST /v1/trips/estimate`, `/v1/booking-options`, `/v1/commutes/proposals`, `/v1/commutes`, `/v1/waitlist`, `GET /v1/home` |
 | Driver answer (D2) | `GET /v1/driver/requests`, `POST /v1/driver/commutes/:id/accept`, `/decline` |
-| Rides, rider (R2) | `GET /v1/rides/upcoming?days=`, `/v1/rides/unsettled`, `/v1/rides/:id`, `/v1/rides/:id/live`; `POST /v1/rides/:id/running-late`, `/payment`, `/rating`; `PUT /v1/devices` |
+| Rides, rider (R2) | `GET /v1/rides/upcoming?days=`, `/v1/rides/unsettled`, `/v1/rides/:id`, `/v1/rides/:id/live`; `POST /v1/rides/:id/running-late`, `/payment`, `/rating`; `PUT /v1/devices` (riders, registered drivers and admins) |
 | Rides, driver (D3 API) | `GET /v1/driver/run?date=`, `PUT /v1/driver/duty`, `POST /v1/driver/location`, `POST /v1/driver/rides/:id/depart`, `/arrive`, `/start`, `/end`, `/contact`, `/no-show`, `/payment` |
 
 The ride lifecycle is one pure function (`Transition` in `backend/internal/domain/rides.go`); every move writes a `ride_events` row.
@@ -120,7 +140,7 @@ The ride lifecycle is one pure function (`Transition` in `backend/internal/domai
 ## Going live
 
 1. **Render.** Create an account, then *New → Blueprint* and pick this repository: `render.yaml` creates the API, the worker and Postgres in Singapore. Enter the keys it asks for (below). Then, once, open the API's *Shell* and run `./bin/db seed-config` to load fare rules, ride types and places (add `--demo-drivers` for the demo drivers). It never deletes data. The blueprint starts as **staging** (`APP_ENV=staging`): there is no SMS yet, so each sign-in code is written to the API's log in Render, where you read it to sign in.
-2. **SMS (MSG91), before real riders.** Register your sender and an OTP template on DLT through MSG91; the template text must contain `##OTP##`. In `render.yaml`, add `MSG91_AUTH_KEY` and `MSG91_OTP_TEMPLATE_ID` to `commute-api` (as `sync: false`) and set `APP_ENV` to `production` on both services; Render then asks for the two keys. Production refuses to start without them. Codes are limited to one every 30 seconds and five an hour per phone, and wrong guesses count across resends.
+2. **SMS (MSG91), before real riders.** Register your sender and an OTP template on DLT through MSG91; the template text must contain `##OTP##`. In `render.yaml`, add `MSG91_AUTH_KEY` and `MSG91_OTP_TEMPLATE_ID` to `commute-api` (as `sync: false`) and set `APP_ENV` to `production` on both services; Render then asks for the two keys. Production refuses to start without them. It also needs driver document storage: in Supabase create a **private** bucket `driver-docs` (file size limit 5 MB, allowed types `image/jpeg, image/png`) and set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (a secret) on `commute-api`; and `ADMIN_PHONES` for whoever reviews drivers. Codes are limited to one every 30 seconds and five an hour per phone, and wrong guesses count across resends.
 3. **Maps (Ola Maps).** Create a project in the Ola Maps console and put its key in `OLA_MAPS_API_KEY`. The backend uses it for place search, road distances and routes, and serves the app's map (`/v1/map/…`: Ola's style trimmed to the base map, with tiles, fonts and sprite passed through and cached), so the key never reaches phones. Check Ola's terms on caching tiles; `MAP_TILE_CACHE_MB=0` turns the cache off.
 4. **App.** In GitHub, set the repository variable `API_BASE_URL` to the API's URL (e.g. `https://commute-api.onrender.com`). CI then builds the APK and the web app in real mode.
 5. **Web app.** In GitHub *Settings → Pages*, choose *Deploy from a branch* → `gh-pages`. CI publishes the web build there on every push to `main`.

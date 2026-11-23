@@ -61,7 +61,7 @@ func (a *App) bookingOptions(ctx context.Context, flow string, pickup, drop doma
 		return out, err
 	}
 	rows, err := a.DB.Query(ctx, `select ride_type, base_lat, base_lng, service_radius_km, work_start, work_end
-		from drivers where city = $1 and active`, a.Config.City)
+		from drivers d where city = $1 and active and `+eligibleDriverSQL("d", "$2"), a.Config.City, a.today())
 	if err != nil {
 		return out, err
 	}

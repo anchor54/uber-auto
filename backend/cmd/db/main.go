@@ -2,7 +2,7 @@
 //
 //	db migrate                          apply new migrations
 //	db seed                             wipe app data and load the demo city (dev and tests only)
-//	db seed-config [--demo-drivers]     add missing fare rules, ride-type config and places
+//	db seed-config [--demo-drivers]     add missing fare rules, ride-type config, plans and places
 //	                                    (and the 15 demo drivers); never deletes
 package main
 

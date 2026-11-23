@@ -11,6 +11,7 @@ import (
 	"math/big"
 	"net/http"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -147,20 +148,16 @@ func (a *App) checkCode(ctx context.Context, phone, role, code string) error {
 	return err
 }
 
-func (a *App) newSession(ctx context.Context, role, ownerID string) (string, error) {
+// newSession signs [phone] in as [role]. Riders have a rider id; drivers a
+// driver id once they have registered; admins only their phone.
+func (a *App) newSession(ctx context.Context, role string, riderID, driverID *string, phone string) (string, error) {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
 	token := hex.EncodeToString(b)
-	var riderID, driverID *string
-	if role == "rider" {
-		riderID = &ownerID
-	} else {
-		driverID = &ownerID
-	}
-	_, err := a.DB.Exec(ctx, "insert into sessions (token_hash, role, rider_id, driver_id, expires_at) values ($1, $2, $3, $4, $5)",
-		sha256Hex(token), role, riderID, driverID, a.now().Add(sessionTTL))
+	_, err := a.DB.Exec(ctx, "insert into sessions (token_hash, role, rider_id, driver_id, phone, expires_at) values ($1, $2, $3, $4, $5, $6)",
+		sha256Hex(token), role, riderID, driverID, phone, a.now().Add(sessionTTL))
 	return token, err
 }
 
@@ -182,12 +179,6 @@ type riderJSON struct {
 	ID    string  `json:"id"`
 	Phone string  `json:"phone"`
 	Name  *string `json:"name"`
-}
-
-type driverAccountJSON struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Phone string `json:"phone"`
 }
 
 func (a *App) authRoutes(handle func(string, handler)) {
@@ -218,7 +209,7 @@ func (a *App) authRoutes(handle func(string, handler)) {
 		if err != nil {
 			return err
 		}
-		token, err := a.newSession(r.Context(), "rider", rider.ID)
+		token, err := a.newSession(r.Context(), "rider", &rider.ID, nil, phone)
 		if err != nil {
 			return err
 		}
@@ -226,18 +217,12 @@ func (a *App) authRoutes(handle func(string, handler)) {
 		return nil
 	})
 
-	// Drivers are onboarded by ops; an unknown phone gets no code (and no SMS).
+	// D1: anyone can sign in as a driver and then register; the code is
+	// the same for a new phone and a registered driver.
 	handle("POST /v1/driver/auth/otp", func(w http.ResponseWriter, r *http.Request) error {
 		phone, err := parsePhone(r)
 		if err != nil {
 			return err
-		}
-		var known bool
-		if err := a.DB.QueryRow(r.Context(), "select exists (select 1 from drivers where phone = $1 and active)", phone).Scan(&known); err != nil {
-			return err
-		}
-		if !known {
-			return apiErr(403, "not_a_driver", "This number isn't registered as a driver.")
 		}
 		if err := a.sendCode(r.Context(), phone, "driver"); err != nil {
 			return err
@@ -247,34 +232,82 @@ func (a *App) authRoutes(handle func(string, handler)) {
 	})
 
 	handle("POST /v1/driver/auth/verify", func(w http.ResponseWriter, r *http.Request) error {
+		ctx := r.Context()
 		phone, code, err := parseVerify(r)
 		if err != nil {
 			return err
 		}
-		if err := a.checkCode(r.Context(), phone, "driver", code); err != nil {
+		if err := a.checkCode(ctx, phone, "driver", code); err != nil {
 			return err
 		}
-		var d driverAccountJSON
-		err = a.DB.QueryRow(r.Context(), "select id, name, phone from drivers where phone = $1 and active", phone).Scan(&d.ID, &d.Name, &d.Phone)
-		if noRows(err) {
-			return apiErr(403, "not_a_driver", "This number isn't registered as a driver.")
+		var driverID *string
+		var active bool
+		err = a.DB.QueryRow(ctx, "select id, active from drivers where phone = $1", phone).Scan(&driverID, &active)
+		if err != nil && !noRows(err) {
+			return err
 		}
+		if driverID != nil && !active {
+			return apiErr(403, "not_a_driver", "This driver account is closed. Contact support.")
+		}
+		token, err := a.newSession(ctx, "driver", nil, driverID, phone)
 		if err != nil {
 			return err
 		}
-		token, err := a.newSession(r.Context(), "driver", d.ID)
+		var driver *driverState
+		if driverID != nil {
+			d, err := a.loadDriverState(ctx, a.DB, *driverID, nil)
+			if err != nil {
+				return err
+			}
+			driver = &d
+		}
+		writeJSON(w, 200, map[string]any{"token": token, "hasProfile": driver != nil, "driver": driver})
+		return nil
+	})
+
+	// Admins: only the phones in ADMIN_PHONES get a code.
+	handle("POST /v1/admin/auth/otp", func(w http.ResponseWriter, r *http.Request) error {
+		phone, err := parsePhone(r)
 		if err != nil {
 			return err
 		}
-		writeJSON(w, 200, map[string]any{"token": token, "driver": d})
+		if !a.isAdminPhone(phone) {
+			return apiErr(403, "not_an_admin", "This number isn't an admin.")
+		}
+		if err := a.sendCode(r.Context(), phone, "admin"); err != nil {
+			return err
+		}
+		w.WriteHeader(204)
+		return nil
+	})
+
+	handle("POST /v1/admin/auth/verify", func(w http.ResponseWriter, r *http.Request) error {
+		phone, code, err := parseVerify(r)
+		if err != nil {
+			return err
+		}
+		if !a.isAdminPhone(phone) {
+			return apiErr(403, "not_an_admin", "This number isn't an admin.")
+		}
+		if err := a.checkCode(r.Context(), phone, "admin", code); err != nil {
+			return err
+		}
+		token, err := a.newSession(r.Context(), "admin", nil, nil, phone)
+		if err != nil {
+			return err
+		}
+		writeJSON(w, 200, map[string]any{"token": token})
 		return nil
 	})
 }
+
+func (a *App) isAdminPhone(phone string) bool { return slices.Contains(a.Config.AdminPhones, phone) }
 
 type session struct {
 	Role     string
 	RiderID  *string
 	DriverID *string
+	Phone    *string
 }
 
 func (a *App) sessionFor(r *http.Request) (session, error) {
@@ -284,25 +317,38 @@ func (a *App) sessionFor(r *http.Request) (session, error) {
 		return session{}, apiErr(401, "unauthorized", "Sign in first")
 	}
 	var s session
-	err := a.DB.QueryRow(r.Context(), "select role, rider_id, driver_id from sessions where token_hash = $1 and expires_at > $2",
-		sha256Hex(token), a.now()).Scan(&s.Role, &s.RiderID, &s.DriverID)
+	err := a.DB.QueryRow(r.Context(), "select role, rider_id, driver_id, phone from sessions where token_hash = $1 and expires_at > $2",
+		sha256Hex(token), a.now()).Scan(&s.Role, &s.RiderID, &s.DriverID, &s.Phone)
 	if noRows(err) {
 		return s, apiErr(401, "unauthorized", "Your session has ended. Sign in again.")
 	}
 	return s, err
 }
 
-// requireSession is the signed-in rider or driver: their role and id.
+// requireSession is the signed-in rider, driver or admin: their role and
+// the id their devices and notifications are keyed by (an admin's phone).
+// A driver who hasn't registered yet has no id: 404 not_registered.
 func (a *App) requireSession(r *http.Request) (role, id string, err error) {
 	s, err := a.sessionFor(r)
 	if err != nil {
 		return "", "", err
 	}
-	if s.Role == "rider" {
+	switch s.Role {
+	case "rider":
 		return s.Role, str(s.RiderID), nil
+	case "admin":
+		if !a.isAdminPhone(str(s.Phone)) {
+			return "", "", apiErr(403, "admins_only", "This number is no longer an admin.")
+		}
+		return s.Role, str(s.Phone), nil
 	}
-	return s.Role, str(s.DriverID), nil
+	if s.DriverID == nil {
+		return "", "", errNotRegistered()
+	}
+	return s.Role, *s.DriverID, nil
 }
+
+func errNotRegistered() error { return apiErr(404, "not_registered", "Register as a driver first.") }
 
 // requireRider resolves the signed-in rider from `Authorization: Bearer <token>`.
 func (a *App) requireRider(r *http.Request) (string, error) {
@@ -316,7 +362,46 @@ func (a *App) requireRider(r *http.Request) (string, error) {
 	return *s.RiderID, nil
 }
 
-// requireDriver resolves the signed-in driver.
+// driverSession is a signed-in driver who may not have registered yet
+// (DriverID nil). D1's sign-up routes use it.
+func (a *App) driverSession(r *http.Request) (session, error) {
+	s, err := a.sessionFor(r)
+	if err != nil {
+		return s, err
+	}
+	if s.Role != "driver" || s.Phone == nil {
+		return s, apiErr(403, "drivers_only", "This needs a driver account.")
+	}
+	return s, nil
+}
+
+// registeredDriver is the signed-in driver's id; 404 not_registered before
+// they have registered.
+func (a *App) registeredDriver(r *http.Request) (string, error) {
+	s, err := a.driverSession(r)
+	if err != nil {
+		return "", err
+	}
+	if s.DriverID == nil {
+		return "", errNotRegistered()
+	}
+	return *s.DriverID, nil
+}
+
+// requireAdmin is the signed-in admin's phone. Taking a phone out of
+// ADMIN_PHONES ends its sessions.
+func (a *App) requireAdmin(r *http.Request) (string, error) {
+	s, err := a.sessionFor(r)
+	if err != nil {
+		return "", err
+	}
+	if s.Role != "admin" || s.Phone == nil || !a.isAdminPhone(*s.Phone) {
+		return "", apiErr(403, "admins_only", "This needs an admin account.")
+	}
+	return *s.Phone, nil
+}
+
+// requireDriver resolves the signed-in, registered driver (D2 and D3's routes).
 func (a *App) requireDriver(r *http.Request) (string, error) {
 	s, err := a.sessionFor(r)
 	if err != nil {

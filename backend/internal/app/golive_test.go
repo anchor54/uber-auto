@@ -183,7 +183,8 @@ func TestProductionRefusesToStartWithoutSMS(t *testing.T) {
 }
 
 func TestPicksMSG91AndOlaWhenKeysAreSet(t *testing.T) {
-	p, err := ProvidersFromEnv(env(map[string]string{"APP_ENV": "production", "MSG91_AUTH_KEY": "a", "MSG91_OTP_TEMPLATE_ID": "b", "OLA_MAPS_API_KEY": "c"}), shared, nil)
+	p, err := ProvidersFromEnv(env(map[string]string{"APP_ENV": "production", "MSG91_AUTH_KEY": "a", "MSG91_OTP_TEMPLATE_ID": "b", "OLA_MAPS_API_KEY": "c",
+		"SUPABASE_URL": "https://x.supabase.co", "SUPABASE_SERVICE_ROLE_KEY": "k"}), shared, nil)
 	eq(t, err, nil)
 	eq(t, p.Maps.Name(), "ola")
 	if _, ok := p.OTPSender.(*MSG91); !ok {
@@ -223,7 +224,7 @@ func TestSeedConfigAddsMissingNeverDeletes(t *testing.T) {
 	ta.exec(`delete from places where id = 'airport'`)
 	added, err := db.SeedConfig(bg, shared, true)
 	eq(t, err, nil)
-	eq(t, added, map[string]int64{"fareRules": 0, "rideTypeConfig": 0, "places": 1, "drivers": 0})
+	eq(t, added, map[string]int64{"fareRules": 0, "rideTypeConfig": 0, "places": 1, "plans": 0, "drivers": 0})
 	eq(t, ta.count(`select base from fare_rules where ride_type = 'bike'`), 99)
 	status(t, ta.get("/v1/home", rider), 200)
 }

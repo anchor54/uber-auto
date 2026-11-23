@@ -38,6 +38,9 @@ func DemoPlace(id string) domain.Place {
 // the order of DemoDrivers.
 func DemoDriverPhone(index int) string { return fmt.Sprintf("90000000%02d", index+1) }
 
+// DemoDriverReference is the payment reference of the demo driver at [index].
+func DemoDriverReference(index int) string { return fmt.Sprintf("DRV-900%02d", index+1) }
+
 type SeedDriver struct {
 	ID, Name, RideType, Vehicle, Plate string
 	Rating                             float64
@@ -70,7 +73,8 @@ func SeedDemoData(ctx context.Context, pool *pgxpool.Pool) error {
 	if _, err := Migrate(ctx, pool); err != nil {
 		return err
 	}
-	if _, err := pool.Exec(ctx, `truncate job_runs, holidays, devices, notifications, ride_ratings, ride_track,
+	if _, err := pool.Exec(ctx, `truncate driver_events, subscription_payments, driver_items, vehicles, plans,
+		job_runs, holidays, devices, notifications, ride_ratings, ride_track,
 		driver_locations, ride_contacts, ride_events, rides, waitlist, match_proposals, commutes, drivers,
 		ride_type_config, fare_rules, places, sessions, otp_codes, riders cascade`); err != nil {
 		return err
@@ -80,7 +84,7 @@ func SeedDemoData(ctx context.Context, pool *pgxpool.Pool) error {
 }
 
 // SeedConfig loads the city's setup into a live database without touching
-// anything else: fare rules, the ride-type config and the demo places (and
+// anything else: fare rules, the ride-type config, the subscription plans and the demo places (and
 // the demo drivers when asked). Rows that already exist are left alone, so
 // ops changes survive a re-run. Returns how many rows each table gained.
 func SeedConfig(ctx context.Context, pool *pgxpool.Pool, demoDrivers bool) (map[string]int64, error) {
@@ -91,7 +95,7 @@ func SeedConfig(ctx context.Context, pool *pgxpool.Pool, demoDrivers bool) (map[
 }
 
 func insertConfig(ctx context.Context, pool *pgxpool.Pool, drivers bool, onConflict string) (map[string]int64, error) {
-	added := map[string]int64{"fareRules": 0, "rideTypeConfig": 0, "places": 0, "drivers": 0}
+	added := map[string]int64{"fareRules": 0, "rideTypeConfig": 0, "places": 0, "plans": 0, "drivers": 0}
 	run := func(key, sql string, args ...any) error {
 		tag, err := pool.Exec(ctx, sql+onConflict, args...)
 		added[key] += tag.RowsAffected()
@@ -120,13 +124,21 @@ func insertConfig(ctx context.Context, pool *pgxpool.Pool, drivers bool, onConfl
 			return added, err
 		}
 	}
+	for _, p := range domain.DefaultPlans {
+		if err := run("plans", `insert into plans (ride_type, vehicle_type, cab_class, monthly_price) values ($1, $2, $3, $4)`,
+			p.RideType, p.VehicleType, p.CabClass, p.MonthlyPrice); err != nil {
+			return added, err
+		}
+	}
 	if drivers {
+		// Onboarded by ops before D1: live and paid up, no fixed day off.
 		for i, d := range DemoDrivers {
 			if err := run("drivers", `insert into drivers (id, city, name, ride_type, vehicle, plate, rating, upi_id, has_ac,
-				base_lat, base_lng, service_radius_km, work_start, work_end, phone)
-				values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 8, 420, 1290, $12)`,
+				base_lat, base_lng, service_radius_km, work_start, work_end, phone,
+				status, subscription_until, day_off_set, reference)
+				values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 8, 420, 1290, $12, 'live', '2099-12-31', true, $13)`,
 				d.ID, DemoCity, d.Name, d.RideType, d.Vehicle, d.Plate, d.Rating, d.UPI,
-				strings.HasPrefix(d.RideType, "cab_"), d.Lat, d.Lng, DemoDriverPhone(i)); err != nil {
+				strings.HasPrefix(d.RideType, "cab_"), d.Lat, d.Lng, DemoDriverPhone(i), DemoDriverReference(i)); err != nil {
 				return added, err
 			}
 		}

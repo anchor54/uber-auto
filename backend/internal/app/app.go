@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -46,6 +47,10 @@ type Config struct {
 	CORSOrigins []string
 	// How long a proposed driver is held while the rider confirms.
 	ProposalHoldMinutes int
+	// Phones that may sign in as admin (ADMIN_PHONES, comma-separated).
+	AdminPhones []string
+	// Where drivers pay their subscription (PLATFORM_UPI_ID).
+	PlatformUPIID string
 }
 
 var DefaultConfig = Config{
@@ -57,6 +62,8 @@ var DefaultConfig = Config{
 	OTPResendSeconds:    30,
 	OTPMaxSendsPerHour:  5,
 	CORSOrigins:         []string{},
+	AdminPhones:         []string{},
+	PlatformUPIID:       "commute.plans@okaxis",
 }
 
 // IsProduction is true when APP_ENV (or NODE_ENV, as the Node backend used)
@@ -87,6 +94,22 @@ func ConfigFromEnv(getenv func(string) string) (Config, error) {
 		if o = strings.TrimSpace(o); o != "" {
 			c.CORSOrigins = append(c.CORSOrigins, o)
 		}
+	}
+	c.AdminPhones = []string{}
+	for _, p := range strings.Split(getenv("ADMIN_PHONES"), ",") {
+		if p = strings.TrimSpace(p); p == "" {
+			continue
+		}
+		if !phoneRe.MatchString(p) {
+			return c, fmt.Errorf("ADMIN_PHONES: %q is not a 10-digit mobile number", p)
+		}
+		c.AdminPhones = append(c.AdminPhones, p)
+	}
+	if v := strings.TrimSpace(getenv("PLATFORM_UPI_ID")); v != "" {
+		if !domain.ValidUPI(v) {
+			return c, fmt.Errorf("PLATFORM_UPI_ID: %q is not a UPI ID", v)
+		}
+		c.PlatformUPIID = v
 	}
 	if IsProduction(getenv) {
 		var unsafe []string
@@ -124,7 +147,11 @@ type App struct {
 	// Sends push notifications for jobs run from this process (the dev
 	// simulator's /dev/sim/jobs); logs them when nil.
 	Push PushSender
-	Log  *slog.Logger
+	// Driver documents: Supabase Storage in staging and production; an
+	// in-memory store served by this API when nil (development and tests).
+	Storage     Storage
+	storageOnce sync.Once
+	Log         *slog.Logger
 }
 
 func (a *App) pushSender() PushSender {
@@ -169,7 +196,17 @@ func writeError(a *App, w http.ResponseWriter, r *http.Request, err error) {
 	case errors.As(err, &ve):
 		writeJSON(w, 400, map[string]any{"error": "invalid_request", "message": ve.Error(), "issues": ve.Issues})
 	case errors.As(err, &ae):
-		writeJSON(w, ae.Status, map[string]any{"error": ae.Code, "message": ae.Message})
+		body := map[string]any{"error": ae.Code, "message": ae.Message}
+		if ae.State != nil {
+			body["state"] = ae.State
+		}
+		if ae.Missing != nil {
+			body["missing"] = ae.Missing
+		}
+		if ae.Items != nil {
+			body["items"] = ae.Items
+		}
+		writeJSON(w, ae.Status, body)
 	case errors.As(err, &br):
 		writeJSON(w, 400, map[string]any{"error": "bad_request", "message": br.message})
 	default:
@@ -296,6 +333,9 @@ func (a *App) Handler() http.Handler {
 	a.driverRequestRoutes(handle)
 	a.rideRoutes(handle)
 	a.mapStyleRoutes(handle)
+	a.driverSignupRoutes(handle)
+	a.adminRoutes(handle)
+	a.memStorageRoutes(mux)
 	if a.Config.EnableDriverSim {
 		a.devSimRoutes(handle)
 	}
