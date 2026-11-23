@@ -2,7 +2,7 @@ name: Driver app
 
 on:
   push:
-    branches: [main]
+    branches: [main, spec-rewrite]
     paths: ['apps/driver/**', '.github/workflows/driver-app.yml', '.github/scripts/**']
   pull_request:
     paths: ['apps/driver/**', '.github/workflows/driver-app.yml', '.github/scripts/**']

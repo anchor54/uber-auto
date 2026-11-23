@@ -2,7 +2,7 @@ name: Rider app
 
 on:
   push:
-    branches: [main]
+    branches: [main, spec-rewrite]
     paths: ['apps/rider/**', '.github/workflows/rider-app.yml', '.github/scripts/**']
   pull_request:
     paths: ['apps/rider/**', '.github/workflows/rider-app.yml', '.github/scripts/**']
