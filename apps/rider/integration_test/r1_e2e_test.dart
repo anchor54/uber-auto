@@ -12,16 +12,22 @@ import 'package:rider/core/session_store.dart';
 
 import '../test/helpers/r1_robot.dart';
 
-/// Flows R1 and D2 in real mode: the app on a device or emulator, talking to
-/// the backend and Postgres, with the dev simulator playing the driver.
+/// R1 in real mode (spec "App-level integration test"): the app on a device
+/// or emulator against the Go backend, with drivers marked interested over
+/// the driver API and rounds closed with the dev clock and the sweep.
 /// Skipped unless built with API_BASE_URL.
 ///
-///   # backend: FIXED_OTP=123456 ENABLE_DRIVER_SIM=true (auto-accept off)
+///   # backend: FIXED_OTP=123456 ENABLE_DEV_ROUTES=true, spec seed
 ///   flutter test integration_test/r1_e2e_test.dart \
 ///     --dart-define=API_BASE_URL=http://10.0.2.2:8080   # emulator → host
+///     [--dart-define=SWEEP_TOKEN=…]
 const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+const sweepToken = String.fromEnvironment('SWEEP_TOKEN');
 
-/// A fresh rider per test, so runs don't see each other's commutes.
+/// The spec seed's live auto drivers (Ravi, Meena, Anil, Suresh).
+const driverPhones = ['9000000201', '9000000202', '9000000203', '9000000204'];
+
+/// A fresh rider per test, so runs don't see each other's series.
 String freshPhone() => '9${Random().nextInt(900000000) + 100000000}';
 
 void main() {
@@ -33,74 +39,98 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// The driver answers through the dev simulator, as the driver app will.
-  Future<void> driver(SessionStore store, String answer) async {
-    final home = await HttpRiderApi(baseUrl: apiBaseUrl, store: store).home();
-    final res = await http.post(Uri.parse('$apiBaseUrl/dev/sim/commutes/${home.commute!.id}/$answer'));
+  Future<Map<String, dynamic>?> post(String path, {Object? body, String? token}) async {
+    final res = await http.post(
+      Uri.parse('$apiBaseUrl$path'),
+      headers: {'content-type': 'application/json', if (token != null) 'authorization': 'Bearer $token'},
+      body: jsonEncode(body ?? {}),
+    );
+    expect(res.statusCode, inInclusiveRange(200, 299), reason: '$path: ${res.body}');
+    return res.body.isEmpty ? null : jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  /// The rider's newest series, as the app sees it.
+  Future<Series> latestSeries(SessionStore store) async =>
+      (await HttpRiderApi(baseUrl: apiBaseUrl, store: store).home()).series.first;
+
+  /// Every seeded auto driver says "I'm interested" in [seriesId].
+  Future<void> driversInterested(String seriesId) async {
+    for (final phone in driverPhones) {
+      await post('/v1/driver/auth/otp', body: {'phone': phone});
+      final token = (await post('/v1/driver/auth/verify', body: {'phone': phone, 'code': '123456'}))!['token'] as String;
+      final res = await http.get(Uri.parse('$apiBaseUrl/v1/offers'), headers: {'authorization': 'Bearer $token'});
+      final offers = ((jsonDecode(res.body) as Map<String, dynamic>)['offers'] as List).cast<Map<String, dynamic>>();
+      for (final o in offers.where((o) => o['series_id'] == seriesId)) {
+        await post('/v1/offers/${o['id']}/mark-interested', token: token);
+      }
+    }
+  }
+
+  /// "Move the clock 15 minutes": the dev clock, then one sweep.
+  Future<void> closeRound() async {
+    await post('/dev/clock/advance', body: {'minutes': 15});
+    final res = await http.post(
+      Uri.parse('$apiBaseUrl/internal/sweep'),
+      headers: {if (sweepToken.isNotEmpty) 'authorization': 'Bearer $sweepToken'},
+    );
     expect(res.statusCode, 200, reason: res.body);
-    expect(jsonDecode(res.body)['status'], answer == 'accept' ? 'active' : 'declined');
   }
 
-  /// Pull down on Home to check for the driver's answer now.
-  Future<void> refreshHome(WidgetTester tester) async {
-    await tester.fling(find.byKey(const Key('home.commute')), const Offset(0, 400), 1000);
-    await tester.pumpAndSettle();
+  /// R1.2 with an auto (the spec seed's drivers drive autos).
+  Future<void> request(R1Robot robot, {Set<RidePreference> toggle = const {}}) async {
+    await robot.fillSetup();
+    await robot.chooseRideType(RideType.auto, toggle: toggle);
+    await robot.request();
+    expect(find.byKey(const Key('home.finding')), findsOneWidget);
+    expect(find.text('Finding your driver'), findsOneWidget);
   }
 
-  testWidgets('R1 + D2: confirm, the driver accepts, the rider stays signed in', (tester) async {
+  testWidgets('R1: request, "Finding your driver", drivers interested, 15 minutes on, the driver on Home', (tester) async {
     final store = MemorySessionStore();
     await launch(tester, store);
     final robot = R1Robot(tester);
     await robot.signIn(phone: freshPhone());
-    expect(store.token, isNotNull, reason: 'the session is saved');
-    await robot.fillSetup();
-    await robot.chooseRideType(RideType.cabSedan);
-    expect(find.byKey(const Key('match.found')), findsOneWidget);
-    await robot.confirm(pay: PaymentMethod.cash);
-    expect(find.byKey(const Key('home.awaiting')), findsOneWidget);
+    await request(robot);
 
-    await driver(store, 'accept');
-    await refreshHome(tester);
+    final s = await latestSeries(store);
+    expect(s.status, SeriesStatus.findingDriver);
+    await driversInterested(s.id);
+    await closeRound();
+    await robot.refreshHome();
     expect(find.text('Driver confirmed'), findsOneWidget);
 
-    // Relaunch with the same saved session: straight to Home, commute intact.
+    // Relaunch with the same saved session: Home reads the series again.
     await tester.pumpWidget(const SizedBox());
     await launch(tester, store);
     expect(find.text('Driver confirmed'), findsOneWidget);
   }, skip: skip);
 
-  testWidgets('D2: the driver declines; the rider books someone else for the same route', (tester) async {
+  testWidgets('R1: nobody interested, three rounds, "No driver yet", Try again', (tester) async {
     final store = MemorySessionStore();
     await launch(tester, store);
     final robot = R1Robot(tester);
     await robot.signIn(phone: freshPhone());
-    await robot.fillSetup();
-    await robot.chooseRideType(RideType.cabSedan);
-    final first = tester.widget<Text>(find.byKey(const Key('match.driverName'))).data!;
-    await robot.confirm();
-    await driver(store, 'decline');
-    await refreshHome(tester);
-    expect(find.byKey(const Key('home.declined')), findsOneWidget);
-
-    await robot.tap('home.rematch');
-    expect(find.byKey(const Key('match.found')), findsOneWidget);
-    final second = tester.widget<Text>(find.byKey(const Key('match.driverName'))).data!;
-    expect(second, isNot(first), reason: 'the driver who declined is not offered again');
-    await robot.confirm();
-    expect(find.text('Waiting for ${second.split(' ').first}'), findsOneWidget);
-    await driver(store, 'accept'); // leave nothing waiting behind
+    await request(robot);
+    for (var i = 0; i < 3; i++) {
+      await closeRound();
+    }
+    await robot.refreshHome();
+    expect(find.text('No driver yet'), findsOneWidget);
+    await robot.tap('noDriver.retry');
+    expect(find.text('Finding your driver'), findsOneWidget);
+    expect((await latestSeries(store)).status, SeriesStatus.findingDriver);
+    await robot.cancelRequest(); // leave nothing open behind
   }, skip: skip);
 
-  testWidgets('R1: no driver fits, join the waitlist', (tester) async {
-    await launch(tester, MemorySessionStore());
+  testWidgets('R1: cancel the request', (tester) async {
+    final store = MemorySessionStore();
+    await launch(tester, store);
     final robot = R1Robot(tester);
     await robot.signIn(phone: freshPhone());
-    await robot.fillSetup();
-    // No seeded driver is a woman, so the backend finds nobody.
-    await robot.chooseRideType(RideType.cabSedan, toggle: {RidePreference.womanDriver});
-    expect(find.byKey(const Key('match.none')), findsOneWidget);
-    await robot.tap('match.waitlist');
-    expect(find.byKey(const Key('home.empty')), findsOneWidget);
+    await request(robot);
+    await robot.cancelRequest();
+    expect(find.byKey(const Key('home.setup')), findsOneWidget);
+    expect(await HttpRiderApi(baseUrl: apiBaseUrl, store: store).home().then((h) => h.series), isEmpty);
   }, skip: skip);
 
   testWidgets('R1: a wrong code shows the backend message', (tester) async {

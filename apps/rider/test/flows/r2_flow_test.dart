@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rider/core/dialer.dart';
+import 'package:rider/core/fake_api.dart';
+import 'package:rider/core/fares.dart';
 import 'package:rider/core/fake_ride_script.dart';
 import 'package:rider/core/models.dart';
 
@@ -49,7 +51,9 @@ void main() {
       await r.advance(40);
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('ride.arrived')), findsOneWidget);
-      expect(find.text('₹250'), findsOneWidget);
+      // The demo fare: the backend's rules for a sedan, Home → Embassy Tech Village.
+      final fare = suggestedFare(RideType.cabSedan, roadKm(demoPlaces.first, demoPlaces[1]));
+      expect(find.text('₹$fare'), findsOneWidget);
       expect(find.text('UPI: ravi.kumar@okbank'), findsOneWidget);
       await r.tap('pay.upi');
       expect(find.text('Ravi marked this received.'), findsOneWidget);
@@ -94,7 +98,7 @@ void main() {
     };
     addTearDown(() => openUri = (uri) async => false);
     await r.tap('ride.call');
-    expect(calls.single.toString(), 'tel:9000000010');
+    expect(calls.single.toString(), 'tel:$demoDriverPhone');
   });
 
   testWidgets('"I\'m 5 min late" once: the driver waits 10 minutes', (tester) async {
@@ -141,7 +145,7 @@ void main() {
 
   testWidgets('Home: the next pickup comes from the ride records', (tester) async {
     final r = await R2Robot.start(tester);
-    expect(find.text('First ride · Thu 22 Oct'), findsOneWidget);
+    expect(find.text('Tomorrow · 22 Oct'), findsOneWidget);
     await r.playRide(inMinutes: 20);
     // Today's played ride is now the next one; no Track ride until departure.
     expect(find.textContaining('Today ·'), findsOneWidget);

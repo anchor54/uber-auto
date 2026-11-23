@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../core/fares.dart';
 import '../../core/models.dart';
-import '../../core/schedule.dart';
 import '../../ui/icons.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
-import 'match_screen.dart';
+import 'review_screen.dart';
 import 'setup_controller.dart';
 
-/// R1.3 Choose a ride type: only the types the backend config allows for
-/// this booking flow in the rider's city, plus ride preferences.
+/// R1.3 Choose a ride type (step 2 of 3): only the types the backend config
+/// allows for regular rides in the rider's city, plus ride preferences.
 class RideTypeScreen extends StatefulWidget {
   const RideTypeScreen({super.key, required this.setup});
 
@@ -35,7 +34,7 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_started && (setup.options == null || setup.options!.flow != setup.flow)) {
+    if (!_started && setup.options == null) {
       _started = true;
       _loading = true;
       _load();
@@ -57,12 +56,7 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
   Future<void> _load() async {
     _error = null;
     try {
-      final o = await AppScope.of(context).api.bookingOptions(
-            flow: setup.flow,
-            pickup: setup.pickup!,
-            drop: setup.drop!,
-            pickupTime: setup.pickupTime,
-          );
+      final o = await AppScope.of(context).api.rideTypeOptions(setup.toRequest());
       if (!mounted) return;
       setup.setOptions(o);
       setState(() => _loading = false);
@@ -77,7 +71,7 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final options = setup.options?.options ?? const <RideTypeOption>[];
+    final options = setup.options ?? const <RideTypeOption>[];
     final selected = setup.rideType;
     final fare = setup.selectedFare;
     return Scaffold(
@@ -136,19 +130,21 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
               children: [
                 if (selected != null && fare != null) ...[
                   PriceRow(
-                    label: '${selected.label} · per ride',
+                    label: '${selected.shortLabel} · per ride',
                     price: formatRupees(fare),
                     priceKey: const Key('rideType.fare'),
+                    labelStyle: AppText.body(14, color: AppColors.muted),
                   ),
                   const SizedBox(height: 8),
                 ],
                 PrimaryButton(
                   key: const Key('rideType.continue'),
-                  label: 'Find my driver',
+                  label: 'Review request',
+                  height: 54,
                   onPressed: selected == null || _loading
                       ? null
                       : () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(builder: (_) => MatchScreen(setup: setup)),
+                            MaterialPageRoute<void>(builder: (_) => ReviewRequestScreen(setup: setup)),
                           ),
                 ),
               ],
@@ -176,14 +172,11 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
 
   Widget _optionCard(RideTypeOption o, bool isSelected) {
     final iconColor = isSelected ? AppColors.green : AppColors.ink;
-    final note = o.driversOnRoute == 0
-        ? "No ${o.type.noun} drivers on your route yet. We'll still look, or add you to the waitlist."
-        : '${o.driversOnRoute} ${o.type.noun} driver${o.driversOnRoute == 1 ? '' : 's'} '
-            '${o.driversOnRoute == 1 ? 'runs' : 'run'} your route at ${formatTime(setup.pickupTime)}';
+    final note = 'Your request goes to every ${o.type.noun} driver in ${cityName(defaultCity)}';
     return Semantics(
       selected: isSelected,
       button: true,
-      label: '${o.type.label}, ${formatRupees(o.fare)} per ride',
+      label: '${o.type.shortLabel}, ${formatRupees(o.fare)} per ride',
       child: GestureDetector(
         key: Key('rideType.${o.type.configKey}'),
         onTap: () => setup.setRideType(o.type),
@@ -204,7 +197,7 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(o.type.label, style: AppText.body(16, weight: FontWeight.w600)),
+                        Text(o.type.shortLabel, style: AppText.body(16, weight: FontWeight.w600)),
                         const SizedBox(height: 2),
                         Text(o.type.description, style: AppText.body(13, color: AppColors.muted)),
                       ],
@@ -234,11 +227,7 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
   }
 
   Widget _preferencesCard(RideType type) {
-    final prefs = [
-      if (type.isCab) RidePreference.acOn,
-      RidePreference.quiet,
-      RidePreference.womanDriver,
-    ];
+    const prefs = RidePreference.values;
     return CardBox(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       child: Column(

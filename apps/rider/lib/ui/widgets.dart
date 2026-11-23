@@ -4,6 +4,18 @@ import 'icons.dart';
 import 'tokens.dart';
 
 /// Back button plus a quiet step label, as at the top of every flow screen.
+/// The key every button also carries, from its label in snake_case without
+/// articles: "Request a regular driver" -> `request_regular_driver`,
+/// "I'm interested" -> `im_interested`. Tests find buttons by it.
+Key labelKey(String label) {
+  final words = label
+      .toLowerCase()
+      .replaceAll(RegExp(r"['’]"), '')
+      .split(RegExp(r'[^a-z0-9]+'))
+      .where((w) => w.isNotEmpty && w != 'a' && w != 'an' && w != 'the');
+  return Key(words.join('_'));
+}
+
 class FlowHeader extends StatelessWidget {
   const FlowHeader({super.key, this.label, this.onBack});
 
@@ -117,7 +129,9 @@ class PrimaryButton extends StatelessWidget {
       enabled: enabled,
       label: label,
       excludeSemantics: true,
-      child: Material(
+      child: KeyedSubtree(
+        key: labelKey(label),
+        child: Material(
         color: enabled ? color : color.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
@@ -138,6 +152,7 @@ class PrimaryButton extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -156,7 +171,9 @@ class OutlineButtonBox extends StatelessWidget {
       button: true,
       label: label,
       excludeSemantics: true,
-      child: Material(
+      child: KeyedSubtree(
+        key: labelKey(label),
+        child: Material(
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -178,6 +195,7 @@ class OutlineButtonBox extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -198,6 +216,7 @@ class LinkButton extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: InkWell(
+        key: labelKey(label),
         onTap: onPressed,
         borderRadius: BorderRadius.circular(10),
         child: SizedBox(

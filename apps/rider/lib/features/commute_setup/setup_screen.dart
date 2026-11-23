@@ -4,41 +4,77 @@ import '../../app_scope.dart';
 import '../../core/fares.dart';
 import '../../core/models.dart';
 import '../../core/schedule.dart';
+import '../../ui/time_picker.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
 import 'place_search_screen.dart';
 import 'ride_type_screen.dart';
 import 'setup_controller.dart';
 
-/// R1.2 Set up a commute: route, repeat, timing, return trip.
-class SetupScreen extends StatefulWidget {
-  const SetupScreen({super.key});
+/// R1.2 Set up a regular ride ("New commute"): route, days, a time per day
+/// (pickup at or arrive by), an optional return leg. Step 1 of 3.
+///
+/// Calls series.preview whenever an input settles, for the start date, the
+/// fare and arrive-by pickup times.
+class NewCommuteScreen extends StatefulWidget {
+  const NewCommuteScreen({super.key, this.setup});
+
+  /// Choices to start from, e.g. "Change times or ride type" on R1.7.
+  /// Null: a new, empty setup.
+  final CommuteSetup? setup;
 
   @override
-  State<SetupScreen> createState() => _SetupScreenState();
+  State<NewCommuteScreen> createState() => _NewCommuteScreenState();
 }
 
-class _SetupScreenState extends State<SetupScreen> {
+class _NewCommuteScreenState extends State<NewCommuteScreen> {
   CommuteSetup? _setup;
-  int _loadId = 0;
+  int _previewId = 0;
 
   CommuteSetup get setup => _setup!;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _setup ??= CommuteSetup(today: AppScope.of(context).clock.now())..addListener(_changed);
+    if (_setup == null) {
+      _setup = (widget.setup ?? CommuteSetup(today: AppScope.of(context).clock.now()))..addListener(_changed);
+      _schedulePreview();
+    }
   }
 
   @override
   void dispose() {
-    // Not disposed here: screens pushed on top may still hold it while the
-    // whole flow is removed at once after confirming.
+    // Not disposed here: screens pushed on top may still hold it.
     _setup?.removeListener(_changed);
     super.dispose();
   }
 
-  void _changed() => setState(() {});
+  void _changed() {
+    if (!mounted) return;
+    setState(() {});
+    if (setup.preview == null && setup.previewError == null) _schedulePreview();
+  }
+
+  /// Inputs here are taps, so each one has settled: ask straight away.
+  /// Only the latest answer is used.
+  void _schedulePreview() {
+    if (setup.complete) _preview();
+  }
+
+  Future<void> _preview() async {
+    if (!mounted || !setup.complete) return;
+    final id = ++_previewId;
+    final request = setup.toRequest();
+    try {
+      final p = await AppScope.of(context).api.previewSeries(request);
+      if (!mounted || id != _previewId) return;
+      setup.setPreview(p);
+    } on ApiException catch (e) {
+      if (!mounted || id != _previewId) return;
+      // A network error leaves the summary at its local values.
+      if (e.code != 'network') setup.setPreviewError(e);
+    }
+  }
 
   Future<void> _pickPlace({required bool pickup}) async {
     final place = await Navigator.of(context).push<Place>(
@@ -46,57 +82,24 @@ class _SetupScreenState extends State<SetupScreen> {
     );
     if (place == null) return;
     pickup ? setup.setPickup(place) : setup.setDrop(place);
-    await _loadRoute();
   }
 
-  /// Once both ends are known, fetch the trip estimate and fares.
-  Future<void> _loadRoute() async {
-    final a = setup.pickup, b = setup.drop;
-    if (a == null || b == null || a == b) return;
-    final id = ++_loadId;
-    final api = AppScope.of(context).api;
-    // Only the summary's preview: if it can't load, the summary shows "–" and
-    // the ride-type step loads (and reports errors) on its own.
-    try {
-      final trip = await api.estimateTrip(a, b);
-      if (!mounted || id != _loadId) return;
-      setup.setTrip(trip);
-    } on ApiException {
-      return;
-    }
-    await _loadOptions();
-  }
-
-  Future<void> _loadOptions() async {
-    final a = setup.pickup, b = setup.drop;
-    if (a == null || b == null || a == b) return;
-    final id = ++_loadId;
-    try {
-      final options = await AppScope.of(context).api.bookingOptions(
-            flow: setup.flow,
-            pickup: a,
-            drop: b,
-            pickupTime: setup.pickupTime,
-          );
-      if (!mounted || id != _loadId) return;
-      setup.setOptions(options);
-    } on ApiException {
-      // As above: a preview only.
-    }
-  }
-
-  Future<void> _pickTime({required bool returnLeg}) async {
-    final current = returnLeg ? setup.returnTime : setup.time;
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: current ~/ 60, minute: current % 60),
-      helpText: returnLeg
-          ? 'Return pickup time'
-          : (setup.timing == TimingMode.pickupAt ? 'Pickup time' : 'Arrive by'),
+  Future<void> _pickTime({int? day, required bool returnLeg}) async {
+    final current = returnLeg
+        ? (day == null ? setup.returnTime : setup.returnTimeFor(day))
+        : (day == null ? setup.time : setup.timeFor(day));
+    final what = returnLeg ? 'Return pickup' : (setup.timing == TimingMode.pickupAt ? 'Pickup' : 'Arrive by');
+    final picked = await showFiveMinuteTimePicker(
+      context,
+      initial: current,
+      title: day == null ? what : '$what, ${weekdayShort(day)}',
     );
     if (picked == null) return;
-    final minutes = picked.hour * 60 + picked.minute;
-    returnLeg ? setup.setReturnTime(minutes) : setup.setTime(minutes);
+    if (returnLeg) {
+      day == null ? setup.setReturnTime(picked) : setup.setReturnDayTime(day, picked);
+    } else {
+      day == null ? setup.setTime(picked) : setup.setDayTime(day, picked);
+    }
   }
 
   void _continue() {
@@ -119,7 +122,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 children: [
                   const ScreenTitle(
                     'New commute',
-                    subtitle: 'Same route, same time, every day you choose. We match you with one regular driver.',
+                    subtitle: "Same route, same time, every day you choose. We'll find you a regular driver for these days.",
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -130,6 +133,8 @@ class _SetupScreenState extends State<SetupScreen> {
                         _repeatCard(s),
                         const SizedBox(height: 14),
                         _timingCard(s),
+                        const SizedBox(height: 14),
+                        _returnCard(s),
                         const SizedBox(height: 14),
                         _summaryCard(s),
                       ],
@@ -147,6 +152,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 PrimaryButton(
                   key: const Key('setup.continue'),
                   label: 'Choose ride type',
+                  height: 54,
                   onPressed: blocker == null ? _continue : null,
                 ),
               ],
@@ -236,10 +242,7 @@ class _SetupScreenState extends State<SetupScreen> {
               (CommuteRepeat.everyWeekday, 'Every weekday'),
               (CommuteRepeat.chosenDays, 'Chosen days each week'),
             ],
-            onChanged: (m) {
-              s.setRepeat(m);
-              _loadOptions();
-            },
+            onChanged: s.setRepeat,
           ),
           const SizedBox(height: 10),
           Text(
@@ -274,11 +277,7 @@ class _SetupScreenState extends State<SetupScreen> {
       excludeSemantics: true,
       child: GestureDetector(
         key: Key('setup.day.$d'),
-        onTap: () {
-          final wasWeekday = s.repeat == CommuteRepeat.everyWeekday;
-          s.toggleDay(d);
-          if (wasWeekday) _loadOptions();
-        },
+        onTap: () => s.toggleDay(d),
         child: Container(
           height: 44,
           decoration: BoxDecoration(
@@ -297,9 +296,7 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   Widget _timingCard(CommuteSetup s) {
-    final (hm, ampm) = splitTime(s.time);
     final arriveBy = s.timing == TimingMode.arriveBy;
-    final drop = s.drop?.title ?? 'your drop-off';
     return CardBox(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,93 +312,219 @@ class _SetupScreenState extends State<SetupScreen> {
             ],
             onChanged: s.setTiming,
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('$hm $ampm', key: const Key('setup.time'), style: AppText.display(30, letterSpacing: 0)),
-                    const SizedBox(height: 2),
-                    Text(
-                      arriveBy
-                          ? 'Pickup around ${formatTime(s.pickupTime)}${s.trip == null ? '' : ' (about ${s.trip!.minutes} min trip)'}'
-                          : 'Driver may arrive ${pickupWindow(s.time)}',
-                      key: const Key('setup.window'),
-                      style: AppText.body(13, color: AppColors.muted),
-                    ),
-                  ],
-                ),
-              ),
-              OutlineButtonBox(
-                key: const Key('setup.changeTime'),
-                label: 'Change',
-                expand: false,
-                onPressed: () => _pickTime(returnLeg: false),
-              ),
-            ],
+          const SizedBox(height: 8),
+          _switchRow(
+            key: const Key('setup.sameTime'),
+            title: 'Same time every day',
+            hint: 'Turn off to set a time for each day',
+            value: s.sameTime,
+            onChanged: s.setSameTime,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           const Hairline(),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Add return trip', style: AppText.body(14, weight: FontWeight.w600)),
-                    const SizedBox(height: 2),
-                    if (s.returnTrip)
-                      GestureDetector(
-                        key: const Key('setup.returnTime'),
-                        onTap: () => _pickTime(returnLeg: true),
-                        child: Text.rich(
-                          TextSpan(
-                            style: AppText.body(13, color: AppColors.muted),
-                            children: [
-                              TextSpan(text: '${formatTime(s.returnTime)} from $drop · '),
-                              TextSpan(
-                                text: 'Change',
-                                style: AppText.body(13, weight: FontWeight.w600, color: AppColors.green),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else
-                      Text('One way only', style: AppText.body(13, color: AppColors.muted)),
-                  ],
-                ),
+          const SizedBox(height: 8),
+          if (s.sameTime)
+            _sameTimeRow(s, arriveBy)
+          else if (s.weekdays.isEmpty)
+            Text('Pick at least one day', style: AppText.body(13, color: AppColors.muted))
+          else
+            for (final d in s.sortedDays)
+              _dayRow(
+                key: Key('setup.time.${dayCode(d)}'),
+                day: d,
+                time: s.timeFor(d),
+                different: s.differs(d),
+                note: arriveBy ? 'Pickup around ${formatTime(s.pickupTimeFor(d, RideDirection.outbound))}' : null,
+                onTap: () => _pickTime(day: d, returnLeg: false),
               ),
-              Switch(
-                key: const Key('setup.return'),
-                value: s.returnTrip,
-                onChanged: s.setReturnTrip,
-              ),
-            ],
+          const SizedBox(height: 8),
+          Text(
+            'Your driver may arrive up to 5 minutes either side of each time.',
+            style: AppText.body(12, color: AppColors.muted, height: 1.4),
           ),
         ],
       ),
     );
   }
 
-  Widget _summaryCard(CommuteSetup s) {
-    final low = s.lowestFare;
+  Widget _sameTimeRow(CommuteSetup s, bool arriveBy) {
+    final (hm, ampm) = splitTime(s.time);
+    final first = s.firstDay;
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('$hm $ampm', key: const Key('setup.time'), style: AppText.display(30, letterSpacing: 0)),
+              if (arriveBy && first != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  'Pickup around ${formatTime(s.pickupTimeFor(first, RideDirection.outbound))}',
+                  key: const Key('setup.window'),
+                  style: AppText.body(13, color: AppColors.muted),
+                ),
+              ],
+            ],
+          ),
+        ),
+        OutlineButtonBox(
+          key: const Key('setup.changeTime'),
+          label: 'Change',
+          expand: false,
+          onPressed: () => _pickTime(returnLeg: false),
+        ),
+      ],
+    );
+  }
+
+  /// One weekday's time: the day, its time, "Different" when it differs
+  /// from the first chosen day, and "Change".
+  Widget _dayRow({
+    required Key key,
+    required int day,
+    required int time,
+    required bool different,
+    String? note,
+    bool showChange = true,
+    required VoidCallback onTap,
+  }) {
+    return Semantics(
+      button: true,
+      label: '${weekdayShort(day)} ${formatTime(time)}${different ? ', different' : ''}${showChange ? '. Change' : ''}',
+      child: InkWell(
+        key: key,
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                SizedBox(width: 44, child: Text(weekdayShort(day), style: AppText.body(14, weight: FontWeight.w600))),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(formatTime(time), style: AppText.body(15, weight: FontWeight.w600)),
+                          if (different) ...[
+                            const SizedBox(width: 8),
+                            const StatusChip('Different', background: AppColors.orangeTint, foreground: AppColors.orangeText),
+                          ],
+                        ],
+                      ),
+                      if (note != null) Text(note, style: AppText.body(12, color: AppColors.muted)),
+                    ],
+                  ),
+                ),
+                if (showChange) Text('Change', style: AppText.body(14, weight: FontWeight.w600, color: AppColors.green)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _switchRow({required Key key, required String title, String? hint, required bool value, required ValueChanged<bool> onChanged}) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppText.body(14, weight: FontWeight.w600)),
+              if (hint != null) ...[
+                const SizedBox(height: 2),
+                Text(hint, style: AppText.body(12, color: AppColors.muted)),
+              ],
+            ],
+          ),
+        ),
+        Switch(key: key, value: value, onChanged: onChanged),
+      ],
+    );
+  }
+
+  Widget _returnCard(CommuteSetup s) {
+    final from = s.drop?.title ?? 'your drop-off';
     return CardBox(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SummaryRow(
-            'Starts',
-            s.weekdays.isEmpty ? '–' : formatDate(s.startDate),
-            valueKey: const Key('setup.starts'),
+          _switchRow(
+            key: const Key('setup.return'),
+            title: 'Add return trip',
+            hint: s.returnTrip ? null : 'One way only',
+            value: s.returnTrip,
+            onChanged: s.setReturnTrip,
           ),
+          if (s.returnTrip) ...[
+            const SizedBox(height: 4),
+            if (s.sameTime)
+              Semantics(
+                button: true,
+                label: '${formatTime(s.returnTime)} every day from $from. Change',
+                excludeSemantics: true,
+                child: InkWell(
+                  key: const Key('setup.returnTime'),
+                  onTap: () => _pickTime(returnLeg: true),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${formatTime(s.returnTime)} every day from $from',
+                            style: AppText.body(14, color: AppColors.ink),
+                          ),
+                        ),
+                        Text('Change', style: AppText.body(14, weight: FontWeight.w600, color: AppColors.green)),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              for (final d in s.sortedDays)
+                _dayRow(
+                  key: Key('setup.returnTime.${dayCode(d)}'),
+                  day: d,
+                  time: s.returnTimeFor(d),
+                  different: s.returnDiffers(d),
+                  // Tapping the row changes it; one "Change" per day is enough.
+                  showChange: false,
+                  onTap: () => _pickTime(day: d, returnLeg: true),
+                ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryCard(CommuteSetup s) {
+    final fare = s.preview?.suggestedFare;
+    final err = s.previewError;
+    final days = rideDaysPerMonth(s.weekdays);
+    return CardBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SummaryRow('Starts', s.weekdays.isEmpty ? '–' : formatDate(s.startDate), valueKey: const Key('setup.starts')),
+          if (err != null) ...[
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(err.message, key: const Key('setup.previewError'), textAlign: TextAlign.right, style: AppText.body(13, color: AppColors.red)),
+            ),
+          ],
           const SizedBox(height: 10),
           SummaryRow(
             'Rides in a month',
-            s.weekdays.isEmpty ? '–' : ridesPerMonthLabel(s.weekdays, returnTrip: s.returnTrip),
+            s.weekdays.isEmpty ? '–' : (s.returnTrip ? 'About ${days * 2} ($days days × 2)' : 'About $days'),
             valueKey: const Key('setup.ridesPerMonth'),
           ),
           const SizedBox(height: 10),
@@ -410,13 +533,12 @@ class _SetupScreenState extends State<SetupScreen> {
           PriceRow(
             label: 'Fare per ride',
             labelStyle: AppText.body(14, weight: FontWeight.w600),
-            price: low == null ? '–' : 'From ${formatRupees(low)}',
-            priceKey: const Key('setup.fareFrom'),
+            price: fare == null ? '–' : formatRupees(fare),
+            priceKey: const Key('setup.fare'),
           ),
           const SizedBox(height: 10),
           Text(
-            'You pay your driver directly after each ride, by UPI or cash. '
-            'Skip a day by 9 PM the night before so your driver can plan.',
+            'You pay your driver directly after each ride, by UPI or cash. Skip or change a day until 1 hour before pickup.',
             style: AppText.body(12, color: AppColors.muted, height: 1.4),
           ),
         ],

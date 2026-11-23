@@ -21,6 +21,10 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 |---|---|
 | R1+D2 backend test writer | 139,073 |
 | R1+D2 backend implementer | 331,786 |
+| R1+D2 app test writer | 272,480 |
+| R1+D2 app implementer | 421,429 |
+
+Cutoff: 5-hour limit hit ~23:58 IST 23 Nov during R1+D2 apps; resumed 05:07 IST 24 Nov.
 
 ## Spec rulings (orchestrator)
 - R1: the start date is the first chosen weekday from tomorrow on. R1-I1's "Mon 23 Nov" is treated as a spec error.

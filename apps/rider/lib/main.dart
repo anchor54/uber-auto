@@ -27,12 +27,13 @@ Future<void> main() async {
   // so a screen can run its colour or map up under the status bar.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   if (apiBaseUrl.isEmpty) {
-    // The demo driver takes a few seconds to accept, so "Waiting for …" shows.
-    // Then, 20 seconds after accepting, the first ride plays itself out at 20x speed.
+    // Each round of offers lasts 8 seconds instead of 15 minutes, so
+    // "Finding your driver" shows briefly before Ravi is picked. Then, 20
+    // seconds later, the first ride plays itself out at 20x speed.
     runApp(RiderApp(
       api: FakeRiderApi(
         latency: const Duration(milliseconds: 500),
-        driverResponse: DemoDriverResponse.acceptLater,
+        roundLength: const Duration(seconds: 8),
         demoRideAfter: const Duration(seconds: 20),
         rideSpeed: 20,
       ),

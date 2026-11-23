@@ -9,21 +9,25 @@ Designs, flows and rules live in the design canvas and the Rider and Driver App 
 | Path | What it is |
 |---|---|
 | `apps/rider/` | Rider app (Flutter, Android + web) |
+| `apps/driver/` | Driver app (Flutter, Android + web) |
 | `backend/` | API and worker (Go, Postgres) |
 | `render.yaml` | Hosting: API, worker and Postgres on Render |
 | `.github/workflows/` | CI: tests, screenshots, APK and web builds, emulator tests, end-to-end tests |
 
-The driver app (`apps/driver/`) arrives with the driver flows; its API exists already.
+Both apps share one structure: `lib/core/` (the API interface, its demo backend `fake_api.dart`
+and HTTP client `http_api.dart`, models), `lib/features/` (screens per flow) and `lib/ui/` (design
+tokens and widgets).
 
 ## Build order
 
 | Flow | Status |
 |---|---|
-| R1 Sign up and book a first commute | Built: app + backend, demo and real mode |
-| D2 Driver accepts or declines a commute | Built: backend API + simulator; rider sees waiting / confirmed / declined |
-| R2 Daily commute ride | Built: rides, lifecycle, live location, payment marks, ratings, worker; push is log-only until a Firebase project exists |
+| R1 + D2 Create a series and get a driver (spec build-order steps 1–5: backend) | Built: series request, offer rounds, the pick, sweeper, simulator |
+| R1 rider app (step 6): New commute with per-day times and arrive-by, ride type, Review and request, Home cards for finding / active / no driver yet | Built: demo and real mode |
+| D2 driver app (step 7): Requests, Request detail (I'm interested / withdraw), Your week | Built: demo and real mode; Today shows Your week until D3 |
+| R2 Daily commute ride | App screens kept from the first build; backend being rewritten with R2 + D3 (its end-to-end test is skipped until then) |
 | R3 Skip or pause, R4 Driver can't make it, R5 Account, R6 One-time ride | To do |
-| D1, D3–D6 Driver app screens | To do (D3's API is built) |
+| D1, D3–D6 Driver app screens (Today, Earnings, Account) | To do |
 
 ## Rider app
 
@@ -38,8 +42,8 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080    # real backend (e
 
 * Sign in with any Indian mobile number; the code is always `123456`.
 * Pick "Home" (search "HSR") and "Embassy Tech Village" (search "Embassy") for the demo commute.
-* The demo driver takes 8 seconds to accept (you'll see "Waiting for Ravi"). 20 seconds later the first ride plays itself out at 20× speed: driver on the way, arrived, in the ride, pay and rate.
-* Choosing the **Woman driver** preference finds no driver, to show the "No driver yet" branch.
+* After "Request a regular driver", Home shows "Finding your driver". Each round of offers lasts 8 seconds in demo mode (15 minutes on the backend); when it closes, the demo driver Ravi is picked and Home shows "Driver confirmed" with Ravi on every weekday. 20 seconds later the first ride plays itself out at 20× speed: driver on the way, arrived, in the ride, pay and rate.
+* Choosing the **Woman driver** preference means nobody is interested: after 3 rounds Home shows "No driver yet" with Try again, Change times or ride type, and Cancel request.
 
 **Real mode** (`--dart-define=API_BASE_URL=…`) talks to the backend over HTTP (`lib/core/http_api.dart`) and keeps the rider signed in across restarts (session token in Android Keystore / iOS Keychain). Debug builds may use plain HTTP to a dev machine; release builds need HTTPS. On a phone over USB or wireless debugging, `adb reverse tcp:8080 tcp:8080` lets the app use `http://127.0.0.1:8080`.
 
@@ -57,6 +61,22 @@ flutter test integration_test/r1_e2e_test.dart integration_test/r2_e2e_test.dart
 Each flow has unit tests (`test/core/`, `test/features/ride/ride_tracker_test.dart`), widget tests per screen (`test/features/`), a flow test at three phone sizes (`test/flows/`), screenshots, and integration tests. The widget tests and the on-device runs share "robots" (`test/helpers/r1_robot.dart`, `r2_robot.dart`).
 
 The **contract test** (`test/contract/`) runs one script of `RiderApi` calls against the demo backend and the real one, so the two can't drift apart unnoticed.
+
+## Driver app
+
+```sh
+cd apps/driver
+flutter pub get
+flutter run                                                    # demo mode
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080    # real backend
+flutter test                                                   # unit, widget and flow tests
+```
+
+**Demo mode** signs in as Ravi Kumar (auto) with any number and the code `123456`. Requests shows
+Priya's regular ride (Koramangala → Whitefield, Mon/Wed/Fri 08:30) and a one-ride cover. Tap
+"I'm interested" on Priya's: when its window closes (90 seconds in demo mode, 15 minutes on the
+backend) you're picked, a green banner says so, and Your week shows her rides tagged "New rider".
+In real mode, sign in with a seeded driver's number (Ravi is `9000000201`).
 
 ## Backend
 
@@ -103,7 +123,7 @@ window has passed and run the pick, keep rides created 14 days ahead, send queue
 a `sweeper_runs` row. In production Cloud Scheduler calls `POST /internal/sweep` every minute; on
 Render, `cmd/worker` runs the same loop.
 
-**Playing the drivers** (until the driver app exists):
+**Playing the drivers** (or use the driver app):
 
 ```sh
 go run ./cmd/sim offers --drivers ravi

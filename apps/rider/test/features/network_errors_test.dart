@@ -8,20 +8,12 @@ import '../helpers/r1_robot.dart';
 
 /// The demo backend, failing the calls a test asks it to (real mode on a bad connection).
 class FlakyApi extends FakeRiderApi {
-  int failFindDrivers = 0;
   bool failSearch = false;
   bool failHome = false;
+  ApiException? failPreview;
+  int failCancel = 0;
 
   static const offline = ApiException('network', "Can't reach the server. Check your connection and try again.");
-
-  @override
-  Future<List<DriverMatch>> findDrivers(CommuteRequest request) async {
-    if (failFindDrivers > 0) {
-      failFindDrivers--;
-      throw offline;
-    }
-    return super.findDrivers(request);
-  }
 
   @override
   Future<List<Place>> searchPlaces(String query) async {
@@ -34,24 +26,36 @@ class FlakyApi extends FakeRiderApi {
     if (failHome) throw offline;
     return super.home();
   }
+
+  @override
+  Future<SeriesPreview> previewSeries(CommuteRequest request) async {
+    final e = failPreview;
+    if (e != null) throw e;
+    return super.previewSeries(request);
+  }
+
+  @override
+  Future<void> cancelRequest(String id) async {
+    if (failCancel > 0) {
+      failCancel--;
+      throw offline;
+    }
+    return super.cancelRequest(id);
+  }
 }
 
 void main() {
-  testWidgets('a failed driver search says so and can be retried', (tester) async {
-    final api = FlakyApi();
+  testWidgets('R1.2 a start_too_soon error shows under "Starts"', (tester) async {
+    final api = FlakyApi()..failPreview = const ApiException('start_too_soon', 'The first ride must be tomorrow or later.');
     await pumpRiderApp(tester, api: api);
     final robot = R1Robot(tester);
     await robot.signIn();
     await robot.fillSetup();
-    api.failFindDrivers = 1;
-    await robot.chooseRideType(RideType.cabSedan);
-    expect(find.byKey(const Key('match.error')), findsOneWidget);
-    expect(find.text(FlakyApi.offline.message), findsOneWidget);
-    await robot.tap('match.retry');
-    expect(find.byKey(const Key('match.found')), findsOneWidget);
+    expect(find.text('The first ride must be tomorrow or later.'), findsOneWidget);
+    expect(find.text('Starts'), findsOneWidget);
   });
 
-  testWidgets('a failed place search shows the reason instead of crashing', (tester) async {
+  testWidgets('R1.2 a failed place search shows the reason instead of crashing', (tester) async {
     final api = FlakyApi();
     await pumpRiderApp(tester, api: api);
     final robot = R1Robot(tester);
@@ -67,7 +71,18 @@ void main() {
     expect(find.byKey(const Key('place.home')), findsOneWidget);
   });
 
-  testWidgets('Home offline shows Try again, which reloads', (tester) async {
+  testWidgets('R1.5 a failed cancel keeps the request and says why', (tester) async {
+    final api = FlakyApi()..failCancel = 1;
+    await pumpRiderApp(tester, api: api);
+    final robot = R1Robot(tester);
+    await robot.requestR1();
+    await robot.cancelRequest();
+    expect(find.text(FlakyApi.offline.message), findsOneWidget);
+    expect(find.byKey(const Key('home.finding')), findsOneWidget);
+    expect(api.series!.status, SeriesStatus.findingDriver);
+  });
+
+  testWidgets('R1.6b Home offline shows Try again, which reloads', (tester) async {
     final api = FlakyApi();
     await pumpRiderApp(tester, api: api);
     final robot = R1Robot(tester);

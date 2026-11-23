@@ -1,40 +1,59 @@
-/// JSON shapes of the backend API (backend/src), mapped to the app's models.
+/// JSON shapes of the backend API (backend/API.md), mapped to the app's models.
 library;
 
 import 'models.dart';
+import 'schedule.dart';
 
-String _repeatKey(CommuteRepeat r) => switch (r) {
-      CommuteRepeat.everyWeekday => 'every_weekday',
-      CommuteRepeat.chosenDays => 'chosen_days',
-    };
-
-CommuteRepeat _repeatFrom(String s) => s == 'every_weekday' ? CommuteRepeat.everyWeekday : CommuteRepeat.chosenDays;
-
-String _timingKey(TimingMode t) => switch (t) {
+String timingKey(TimingMode t) => switch (t) {
       TimingMode.pickupAt => 'pickup_at',
       TimingMode.arriveBy => 'arrive_by',
     };
 
-TimingMode _timingFrom(String s) => s == 'arrive_by' ? TimingMode.arriveBy : TimingMode.pickupAt;
+TimingMode timingFrom(Object? s) => s == 'arrive_by' ? TimingMode.arriveBy : TimingMode.pickupAt;
+
+String directionKey(RideDirection d) => d == RideDirection.returnLeg ? 'return' : 'outbound';
+
+RideDirection directionFrom(Object? s) => s == 'return' ? RideDirection.returnLeg : RideDirection.outbound;
 
 String preferenceKey(RidePreference p) => switch (p) {
-      RidePreference.acOn => 'ac_on',
+      RidePreference.acOn => 'ac',
       RidePreference.quiet => 'quiet',
       RidePreference.womanDriver => 'woman_driver',
     };
 
-RidePreference _preferenceFrom(String s) => RidePreference.values.firstWhere((p) => preferenceKey(p) == s);
+RidePreference? _preferenceFrom(Object? s) => switch (s) {
+      'ac' || 'ac_on' => RidePreference.acOn,
+      'quiet' => RidePreference.quiet,
+      'woman_driver' => RidePreference.womanDriver,
+      _ => null,
+    };
 
-PaymentMethod paymentFrom(String s) => s == 'cash' ? PaymentMethod.cash : PaymentMethod.upi;
+Set<RidePreference> preferencesFrom(Object? list) =>
+    {for (final p in (list as List? ?? const [])) if (_preferenceFrom(p) case final v?) v};
+
+PaymentMethod paymentFrom(Object? s) => s == 'cash' ? PaymentMethod.cash : PaymentMethod.upi;
 
 String paymentKey(PaymentMethod m) => m.name; // 'upi' | 'cash'
 
-CommuteStatus commuteStatusFrom(String s) => switch (s) {
-      'awaiting_driver' => CommuteStatus.awaitingDriver,
-      'active' => CommuteStatus.active,
-      'paused' => CommuteStatus.paused,
-      'declined' => CommuteStatus.declined,
-      _ => CommuteStatus.cancelled,
+SeriesStatus seriesStatusFrom(Object? s) => switch (s) {
+      'finding_driver' => SeriesStatus.findingDriver,
+      'active' => SeriesStatus.active,
+      'paused' => SeriesStatus.paused,
+      'no_driver_found' => SeriesStatus.noDriverFound,
+      _ => SeriesStatus.ended,
+    };
+
+OfferStatus offerStatusFrom(Object? s) => switch (s) {
+      'open' => OfferStatus.open,
+      'closing' => OfferStatus.closing,
+      _ => OfferStatus.closed,
+    };
+
+OfferOutcome? offerOutcomeFrom(Object? s) => switch (s) {
+      'assigned' => OfferOutcome.assigned,
+      'no_fit' => OfferOutcome.noFit,
+      'cancelled' => OfferOutcome.cancelled,
+      _ => null,
     };
 
 /// "2026-10-22" as a local date.
@@ -48,112 +67,113 @@ String dateKey(DateTime d) =>
 
 double _num(Object? v) => (v as num).toDouble();
 
-Map<String, Object?> placeToJson(Place p) => {'id': p.id, 'title': p.title, 'detail': p.detail, 'lat': p.lat, 'lng': p.lng};
+/// What the backend's series request takes: `{lat, lng, label}`.
+Map<String, Object?> placeToJson(Place p) => {'lat': p.lat, 'lng': p.lng, 'label': p.title};
 
-Place placeFromJson(Map<String, Object?> j) => Place(
-      id: j['id'] as String,
-      title: j['title'] as String,
-      detail: (j['detail'] as String?) ?? '',
-      lat: _num(j['lat']),
-      lng: _num(j['lng']),
-    );
-
-TripEstimate tripFromJson(Map<String, Object?> j) => TripEstimate(
-      distanceKm: _num(j['distanceKm']),
-      minutes: (j['minutes'] as num).toInt(),
-      polyline: j['polyline'] as String?,
-    );
-
-/// What the backend's commuteRequestSchema accepts. Pickup time and start
-/// date are not sent: the server works them out.
-Map<String, Object?> commuteRequestToJson(CommuteRequest r) => {
-      'pickup': placeToJson(r.pickup),
-      'drop': placeToJson(r.drop),
-      'repeat': _repeatKey(r.repeat),
-      'weekdays': (r.weekdays.toList()..sort()),
-      'timing': _timingKey(r.timing),
-      'time': r.time,
-      'returnTrip': r.returnTrip,
-      'returnTime': r.returnTime,
-      'rideType': r.rideType.configKey,
-      'preferences': [for (final p in r.preferences) preferenceKey(p)],
-    };
-
-Driver driverFromJson(Map<String, Object?> j) => Driver(
-      id: j['id'] as String,
-      name: j['name'] as String,
-      vehicle: j['vehicle'] as String,
-      plate: j['plate'] as String,
-      rating: _num(j['rating']),
-      upiId: (j['upiId'] as String?) ?? '',
-      phone: j['phone'] as String?,
-    );
-
-DriverMatch proposalFromJson(Map<String, Object?> j) => DriverMatch(
-      proposalId: j['id'] as String,
-      driver: driverFromJson(j['driver'] as Map<String, Object?>),
-      fare: (j['fare'] as num).toInt(),
-      trip: tripFromJson(j['trip'] as Map<String, Object?>),
-      reasons: [for (final r in j['reasons'] as List) r as String],
-      expiresAt: j['expiresAt'] == null ? null : DateTime.parse(j['expiresAt'] as String).toLocal(),
-    );
-
-Commute commuteFromJson(Map<String, Object?> j) {
-  final weekdays = {for (final d in j['weekdays'] as List) (d as num).toInt()};
-  final request = CommuteRequest(
-    pickup: placeFromJson(j['pickup'] as Map<String, Object?>),
-    drop: placeFromJson(j['drop'] as Map<String, Object?>),
-    repeat: _repeatFrom(j['repeat'] as String),
-    weekdays: weekdays,
-    timing: _timingFrom(j['timing'] as String),
-    time: (j['time'] as num).toInt(),
-    pickupTime: (j['pickupTime'] as num).toInt(),
-    returnTrip: j['returnTrip'] as bool,
-    returnTime: (j['returnTime'] as num).toInt(),
-    startDate: dateFrom(j['startDate'] as String),
-    rideType: RideTypeInfo.fromKey(j['rideType'] as String),
-    preferences: {for (final p in (j['preferences'] as List? ?? const [])) _preferenceFrom(p as String)},
-  );
-  return Commute(
-    id: j['id'] as String,
-    request: request,
-    driver: driverFromJson(j['driver'] as Map<String, Object?>),
-    fare: (j['fare'] as num).toInt(),
-    usualPayment: paymentFrom(j['usualPayment'] as String),
-    status: commuteStatusFrom(j['status'] as String),
-    respondBy: j['respondBy'] == null ? null : DateTime.parse(j['respondBy'] as String).toLocal(),
-    trip: j['trip'] == null ? null : tripFromJson(j['trip'] as Map<String, Object?>),
-    declineReason: switch (j['declineReason']) {
-      'declined' => DeclineReason.declined,
-      'no_answer' => DeclineReason.noAnswer,
-      _ => null,
-    },
+/// Place search results (`{id, title, detail, lat, lng}`) and series places
+/// (`{lat, lng, label}`).
+Place placeFromJson(Map<String, Object?> j) {
+  final title = (j['title'] as String?) ?? (j['label'] as String?) ?? '';
+  return Place(
+    id: (j['id'] as String?) ?? title,
+    title: title,
+    detail: (j['detail'] as String?) ?? '',
+    lat: _num(j['lat']),
+    lng: _num(j['lng']),
   );
 }
 
-RiderProfile riderFromJson(Map<String, Object?> j) =>
-    RiderProfile(phone: j['phone'] as String, name: j['name'] as String?);
+Map<String, Object?> slotToJson(SlotRequest s) => {
+      'weekday': s.weekday,
+      'direction': directionKey(s.direction),
+      'timing': timingKey(s.timing),
+      'time': clockKey(s.time),
+    };
 
-BookingOptions bookingOptionsFromJson(Map<String, Object?> j) {
-  final flow = BookingFlow.values.firstWhere((f) => f.configKey == j['flow']);
-  final options = <RideTypeOption>[];
-  for (final o in j['options'] as List) {
-    final m = o as Map<String, Object?>;
-    final key = m['type'] as String;
-    // Skip ride types this app version doesn't know rather than failing.
-    if (!RideType.values.any((t) => t.configKey == key)) continue;
-    options.add(RideTypeOption(
-      type: RideTypeInfo.fromKey(key),
-      fare: (m['fare'] as num).toInt(),
-      driversOnRoute: (m['driversOnRoute'] as num).toInt(),
-    ));
-  }
-  final def = j['defaultType'] as String?;
-  return BookingOptions(
-    flow: flow,
-    options: options,
-    defaultType: def == null || !options.any((o) => o.type.configKey == def) ? null : RideTypeInfo.fromKey(def),
+/// The series request body (series.preview, series.create, series.retry).
+Map<String, Object?> commuteRequestToJson(CommuteRequest r) => {
+      'pickup': placeToJson(r.pickup),
+      'drop': placeToJson(r.drop),
+      'vehicle_type': r.rideType.configKey,
+      'preferences': [for (final p in r.preferences) preferenceKey(p)],
+      'slots': [for (final s in r.slots) slotToJson(s)],
+      'usual_payment': paymentKey(r.usualPayment),
+      if (r.startDate != null) 'start_date': dateKey(r.startDate!),
+    };
+
+int? _clockOrNull(Object? s) => s is String && s.isNotEmpty ? parseClock(s) : null;
+
+Driver driverFromJson(Map<String, Object?> j) => Driver(
+      id: j['id'] as String,
+      name: (j['name'] as String?) ?? '',
+      vehicle: (j['vehicle_desc'] as String?) ?? (j['vehicle'] as String?) ?? '',
+      plate: (j['vehicle_number'] as String?) ?? (j['plate'] as String?) ?? '',
+      rating: j['rating'] == null ? 0 : _num(j['rating']),
+      upiId: (j['upi_id'] as String?) ?? (j['upiId'] as String?) ?? '',
+      phone: j['phone'] as String?,
+      rideType: RideTypeInfo.tryKey(j['vehicle_type'] as String?),
+    );
+
+SeriesSlot seriesSlotFromJson(Map<String, Object?> j) => SeriesSlot(
+      id: j['id'] as String?,
+      weekday: (j['weekday'] as num).toInt(),
+      direction: directionFrom(j['direction']),
+      timing: timingFrom(j['timing']),
+      arriveByTime: _clockOrNull(j['arrive_by_time']),
+      pickupTime: parseClock(j['local_pickup_time'] as String),
+      estimatedDropTime: _clockOrNull(j['estimated_drop_time']),
+      driver: j['driver'] is Map<String, Object?> ? driverFromJson(j['driver'] as Map<String, Object?>) : null,
+      active: (j['active'] as bool?) ?? true,
+    );
+
+List<SeriesSlot> _slots(Object? list) => [for (final s in (list as List? ?? const [])) seriesSlotFromJson(s as Map<String, Object?>)];
+
+DateTime? _time(Object? s) => s == null ? null : DateTime.parse(s as String).toLocal();
+
+SeriesPreview seriesPreviewFromJson(Map<String, Object?> j) => SeriesPreview(
+      rideType: RideTypeInfo.fromKey((j['vehicle_type'] ?? j['ride_type']) as String),
+      distanceKm: _num(j['distance_km']),
+      travelMinutes: (j['travel_minutes'] as num).toInt(),
+      startDate: dateFrom(j['start_date'] as String),
+      suggestedFare: (j['suggested_fare'] as num).toInt(),
+      ridesPerMonth: (j['rides_per_month'] as num?)?.toInt() ?? 0,
+      slots: _slots(j['slots']),
+    );
+
+SeriesOffer? _offerFrom(Object? j) {
+  if (j is! Map<String, Object?>) return null;
+  return SeriesOffer(
+    id: j['id'] as String,
+    round: (j['round'] as num).toInt(),
+    status: offerStatusFrom(j['status']),
+    openedAt: _time(j['opened_at'])!,
+    expiresAt: _time(j['expires_at'])!,
+    outcome: offerOutcomeFrom(j['outcome']),
   );
+}
+
+Series seriesFromJson(Map<String, Object?> j) => Series(
+      id: j['id'] as String,
+      status: seriesStatusFrom(j['status']),
+      city: (j['city'] as String?) ?? 'blr',
+      rideType: RideTypeInfo.fromKey((j['vehicle_type'] ?? j['ride_type']) as String),
+      preferences: preferencesFrom(j['preferences']),
+      pickup: placeFromJson(j['pickup'] as Map<String, Object?>),
+      drop: placeFromJson(j['drop'] as Map<String, Object?>),
+      startDate: dateFrom(j['start_date'] as String),
+      distanceKm: _num(j['distance_km']),
+      travelMinutes: (j['travel_minutes'] as num).toInt(),
+      suggestedFare: (j['suggested_fare'] as num).toInt(),
+      usualPayment: paymentFrom(j['usual_payment']),
+      requestedAt: _time(j['requested_at'])!,
+      version: (j['version'] as num?)?.toInt() ?? 1,
+      slots: _slots(j['slots']),
+      offer: _offerFrom(j['offer']),
+    );
+
+RiderProfile riderFromJson(Map<String, Object?> j) {
+  final name = j['name'] as String?;
+  return RiderProfile(phone: j['phone'] as String, name: name == null || name.isEmpty ? null : name);
 }
 
 // ---------------------------------------------------------------- flow R2
@@ -183,8 +203,6 @@ DriverPaymentMark? _driverMarkFrom(Object? s) => switch (s) {
       'not_paid' => DriverPaymentMark.notPaid,
       _ => null,
     };
-
-DateTime? _time(Object? s) => s == null ? null : DateTime.parse(s as String).toLocal();
 
 Map<String, Object?> ratingToJson(RideRating r) => {
       'stars': r.stars,

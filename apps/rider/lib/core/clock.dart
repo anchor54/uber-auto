@@ -15,3 +15,15 @@ class FixedClock extends Clock {
   @override
   DateTime now() => value;
 }
+
+/// A clock tests move by hand, e.g. 15 minutes on so a round of offers
+/// closes in the demo backend.
+class ManualClock extends Clock {
+  ManualClock(this.value);
+  DateTime value;
+
+  @override
+  DateTime now() => value;
+
+  void advance(Duration by) => value = value.add(by);
+}

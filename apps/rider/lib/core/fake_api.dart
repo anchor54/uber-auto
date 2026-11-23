@@ -6,44 +6,58 @@ import 'schedule.dart';
 
 /// In-memory backend used in demo mode and in every test.
 ///
-/// Behaviour is deterministic so tests and manual testing see the same thing:
-/// * The OTP is always [demoOtp].
-/// * Choosing the "Woman driver" preference finds no driver, so the
-///   "No driver yet" branch can be tested.
-/// * Any other request is matched with three drivers of the chosen type,
-///   leaving out any driver who already turned this rider down.
-/// * The driver answers as [driverResponse] says (flow D2): straight away by
-///   default, so tests see an active commute.
-/// * An active commute has a ride per leg for the next two weeks (flow R2).
+/// It plays the same story as the real backend (backend/API.md), on the
+/// injected clock, so tests move the clock instead of waiting:
+/// * The OTP is always [demoOtp]. The rider is "Priya Sharma".
+/// * Creating a series opens round 1 of offers for [roundLength] (15 minutes,
+///   as on the backend; demo mode uses 8 seconds). When a round closes, the
+///   demo driver Ravi was interested and is picked: the series becomes
+///   active with Ravi on every weekday, and two weeks of rides are created.
+/// * With the "Woman driver" preference nobody is interested: after 3 rounds
+///   the series is `no_driver_found`, so the "No driver yet" path can be
+///   tested. So is every request while [driversInterested] is false.
+/// * Ride types in [noDriverTypes] have no eligible driver: straight to
+///   `no_driver_found`, no rounds.
+/// * [closeRound] closes the open round now, whatever the clock says.
+/// * An active series has a ride per slot for the next two weeks (flow R2).
 ///   [playNextRide] makes the next one play itself out; in demo mode
 ///   [demoRideAfter] does that on its own, sped up by [rideSpeed].
 class FakeRiderApi implements RiderApi {
   FakeRiderApi({
     this.latency = Duration.zero,
-    Map<BookingFlow, RideTypeConfig>? config,
-    this.driverResponse = DemoDriverResponse.acceptNow,
-    this.driverResponseDelay = const Duration(seconds: 8),
+    List<RideType>? rideTypes,
+    this.roundLength = const Duration(minutes: 15),
+    this.driversInterested = true,
+    Set<RideType>? noDriverTypes,
     this.demoRideAfter,
     this.rideSpeed = 1,
     DateTime Function()? now,
-  })  : config = config ?? defaultRideTypeConfig,
+  })  : rideTypes = rideTypes ?? RideType.values,
+        noDriverTypes = noDriverTypes ?? <RideType>{},
         _explicitNow = now != null,
         _now = now ?? DateTime.now;
 
   static const demoOtp = '123456';
 
+  /// Rounds per request before `no_driver_found`, as on the backend.
+  static const maxRounds = 3;
+
   final Duration latency;
 
-  /// Mirrors the backend ride-type config: allowed types per booking flow.
-  final Map<BookingFlow, RideTypeConfig> config;
+  /// The ride types the config allows for regular rides, in config order.
+  final List<RideType> rideTypes;
 
-  /// How the demo driver answers a confirmed commute.
-  DemoDriverResponse driverResponse;
+  /// How long each round of offers stays open.
+  final Duration roundLength;
 
-  /// For the delayed responses: how long the driver takes.
-  final Duration driverResponseDelay;
+  /// Whether the demo driver says "I'm interested" (unless the rider asked
+  /// for a woman driver).
+  bool driversInterested;
 
-  /// Demo mode: once the commute is active, the next ride starts playing after this long.
+  /// Ride types with no eligible driver at all.
+  final Set<RideType> noDriverTypes;
+
+  /// Demo mode: once the series is active, the next ride starts playing after this long.
   final Duration? demoRideAfter;
 
   /// How much faster than real time a scripted ride plays.
@@ -63,18 +77,28 @@ class FakeRiderApi implements RiderApi {
   /// Push tokens registered, for tests.
   final List<String> pushTokens = [];
 
-  RiderProfile? _profile;
-  Commute? _commute;
-  DateTime? _confirmedAt;
-  final Set<String> _declinedBy = {};
+  /// Every request sent to create or retry a series, for tests.
+  final List<CommuteRequest> requests = [];
 
-  /// The confirmed commute, for tests to inspect.
-  Commute? get commute => _commute;
-  final List<CommuteRequest> waitlist = [];
+  RiderProfile? _profile;
+
+  /// Newest last.
+  final List<Series> _series = [];
   int _ids = 0;
 
-  Future<void> _wait() =>
-      latency == Duration.zero ? Future<void>.value() : Future<void>.delayed(latency);
+  /// The latest series, for tests to inspect.
+  Series? get series {
+    _catchUp();
+    return _series.isEmpty ? null : _series.last;
+  }
+
+  /// Every series, oldest first.
+  List<Series> get allSeries {
+    _catchUp();
+    return List.unmodifiable(_series);
+  }
+
+  Future<void> _wait() => latency == Duration.zero ? Future<void>.value() : Future<void>.delayed(latency);
 
   /// Demo sessions live as long as this object: a fresh app starts signed out.
   @override
@@ -94,7 +118,7 @@ class FakeRiderApi implements RiderApi {
     if (code != demoOtp) {
       throw const ApiException('invalid_code', "That code isn't right. Check the SMS and try again.");
     }
-    return _profile = RiderProfile(phone: phone);
+    return _profile = RiderProfile(phone: phone, name: demoRiderName);
   }
 
   @override
@@ -102,184 +126,262 @@ class FakeRiderApi implements RiderApi {
     await _wait();
     final q = query.trim().toLowerCase();
     if (q.isEmpty) return demoPlaces;
-    return demoPlaces
-        .where((p) => p.title.toLowerCase().contains(q) || p.detail.toLowerCase().contains(q))
-        .toList();
+    return demoPlaces.where((p) => p.title.toLowerCase().contains(q) || p.detail.toLowerCase().contains(q)).toList();
   }
 
   @override
-  Future<TripEstimate> estimateTrip(Place pickup, Place drop) async {
+  Future<List<RideTypeOption>> rideTypeOptions(CommuteRequest request) async {
     await _wait();
-    return estimateRoadTrip(pickup, drop);
+    final km = roadKm(request.pickup, request.drop);
+    return [for (final t in rideTypes) RideTypeOption(type: t, fare: suggestedFare(t, km))];
   }
 
-  @override
-  Future<BookingOptions> bookingOptions({
-    required BookingFlow flow,
-    required Place pickup,
-    required Place drop,
-    required int pickupTime,
-  }) async {
-    await _wait();
-    final trip = estimateRoadTrip(pickup, drop);
-    final cfg = config[flow] ?? const RideTypeConfig(allowed: [], defaultType: null);
-    return BookingOptions(
-      flow: flow,
-      defaultType: cfg.defaultType,
-      options: [
-        for (final type in cfg.allowed)
-          RideTypeOption(
-            type: type,
-            fare: suggestedFare(type, trip.distanceKm),
-            driversOnRoute: _driversOnRoute[type] ?? 0,
-          ),
-      ],
-    );
-  }
+  // ---------------------------------------------------------------- R1
 
-  @override
-  Future<List<DriverMatch>> findDrivers(CommuteRequest request) async {
-    await _wait();
-    if (request.preferences.contains(RidePreference.womanDriver)) return const [];
-    final trip = estimateRoadTrip(request.pickup, request.drop);
-    final fare = suggestedFare(request.rideType, trip.distanceKm);
-    final drivers = [
-      for (final d in _driversByType[request.rideType] ?? const <Driver>[])
-        if (!_declinedBy.contains(d.id)) d,
-    ];
-    final area = request.pickup.detail.isNotEmpty ? request.pickup.detail.split(', ').last : request.pickup.title;
-    return [
-      for (final (i, d) in drivers.indexed)
-        DriverMatch(
-          driver: d,
-          fare: fare,
-          trip: trip,
-          reasons: [
-            request.returnTrip ? 'Same driver every day, both directions' : 'Same driver on every ride',
-            i == 0
-                ? 'Already drives near $area at this time'
-                : 'Has a free slot at ${_slotWord(request.pickupTime)} on your days',
-            'If ${d.firstName} can\'t make it, a backup driver is confirmed the night before',
-          ],
-        ),
-    ];
-  }
+  DateTime get _today => dateOnly(_now());
 
-  @override
-  Future<Commute> confirmCommute({
-    required CommuteRequest request,
-    required DriverMatch match,
-    required PaymentMethod usualPayment,
-  }) async {
-    await _wait();
-    _ids++;
-    final now = _now();
-    request = _resolve(request, now);
-    final acceptNow = driverResponse == DemoDriverResponse.acceptNow;
-    _confirmedAt = now;
-    _commute = Commute(
-      id: 'cm_$_ids',
-      request: request,
-      driver: acceptNow ? match.driver.withPhone(_demoDriverPhone) : match.driver,
-      fare: match.fare,
-      usualPayment: usualPayment,
-      status: acceptNow ? CommuteStatus.active : CommuteStatus.awaitingDriver,
-      respondBy: acceptNow ? null : now.add(const Duration(hours: 12)),
-      trip: estimateRoadTrip(request.pickup, request.drop),
-    );
-    if (acceptNow) _commuteActive();
-    return _commute!;
-  }
-
-  /// Like the backend, the server side decides the pickup time and the start
-  /// date; what the app worked out for display is not trusted.
-  CommuteRequest _resolve(CommuteRequest r, DateTime now) {
-    final trip = estimateRoadTrip(r.pickup, r.drop);
-    return CommuteRequest(
-      pickup: r.pickup,
-      drop: r.drop,
-      repeat: r.repeat,
-      weekdays: r.weekdays,
-      timing: r.timing,
-      time: r.time,
-      pickupTime: r.timing == TimingMode.pickupAt ? r.time : pickupForArrival(r.time, trip.minutes),
-      returnTrip: r.returnTrip,
-      returnTime: r.returnTime,
-      startDate: firstRideDate(dateOnly(now), r.weekdays),
+  /// What the backend checks and works out for a request (series.preview).
+  SeriesPreview _preview(CommuteRequest r) {
+    if (!rideTypes.contains(r.rideType)) {
+      throw ApiException('ride_type_not_allowed', '${r.rideType.shortLabel} rides aren\'t available for regular rides here.');
+    }
+    if (r.slots.isEmpty) throw const ApiException('invalid_request', 'Pick at least one day.');
+    final start = r.startDate;
+    if (start != null && !dateOnly(start).isAfter(_today)) {
+      throw const ApiException('start_too_soon', 'The first ride can be tomorrow at the earliest.');
+    }
+    final km = roadKm(r.pickup, r.drop);
+    final minutes = travelMinutes(r.rideType, km);
+    final slots = <SeriesSlot>[];
+    for (final s in r.slots) {
+      final pickup = s.timing == TimingMode.arriveBy ? pickupForArrival(s.time, minutes) : s.time;
+      if (pickup < 0) throw const ApiException('invalid_time', 'That arrival time is too early for this trip.');
+      slots.add(SeriesSlot(
+        weekday: s.weekday,
+        direction: s.direction,
+        timing: s.timing,
+        arriveByTime: s.timing == TimingMode.arriveBy ? s.time : null,
+        pickupTime: pickup,
+        estimatedDropTime: pickup + minutes,
+      ));
+    }
+    slots.sort((a, b) => a.weekday != b.weekday ? a.weekday.compareTo(b.weekday) : a.direction.index.compareTo(b.direction.index));
+    final days = {for (final s in slots) s.weekday};
+    var from = _today;
+    if (start != null && dateOnly(start).isAfter(from.add(const Duration(days: 1)))) {
+      from = dateOnly(start).subtract(const Duration(days: 1));
+    }
+    return SeriesPreview(
       rideType: r.rideType,
-      preferences: r.preferences,
+      distanceKm: (km * 10).round() / 10,
+      travelMinutes: minutes,
+      startDate: firstRideDate(from, days),
+      suggestedFare: suggestedFare(r.rideType, km),
+      ridesPerMonth: (slots.length * 30 / 7).round(),
+      slots: slots,
     );
   }
 
-  /// The driver answers now, whatever [driverResponse] says. For tests.
-  void driverAccepts() => _answer(DemoDriverResponse.acceptLater);
-  void driverDeclines() => _answer(DemoDriverResponse.decline);
-  void driverNeverAnswers() => _answer(DemoDriverResponse.noAnswer);
+  @override
+  Future<SeriesPreview> previewSeries(CommuteRequest request) async {
+    await _wait();
+    return _preview(request);
+  }
 
-  void _answer(DemoDriverResponse response) {
-    final c = _commute;
-    if (c == null || c.status != CommuteStatus.awaitingDriver) return;
-    switch (response) {
-      case DemoDriverResponse.acceptNow:
-      case DemoDriverResponse.acceptLater:
-        _commute = Commute(
-          id: c.id,
-          request: c.request,
-          driver: c.driver.withPhone(_demoDriverPhone),
-          fare: c.fare,
-          usualPayment: c.usualPayment,
-          status: CommuteStatus.active,
-          trip: c.trip,
+  SeriesOffer _openRound(int round, DateTime at) {
+    _ids++;
+    return SeriesOffer(id: 'of_$_ids', round: round, status: OfferStatus.open, openedAt: at, expiresAt: at.add(roundLength));
+  }
+
+  SeriesOffer _closed(SeriesOffer o, OfferOutcome outcome) =>
+      SeriesOffer(id: o.id, round: o.round, status: OfferStatus.closed, openedAt: o.openedAt, expiresAt: o.expiresAt, outcome: outcome);
+
+  /// A request goes out: round 1, or no rounds at all when nobody is eligible.
+  Series _request(Series s) {
+    if (noDriverTypes.contains(s.rideType)) return s.copyWith(status: SeriesStatus.noDriverFound, clearOffer: true);
+    return s.copyWith(status: SeriesStatus.findingDriver, offer: _openRound(1, _now()));
+  }
+
+  @override
+  Future<Series> createSeries(CommuteRequest request) async {
+    await _wait();
+    final p = _preview(request);
+    requests.add(request);
+    _ids++;
+    final s = Series(
+      id: 'sr_$_ids',
+      status: SeriesStatus.findingDriver,
+      rideType: request.rideType,
+      preferences: {...request.preferences},
+      pickup: request.pickup,
+      drop: request.drop,
+      startDate: p.startDate,
+      distanceKm: p.distanceKm,
+      travelMinutes: p.travelMinutes,
+      suggestedFare: p.suggestedFare,
+      usualPayment: request.usualPayment,
+      requestedAt: _now(),
+      slots: [for (final (i, slot) in p.slots.indexed) _withId(slot, 'sl_${_ids}_$i')],
+      version: 0,
+    );
+    final created = _request(s);
+    _series.add(created);
+    return created;
+  }
+
+  SeriesSlot _withId(SeriesSlot s, String id) => SeriesSlot(
+        id: id,
+        weekday: s.weekday,
+        direction: s.direction,
+        timing: s.timing,
+        arriveByTime: s.arriveByTime,
+        pickupTime: s.pickupTime,
+        estimatedDropTime: s.estimatedDropTime,
+        driver: s.driver,
+        active: s.active,
+      );
+
+  int _indexOf(String id) {
+    final i = _series.indexWhere((s) => s.id == id);
+    if (i < 0) throw const ApiException('not_found', 'No such series');
+    return i;
+  }
+
+  @override
+  Future<Series> getSeries(String id) async {
+    await _wait();
+    _catchUp();
+    return _series[_indexOf(id)];
+  }
+
+  @override
+  Future<List<Series>> listSeries() async {
+    await _wait();
+    _catchUp();
+    return _series.reversed.toList();
+  }
+
+  @override
+  Future<void> cancelRequest(String id) async {
+    await _wait();
+    _catchUp();
+    final i = _indexOf(id);
+    final s = _series[i];
+    switch (s.status) {
+      case SeriesStatus.ended:
+        return;
+      case SeriesStatus.findingDriver:
+      case SeriesStatus.noDriverFound:
+        final o = s.offer;
+        _series[i] = s.copyWith(
+          status: SeriesStatus.ended,
+          offer: o != null && o.status != OfferStatus.closed ? _closed(o, OfferOutcome.cancelled) : o,
         );
-        _commuteActive();
-      case DemoDriverResponse.decline:
-        _declinedBy.add(c.driver.id);
-        _commute = c.withStatus(CommuteStatus.declined, reason: DeclineReason.declined);
-      case DemoDriverResponse.noAnswer:
-        _declinedBy.add(c.driver.id);
-        _commute = c.withStatus(CommuteStatus.declined, reason: DeclineReason.noAnswer);
+      case SeriesStatus.active:
+      case SeriesStatus.paused:
+        final driver = s.slots.map((x) => x.driver).whereType<Driver>().firstOrNull;
+        throw ApiException(
+          'already_assigned',
+          '${driver?.firstName ?? 'A driver'} was just assigned.',
+          state: s,
+        );
     }
   }
 
-  /// Plays out a delayed driver response once its time has come.
-  void _catchUp() {
-    final at = _confirmedAt;
-    if (at == null || driverResponse == DemoDriverResponse.acceptNow) return;
-    if (_now().difference(at) >= driverResponseDelay) _answer(driverResponse);
+  @override
+  Future<Series> retrySeries(String id, {CommuteRequest? changes}) async {
+    await _wait();
+    _catchUp();
+    final i = _indexOf(id);
+    final s = _series[i];
+    if (s.status != SeriesStatus.noDriverFound) {
+      throw ApiException('not_retryable', 'This request is not waiting for a retry.', state: s);
+    }
+    final base = s.toRequest();
+    final r = changes ?? base;
+    requests.add(r);
+    final p = _preview(r);
+    final next = _request(s.copyWith(
+      rideType: r.rideType,
+      preferences: {...r.preferences},
+      usualPayment: r.usualPayment,
+      startDate: p.startDate,
+      suggestedFare: p.suggestedFare,
+      travelMinutes: p.travelMinutes,
+      distanceKm: p.distanceKm,
+      slots: [for (final (j, slot) in p.slots.indexed) _withId(slot, '${s.id}_r${s.version}_$j')],
+    ));
+    _series[i] = next;
+    return next;
   }
 
-  @override
-  Future<void> joinWaitlist(CommuteRequest request) async {
-    await _wait();
-    waitlist.add(request);
+  /// Closes every open round now, as if its window had passed: the pick runs.
+  void closeRound() {
+    final now = _now();
+    for (var i = 0; i < _series.length; i++) {
+      final s = _series[i];
+      final o = s.offer;
+      if (s.status != SeriesStatus.findingDriver || o == null || o.status != OfferStatus.open) continue;
+      if (o.expiresAt.isAfter(now)) {
+        _series[i] = s.copyWith(
+          offer: SeriesOffer(id: o.id, round: o.round, status: o.status, openedAt: o.openedAt, expiresAt: now),
+        );
+      }
+    }
+    _catchUp();
   }
+
+  /// Runs the sweep: closes rounds whose window has passed and picks.
+  void _catchUp() {
+    final now = _now();
+    for (var i = 0; i < _series.length; i++) {
+      var s = _series[i];
+      while (s.status == SeriesStatus.findingDriver) {
+        final o = s.offer;
+        if (o == null || o.status != OfferStatus.open || o.expiresAt.isAfter(now)) break;
+        if (_someoneInterested(s)) {
+          final ravi = demoDriverFor(s.rideType).withPhone(demoDriverPhone);
+          s = s.copyWith(
+            status: SeriesStatus.active,
+            offer: _closed(o, OfferOutcome.assigned),
+            slots: [for (final slot in s.slots) slot.withDriver(ravi)],
+          );
+          _series[i] = s;
+          _seriesActive(s);
+        } else if (o.round < maxRounds) {
+          s = s.copyWith(offer: _openRound(o.round + 1, o.expiresAt));
+        } else {
+          s = s.copyWith(status: SeriesStatus.noDriverFound, offer: _closed(o, OfferOutcome.noFit));
+        }
+      }
+      _series[i] = s;
+    }
+  }
+
+  bool _someoneInterested(Series s) => driversInterested && !s.preferences.contains(RidePreference.womanDriver);
 
   @override
   Future<HomeData> home() async {
     await _wait();
     _catchUp();
     return HomeData(
-      profile: _profile ?? const RiderProfile(phone: ''),
-      commute: _commute,
-      recentRides: const [],
+      profile: _profile ?? const RiderProfile(phone: '', name: demoRiderName),
+      series: [for (final s in _series.reversed) if (s.status != SeriesStatus.ended) s],
     );
   }
 
-  static String _slotWord(int minutes) => minutes < 720 ? 'that time in the morning' : 'that time';
-
   // ---------------------------------------------------------------- flow R2
 
-  /// Creates two weeks of rides, as the backend does when a commute becomes active.
-  void _commuteActive() {
-    final c = _commute!;
-    final r = c.request;
-    final today = dateOnly(_now());
-    var day = r.startDate.isAfter(today) ? r.startDate : today;
+  /// Creates two weeks of rides, as the backend does when a driver is picked.
+  void _seriesActive(Series s) {
+    final today = _today;
+    var day = s.startDate.isAfter(today) ? s.startDate : today;
     final last = today.add(const Duration(days: 14));
     while (!day.isAfter(last)) {
-      if (r.weekdays.contains(day.weekday)) {
-        _addRide(c, day, RideDirection.outbound, r.pickupTime, r.pickup, r.drop);
-        if (r.returnTrip) _addRide(c, day, RideDirection.returnLeg, r.returnTime, r.drop, r.pickup);
+      for (final slot in s.slots) {
+        if (slot.weekday != day.weekday || !slot.active) continue;
+        final out = slot.direction == RideDirection.outbound;
+        _addRide(s, slot, day, out ? s.pickup : s.drop, out ? s.drop : s.pickup);
       }
       day = DateTime(day.year, day.month, day.day + 1);
     }
@@ -287,24 +389,25 @@ class FakeRiderApi implements RiderApi {
     if (after != null) playNextRide(at: _now().add(after), speed: rideSpeed);
   }
 
-  void _addRide(Commute c, DateTime day, RideDirection dir, int minute, Place pickup, Place drop) {
+  void _addRide(Series s, SeriesSlot slot, DateTime day, Place pickup, Place drop) {
+    final minute = slot.pickupTime;
     final pickupAt = DateTime(day.year, day.month, day.day, minute ~/ 60, minute % 60);
     if (!pickupAt.isAfter(_now())) return;
-    final id = 'ride_${dateKey(day)}_${dir.name}';
+    final id = 'ride_${s.id}_${dateKey(day)}_${slot.direction.name}';
     _rides[id] = Ride(
       id: id,
       date: day,
-      direction: dir,
+      direction: slot.direction,
       state: RideState.scheduled,
       pickup: pickup,
       drop: drop,
       pickupAt: pickupAt,
       windowStart: pickupAt.subtract(const Duration(minutes: 5)),
       windowEnd: pickupAt.add(const Duration(minutes: 5)),
-      tripMinutes: estimateRoadTrip(pickup, drop).minutes,
-      fare: c.fare,
-      rideType: c.request.rideType,
-      driver: c.driver,
+      tripMinutes: s.travelMinutes,
+      fare: s.suggestedFare,
+      rideType: s.rideType,
+      driver: slot.driver ?? demoDriverFor(s.rideType),
       pin: (1000 + (_rides.length * 7919) % 9000).toString(),
     );
   }
@@ -471,46 +574,17 @@ class FakeRiderApi implements RiderApi {
   }
 }
 
-/// How the demo driver answers a confirmed commute (flow D2).
-enum DemoDriverResponse {
-  /// Accepts at once: the commute is active straight after confirming.
-  acceptNow,
+/// The demo rider, as in the backend's spec seed.
+const demoRiderName = 'Priya Sharma';
 
-  /// Shows "Waiting for …", then accepts after the delay.
-  acceptLater,
-
-  /// Shows "Waiting for …", then declines after the delay.
-  decline,
-
-  /// Shows "Waiting for …", then the request lapses after the delay.
-  noAnswer,
-}
-
-const _demoDriverPhone = '9000000010';
-
-class RideTypeConfig {
-  const RideTypeConfig({required this.allowed, required this.defaultType});
-  final List<RideType> allowed;
-  final RideType? defaultType;
-}
-
-const defaultRideTypeConfig = <BookingFlow, RideTypeConfig>{
-  BookingFlow.oneTime: RideTypeConfig(allowed: RideType.values, defaultType: RideType.auto),
-  BookingFlow.recurringWeekday: RideTypeConfig(allowed: RideType.values, defaultType: RideType.cabSedan),
-  BookingFlow.recurringWeekly: RideTypeConfig(allowed: RideType.values, defaultType: RideType.cabSedan),
-};
-
-const _driversOnRoute = <RideType, int>{
-  RideType.bike: 3,
-  RideType.auto: 4,
-  RideType.cabHatchback: 2,
-  RideType.cabSedan: 5,
-  RideType.cabSuv: 1,
-};
+/// The demo driver's number, shared once he is picked.
+const demoDriverPhone = '9000000201';
 
 const demoPlaces = <Place>[
   Place(id: 'home', title: 'Home', detail: '14th Main, HSR Layout', lat: 12.9121, lng: 77.6446),
   Place(id: 'etv', title: 'Embassy Tech Village', detail: 'Gate 3', lat: 12.9406, lng: 77.6964),
+  Place(id: 'koramangala', title: 'Koramangala', detail: 'Koramangala, Bengaluru', lat: 12.9352, lng: 77.6245),
+  Place(id: 'whitefield', title: 'Whitefield', detail: 'Whitefield, Bengaluru', lat: 12.9698, lng: 77.7178),
   Place(id: 'manyata', title: 'Manyata Tech Park', detail: 'Hebbal', lat: 13.0475, lng: 77.6203),
   Place(id: 'itpl', title: 'ITPL', detail: 'Whitefield', lat: 12.9866, lng: 77.7378),
   Place(id: 'forum', title: 'Forum Mall', detail: 'Koramangala', lat: 12.9346, lng: 77.6113),
@@ -518,30 +592,22 @@ const demoPlaces = <Place>[
   Place(id: 'airport', title: 'Kempegowda Airport', detail: 'Terminal 2', lat: 13.1989, lng: 77.7068),
 ];
 
-const _driversByType = <RideType, List<Driver>>{
-  RideType.bike: [
-    Driver(id: 'd_arjun', name: 'Arjun Rao', vehicle: 'Black Splendor · helmet', plate: 'KA 51 EX 2210', rating: 4.8, upiId: 'arjun.rao@okhdfc'),
-    Driver(id: 'd_vinay', name: 'Vinay S', vehicle: 'Red Pulsar · helmet', plate: 'KA 03 HY 7781', rating: 4.7, upiId: 'vinay.s@ybl'),
-    Driver(id: 'd_kiran', name: 'Kiran Gowda', vehicle: 'Blue Activa · helmet', plate: 'KA 05 KP 9012', rating: 4.6, upiId: 'kiran.g@okaxis'),
-  ],
-  RideType.auto: [
-    Driver(id: 'd_manju', name: 'Manjunath B', vehicle: 'Green auto · 3 seats', plate: 'KA 01 AC 4420', rating: 4.8, upiId: 'manju.b@ybl'),
-    Driver(id: 'd_raju', name: 'Raju K', vehicle: 'Green auto · 3 seats', plate: 'KA 05 AD 1189', rating: 4.7, upiId: 'raju.k@okicici'),
-    Driver(id: 'd_salim', name: 'Salim Pasha', vehicle: 'Green auto · 3 seats', plate: 'KA 02 AB 7765', rating: 4.6, upiId: 'salim.p@ybl'),
-  ],
-  RideType.cabHatchback: [
-    Driver(id: 'd_naveen', name: 'Naveen P', vehicle: 'Grey Swift · AC · 4 seats', plate: 'KA 03 MB 5521', rating: 4.8, upiId: 'naveen.p@okhdfc'),
-    Driver(id: 'd_sunil', name: 'Sunil R', vehicle: 'White WagonR · AC · 4 seats', plate: 'KA 04 MC 3390', rating: 4.7, upiId: 'sunil.r@ybl'),
-    Driver(id: 'd_mohan', name: 'Mohan D', vehicle: 'Red i20 · AC · 4 seats', plate: 'KA 51 MD 1102', rating: 4.6, upiId: 'mohan.d@okaxis'),
-  ],
-  RideType.cabSedan: [
-    Driver(id: 'd_ravi', name: 'Ravi Kumar', vehicle: 'White Dzire · AC · 4 seats', plate: 'KA 01 AB 1234', rating: 4.9, upiId: 'ravi.kumar@okbank'),
-    Driver(id: 'd_suresh', name: 'Suresh M', vehicle: 'Silver Etios · AC · 4 seats', plate: 'KA 05 MN 4410', rating: 4.8, upiId: 'suresh.m@ybl'),
-    Driver(id: 'd_imran', name: 'Imran K', vehicle: 'Silver Honda City · AC · 4 seats', plate: 'KA 05 MK 2290', rating: 4.8, upiId: 'imran.k@okaxis'),
-  ],
-  RideType.cabSuv: [
-    Driver(id: 'd_prakash', name: 'Prakash N', vehicle: 'White Ertiga · AC · 6 seats', plate: 'KA 01 MP 8890', rating: 4.8, upiId: 'prakash.n@okhdfc'),
-    Driver(id: 'd_joseph', name: 'Joseph A', vehicle: 'Grey Innova · AC · 7 seats', plate: 'KA 02 MJ 3345', rating: 4.7, upiId: 'joseph.a@ybl'),
-    Driver(id: 'd_ganesh', name: 'Ganesh T', vehicle: 'White XL6 · AC · 6 seats', plate: 'KA 53 MG 6610', rating: 4.6, upiId: 'ganesh.t@okaxis'),
-  ],
-};
+/// Ravi, the demo driver who takes every request, in a vehicle of [type].
+Driver demoDriverFor(RideType type) {
+  final (vehicle, plate) = switch (type) {
+    RideType.bike => ('Black Splendor · helmet', 'KA 51 EX 2210'),
+    RideType.auto => ('Green auto · 3 seats', 'KA 05 AB 1234'),
+    RideType.cabHatchback => ('Grey Swift · AC · 4 seats', 'KA 03 MB 5521'),
+    RideType.cabSedan => ('White Dzire · AC · 4 seats', 'KA 01 AB 1234'),
+    RideType.cabSuv => ('White Ertiga · AC · 6 seats', 'KA 01 MP 8890'),
+  };
+  return Driver(
+    id: 'd_ravi',
+    name: 'Ravi Kumar',
+    vehicle: vehicle,
+    plate: plate,
+    rating: 4.9,
+    upiId: 'ravi.kumar@okbank',
+    rideType: type,
+  );
+}

@@ -24,23 +24,38 @@ abstract class PushService {
   Future<PushEvent?> takeLaunchEvent();
 }
 
-/// One push about a ride. [kind] is the backend's notification kind
-/// (driver_on_the_way, driver_arrived, …).
+/// One push about a ride or a series. [kind] is the backend's notification
+/// kind (series_active, series_no_driver, driver_on_the_way, …).
 class PushEvent {
-  const PushEvent({required this.kind, required this.rideId, required this.opened});
+  const PushEvent({required this.kind, this.rideId, this.seriesId, required this.opened});
 
   final String kind;
-  final String rideId;
+
+  /// The ride the push is about (flow R2), or null.
+  final String? rideId;
+
+  /// The series the push is about (flow R1: driver confirmed, no driver yet), or null.
+  final String? seriesId;
 
   /// True when the rider tapped it; false when it arrived with the app open.
   final bool opened;
 
-  /// Reads the data the backend sends with every push: {kind, rideId}.
+  /// A result of a series request: Home reads the series again.
+  bool get isSeriesResult => seriesId != null && rideId == null;
+
+  /// Reads the data the backend sends with every push: `kind` plus
+  /// `series_id` or a ride id.
   static PushEvent? fromData(Map<String, dynamic> data, {required bool opened}) {
-    final rideId = data['rideId'];
+    String? read(String a, String b) {
+      final v = data[a] ?? data[b];
+      return v is String && v.isNotEmpty ? v : null;
+    }
+
+    final rideId = read('ride_id', 'rideId');
+    final seriesId = read('series_id', 'seriesId');
+    if (rideId == null && seriesId == null) return null;
     final kind = data['kind'];
-    if (rideId is! String || rideId.isEmpty) return null;
-    return PushEvent(kind: kind is String ? kind : '', rideId: rideId, opened: opened);
+    return PushEvent(kind: kind is String ? kind : '', rideId: rideId, seriesId: seriesId, opened: opened);
   }
 }
 

@@ -21,6 +21,11 @@ import '../test/helpers/r1_robot.dart';
 ///     --dart-define=API_BASE_URL=http://10.0.2.2:8080
 const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 
+/// The rewritten backend (branch spec-rewrite) has no daily-ride endpoints
+/// or ride simulator yet: they come with R2+D3. Until then this test is
+/// skipped even in real mode.
+const r2BackendReady = false;
+
 Future<Map<String, Object?>> sim(String path, [Object body = const {}]) async {
   final res = await http.post(
     Uri.parse('$apiBaseUrl/dev/sim/$path'),
@@ -50,13 +55,13 @@ void main() {
     await tester.pumpAndSettle();
     final robot = R1Robot(tester);
 
-    // R1 + D2: a commute the driver has accepted, so its rides exist.
+    // R1 + D2: a series with a driver, so its rides exist.
     await robot.signIn(phone: '9${Random().nextInt(900000000) + 100000000}');
     await robot.fillSetup();
-    await robot.chooseRideType(RideType.cabSedan);
-    await robot.confirm();
-    final commute = (await api.home()).commute!;
-    await sim('commutes/${commute.id}/accept');
+    await robot.chooseRideType(RideType.auto);
+    await robot.request();
+    final series = (await api.listSeries()).first;
+    await sim('series/${series.id}/assign');
     final ride = (await api.upcomingRides(days: 14)).first;
     expect(ride.state, RideState.scheduled);
 
@@ -90,5 +95,5 @@ void main() {
     expect(done.state, RideState.completed);
     expect(done.riderPayment, PaymentMethod.cash);
     expect(done.rating?.stars, 5);
-  }, skip: apiBaseUrl.isEmpty);
+  }, skip: apiBaseUrl.isEmpty || !r2BackendReady);
 }

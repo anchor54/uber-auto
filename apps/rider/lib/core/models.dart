@@ -4,7 +4,7 @@ library;
 enum RideType { bike, auto, cabHatchback, cabSedan, cabSuv }
 
 extension RideTypeInfo on RideType {
-  /// Key used by the backend ride-type config.
+  /// Key used by the backend (`vehicle_type`, ride-type config).
   String get configKey => switch (this) {
         RideType.bike => 'bike',
         RideType.auto => 'auto',
@@ -13,6 +13,7 @@ extension RideTypeInfo on RideType {
         RideType.cabSuv => 'cab_suv',
       };
 
+  /// "Cab · Sedan": the type with its group, as on R1.4 and Home.
   String get label => switch (this) {
         RideType.bike => 'Bike',
         RideType.auto => 'Auto',
@@ -21,7 +22,16 @@ extension RideTypeInfo on RideType {
         RideType.cabSuv => 'Cab · SUV',
       };
 
-  /// Lower-case noun used in sentences, e.g. "5 sedan drivers".
+  /// "Sedan": the row title on R1.3, and "{ride type} drivers" in sentences.
+  String get shortLabel => switch (this) {
+        RideType.bike => 'Bike',
+        RideType.auto => 'Auto',
+        RideType.cabHatchback => 'Hatchback',
+        RideType.cabSedan => 'Sedan',
+        RideType.cabSuv => 'SUV',
+      };
+
+  /// Lower-case noun used in sentences, e.g. "every sedan driver".
   String get noun => switch (this) {
         RideType.bike => 'bike',
         RideType.auto => 'auto',
@@ -38,25 +48,29 @@ extension RideTypeInfo on RideType {
         RideType.cabSuv => '6 seats · AC · big boot',
       };
 
-  bool get isCab =>
-      this == RideType.cabHatchback ||
-      this == RideType.cabSedan ||
-      this == RideType.cabSuv;
+  bool get isCab => this == RideType.cabHatchback || this == RideType.cabSedan || this == RideType.cabSuv;
 
-  static RideType fromKey(String key) =>
-      RideType.values.firstWhere((t) => t.configKey == key);
+  static RideType fromKey(String key) => RideType.values.firstWhere((t) => t.configKey == key);
+
+  /// Null for a type this app version doesn't know.
+  static RideType? tryKey(String? key) {
+    for (final t in RideType.values) {
+      if (t.configKey == key) return t;
+    }
+    return null;
+  }
 }
 
-enum BookingFlow { oneTime, recurringWeekday, recurringWeekly }
+/// The only city until multi-city sign-up exists (the backend's `city`).
+const defaultCity = 'blr';
 
-extension BookingFlowInfo on BookingFlow {
-  String get configKey => switch (this) {
-        BookingFlow.oneTime => 'one_time',
-        BookingFlow.recurringWeekday => 'recurring_weekday',
-        BookingFlow.recurringWeekly => 'recurring_weekly',
-      };
-}
+/// "Bengaluru" for the backend's city code.
+String cityName(String code) => switch (code) {
+      'blr' => 'Bengaluru',
+      _ => code,
+    };
 
+/// R1.2's two-way choice. Only the app uses it: the backend gets one slot per day.
 enum CommuteRepeat { everyWeekday, chosenDays }
 
 enum TimingMode { pickupAt, arriveBy }
@@ -92,6 +106,7 @@ class Place {
   final String id;
 
   /// Short name shown in summaries, e.g. "Home" or "Embassy Tech Village".
+  /// Sent to the backend as the place's `label`.
   final String title;
 
   /// Extra detail, e.g. "14th Main, HSR Layout" or "Gate 3".
@@ -101,9 +116,7 @@ class Place {
 
   String get display {
     if (detail.isEmpty) return title;
-    return title == 'Home' || title == 'Office'
-        ? '$title · $detail'
-        : '$title, $detail';
+    return title == 'Home' || title == 'Office' ? '$title · $detail' : '$title, $detail';
   }
 
   @override
@@ -122,101 +135,264 @@ class TripEstimate {
   final String? polyline;
 }
 
+/// One row on R1.3: a ride type the config allows for regular rides in the
+/// rider's city, with its suggested fare per ride for this route.
 class RideTypeOption {
-  const RideTypeOption({
-    required this.type,
-    required this.fare,
-    required this.driversOnRoute,
-  });
+  const RideTypeOption({required this.type, required this.fare});
 
   final RideType type;
 
   /// Suggested fare per ride, in whole rupees.
   final int fare;
-
-  /// Drivers of this type who already run the route at this time.
-  final int driversOnRoute;
 }
 
-class BookingOptions {
-  const BookingOptions({
-    required this.flow,
-    required this.options,
-    required this.defaultType,
+/// One leg of a series on one weekday, as the rider asks for it.
+class SlotRequest {
+  const SlotRequest({
+    required this.weekday,
+    this.direction = RideDirection.outbound,
+    this.timing = TimingMode.pickupAt,
+    required this.time,
   });
 
-  final BookingFlow flow;
+  /// ISO weekday, 1 = Monday … 7 = Sunday.
+  final int weekday;
+  final RideDirection direction;
+  final TimingMode timing;
 
-  /// Only the ride types the backend config allows, in config order.
-  final List<RideTypeOption> options;
-  final RideType? defaultType;
-
-  RideTypeOption? optionFor(RideType type) {
-    for (final o in options) {
-      if (o.type == type) return o;
-    }
-    return null;
-  }
+  /// Minutes after midnight: the pickup time, or the arrive-by time.
+  final int time;
 }
 
-/// Everything the rider chose while setting up a regular ride.
+/// Everything the rider chose while setting up a regular ride: the body of
+/// series.preview, series.create and series.retry.
 class CommuteRequest {
   const CommuteRequest({
     required this.pickup,
     required this.drop,
-    required this.repeat,
-    required this.weekdays,
-    required this.timing,
-    required this.time,
-    required this.pickupTime,
-    required this.returnTrip,
-    required this.returnTime,
-    required this.startDate,
+    required this.slots,
     required this.rideType,
-    required this.preferences,
+    this.preferences = const {},
+    this.usualPayment = PaymentMethod.upi,
+    this.startDate,
   });
 
   final Place pickup;
   final Place drop;
-  final CommuteRepeat repeat;
 
-  /// ISO weekdays, 1 = Monday … 7 = Sunday.
-  final Set<int> weekdays;
-  final TimingMode timing;
-
-  /// Minutes after midnight the rider entered (pickup time or arrive-by time).
-  final int time;
-
-  /// Minutes after midnight of the morning pickup.
-  final int pickupTime;
-  final bool returnTrip;
-  final int returnTime;
-  final DateTime startDate;
+  /// One per weekday and direction ("Same time every day" sends the same
+  /// time for every day).
+  final List<SlotRequest> slots;
   final RideType rideType;
   final Set<RidePreference> preferences;
+  final PaymentMethod usualPayment;
 
-  BookingFlow get flow => repeat == CommuteRepeat.everyWeekday
-      ? BookingFlow.recurringWeekday
-      : BookingFlow.recurringWeekly;
+  /// The earliest start wanted, or null: the first chosen weekday from tomorrow.
+  final DateTime? startDate;
 
-  CommuteRequest copyWith({
-    int? time,
-    int? pickupTime,
-    Set<RidePreference>? preferences,
-  }) =>
-      CommuteRequest(
+  /// ISO weekdays with an outbound slot.
+  Set<int> get weekdays => {for (final s in slots) if (s.direction == RideDirection.outbound) s.weekday};
+
+  bool get returnTrip => slots.any((s) => s.direction == RideDirection.returnLeg);
+}
+
+/// What the backend works out from a request (series.preview); nothing is saved.
+class SeriesPreview {
+  const SeriesPreview({
+    required this.rideType,
+    required this.distanceKm,
+    required this.travelMinutes,
+    required this.startDate,
+    required this.suggestedFare,
+    required this.ridesPerMonth,
+    required this.slots,
+  });
+
+  final RideType rideType;
+  final double distanceKm;
+  final int travelMinutes;
+  final DateTime startDate;
+  final int suggestedFare;
+  final int ridesPerMonth;
+  final List<SeriesSlot> slots;
+}
+
+/// Where a series is. Only the server moves it.
+enum SeriesStatus { findingDriver, active, paused, noDriverFound, ended }
+
+/// A round of offers to drivers: open, closing (the window passed, the pick
+/// is running) or closed.
+enum OfferStatus { open, closing, closed }
+
+enum OfferOutcome { assigned, noFit, cancelled }
+
+/// The latest round of a series' request. The rider app shows no rounds;
+/// they are here for tests and support.
+class SeriesOffer {
+  const SeriesOffer({
+    required this.id,
+    required this.round,
+    required this.status,
+    required this.openedAt,
+    required this.expiresAt,
+    this.outcome,
+  });
+
+  final String id;
+  final int round;
+  final OfferStatus status;
+  final DateTime openedAt;
+  final DateTime expiresAt;
+  final OfferOutcome? outcome;
+}
+
+/// One weekday and direction of a series, with its driver once picked.
+class SeriesSlot {
+  const SeriesSlot({
+    this.id,
+    required this.weekday,
+    required this.direction,
+    required this.timing,
+    this.arriveByTime,
+    required this.pickupTime,
+    this.estimatedDropTime,
+    this.driver,
+    this.active = true,
+  });
+
+  final String? id;
+
+  /// ISO weekday, 1 = Monday … 7 = Sunday.
+  final int weekday;
+  final RideDirection direction;
+  final TimingMode timing;
+
+  /// Minutes after midnight, for an arrive-by slot.
+  final int? arriveByTime;
+
+  /// Minutes after midnight. For arrive-by, worked out by the server.
+  final int pickupTime;
+  final int? estimatedDropTime;
+  final Driver? driver;
+  final bool active;
+
+  /// The time the rider entered: arrive-by time, or the pickup time.
+  int get enteredTime => timing == TimingMode.arriveBy ? (arriveByTime ?? pickupTime) : pickupTime;
+
+  SeriesSlot withDriver(Driver? d) => SeriesSlot(
+        id: id,
+        weekday: weekday,
+        direction: direction,
+        timing: timing,
+        arriveByTime: arriveByTime,
+        pickupTime: pickupTime,
+        estimatedDropTime: estimatedDropTime,
+        driver: d,
+        active: active,
+      );
+}
+
+/// A regular ride: the rider's request and, once picked, its drivers.
+class Series {
+  const Series({
+    required this.id,
+    required this.status,
+    required this.rideType,
+    required this.preferences,
+    required this.pickup,
+    required this.drop,
+    required this.startDate,
+    required this.distanceKm,
+    required this.travelMinutes,
+    required this.suggestedFare,
+    required this.usualPayment,
+    required this.requestedAt,
+    required this.slots,
+    this.city = 'blr',
+    this.version = 1,
+    this.offer,
+  });
+
+  final String id;
+  final SeriesStatus status;
+  final String city;
+  final RideType rideType;
+  final Set<RidePreference> preferences;
+  final Place pickup;
+  final Place drop;
+  final DateTime startDate;
+  final double distanceKm;
+  final int travelMinutes;
+  final int suggestedFare;
+  final PaymentMethod usualPayment;
+  final DateTime requestedAt;
+  final int version;
+  final List<SeriesSlot> slots;
+
+  /// The latest round, whatever its status.
+  final SeriesOffer? offer;
+
+  List<SeriesSlot> get outbound => [for (final s in slots) if (s.direction == RideDirection.outbound) s]
+    ..sort((a, b) => a.weekday.compareTo(b.weekday));
+
+  List<SeriesSlot> get returns => [for (final s in slots) if (s.direction == RideDirection.returnLeg) s]
+    ..sort((a, b) => a.weekday.compareTo(b.weekday));
+
+  /// ISO weekdays with an outbound slot.
+  Set<int> get weekdays => {for (final s in outbound) s.weekday};
+
+  bool get returnTrip => slots.any((s) => s.direction == RideDirection.returnLeg);
+
+  SeriesSlot? slotFor(int weekday, RideDirection direction) {
+    for (final s in slots) {
+      if (s.weekday == weekday && s.direction == direction) return s;
+    }
+    return null;
+  }
+
+  /// The request that made this series, e.g. to change it and try again.
+  CommuteRequest toRequest() => CommuteRequest(
         pickup: pickup,
         drop: drop,
-        repeat: repeat,
-        weekdays: weekdays,
-        timing: timing,
-        time: time ?? this.time,
-        pickupTime: pickupTime ?? this.pickupTime,
-        returnTrip: returnTrip,
-        returnTime: returnTime,
-        startDate: startDate,
+        slots: [
+          for (final s in slots) SlotRequest(weekday: s.weekday, direction: s.direction, timing: s.timing, time: s.enteredTime),
+        ],
         rideType: rideType,
+        preferences: {...preferences},
+        usualPayment: usualPayment,
+      );
+
+  Series copyWith({
+    SeriesStatus? status,
+    List<SeriesSlot>? slots,
+    SeriesOffer? offer,
+    bool clearOffer = false,
+    DateTime? startDate,
+    RideType? rideType,
+    Set<RidePreference>? preferences,
+    int? suggestedFare,
+    int? travelMinutes,
+    double? distanceKm,
+    DateTime? requestedAt,
+    PaymentMethod? usualPayment,
+  }) =>
+      Series(
+        id: id,
+        status: status ?? this.status,
+        city: city,
+        rideType: rideType ?? this.rideType,
         preferences: preferences ?? this.preferences,
+        pickup: pickup,
+        drop: drop,
+        startDate: startDate ?? this.startDate,
+        distanceKm: distanceKm ?? this.distanceKm,
+        travelMinutes: travelMinutes ?? this.travelMinutes,
+        suggestedFare: suggestedFare ?? this.suggestedFare,
+        usualPayment: usualPayment ?? this.usualPayment,
+        requestedAt: requestedAt ?? this.requestedAt,
+        version: version + 1,
+        slots: slots ?? this.slots,
+        offer: clearOffer ? null : (offer ?? this.offer),
       );
 }
 
@@ -227,147 +403,71 @@ class Driver {
     required this.vehicle,
     required this.plate,
     required this.rating,
-    required this.upiId,
+    this.upiId = '',
     this.phone,
+    this.rideType,
   });
 
   final String id;
   final String name;
 
   /// For the rider's Call button once a ride is under way. Null when the
-  /// backend doesn't share it (before the driver accepts).
+  /// backend doesn't share it.
   final String? phone;
 
-  /// e.g. "White Dzire · AC · 4 seats"
+  /// e.g. "Green auto · 3 seats" (the backend's `vehicle_desc`).
   final String vehicle;
+
+  /// e.g. "KA 05 AB 1234" (the backend's `vehicle_number`).
   final String plate;
   final double rating;
   final String upiId;
+  final RideType? rideType;
 
   String get firstName => name.split(' ').first;
 
   String get initials {
     final parts = name.split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
-        .toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1)).toUpperCase();
   }
 
-  /// "White Dzire" from "White Dzire · AC · 4 seats".
+  /// "Green auto" from "Green auto · 3 seats".
   String get car => vehicle.split(' · ').first;
 
   Driver withPhone(String? value) =>
-      Driver(id: id, name: name, vehicle: vehicle, plate: plate, rating: rating, upiId: upiId, phone: value);
-}
-
-class DriverMatch {
-  const DriverMatch({
-    required this.driver,
-    required this.fare,
-    required this.trip,
-    required this.reasons,
-    this.proposalId,
-    this.expiresAt,
-  });
-
-  final Driver driver;
-  final int fare;
-  final TripEstimate trip;
-
-  /// Why this driver fits, shown as check lines.
-  final List<String> reasons;
-
-  /// The backend's id for this offer; confirming sends it back. Null in the
-  /// demo backend, which confirms from the match itself.
-  final String? proposalId;
-
-  /// When the backend stops honouring this offer.
-  final DateTime? expiresAt;
-}
-
-/// `awaitingDriver`: confirmed by the rider, waiting for the driver to accept
-/// (flow D2). `declined`: the driver said no or didn't answer in time; the
-/// rider is asked to pick another driver.
-enum CommuteStatus { awaitingDriver, active, paused, cancelled, declined }
-
-/// Why a commute ended up [CommuteStatus.declined].
-enum DeclineReason { declined, noAnswer }
-
-class Commute {
-  const Commute({
-    required this.id,
-    required this.request,
-    required this.driver,
-    required this.fare,
-    required this.usualPayment,
-    required this.status,
-    this.respondBy,
-    this.declineReason,
-    this.trip,
-  });
-
-  final String id;
-  final CommuteRequest request;
-
-  /// The trip the server booked with (road distance and minutes). Setting up
-  /// the same commute again uses it, so previews match the booking.
-  final TripEstimate? trip;
-  final Driver driver;
-  final int fare;
-  final PaymentMethod usualPayment;
-  final CommuteStatus status;
-
-  /// While awaiting the driver: when the request lapses if they don't answer.
-  final DateTime? respondBy;
-
-  /// Set when [status] is [CommuteStatus.declined].
-  final DeclineReason? declineReason;
-
-  Commute withStatus(CommuteStatus s, {DeclineReason? reason}) => Commute(
-        id: id,
-        request: request,
-        driver: driver,
-        fare: fare,
-        usualPayment: usualPayment,
-        status: s,
-        respondBy: respondBy,
-        declineReason: reason,
-        trip: trip,
-      );
+      Driver(id: id, name: name, vehicle: vehicle, plate: plate, rating: rating, upiId: upiId, phone: value, rideType: rideType);
 }
 
 class RiderProfile {
   const RiderProfile({required this.phone, this.name});
   final String phone;
   final String? name;
-}
 
-class RecentRide {
-  const RecentRide({
-    required this.drop,
-    required this.rideType,
-    required this.date,
-  });
-  final Place drop;
-  final RideType rideType;
-  final DateTime date;
+  /// "Priya" from "Priya Sharma"; null when the name isn't known.
+  String? get firstName {
+    final n = name?.trim();
+    if (n == null || n.isEmpty) return null;
+    return n.split(' ').first;
+  }
 }
 
 class HomeData {
-  const HomeData({
-    required this.profile,
-    required this.commute,
-    required this.recentRides,
-  });
+  const HomeData({required this.profile, required this.series});
   final RiderProfile profile;
-  final Commute? commute;
-  final List<RecentRide> recentRides;
+
+  /// The rider's series that aren't ended, newest first.
+  final List<Series> series;
 }
 
 class ApiException implements Exception {
-  const ApiException(this.code, this.message);
+  const ApiException(this.code, this.message, {this.state});
   final String code;
   final String message;
+
+  /// The object as it is now (e.g. the series after a 409), when the server sent it.
+  final Object? state;
 
   @override
   String toString() => 'ApiException($code): $message';

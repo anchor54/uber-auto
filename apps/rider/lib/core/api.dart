@@ -3,7 +3,8 @@ import 'models.dart';
 /// Everything the rider app needs from the backend.
 ///
 /// [FakeRiderApi] implements this with demo data and [HttpRiderApi] talks to
-/// the real backend (backend/). Screens only see this interface.
+/// the real backend (backend/, see backend/API.md). Screens only see this
+/// interface.
 abstract class RiderApi {
   /// The signed-in rider if a saved session is still valid, else null.
   /// Called once at startup so a rider stays signed in across restarts.
@@ -17,30 +18,39 @@ abstract class RiderApi {
 
   Future<List<Place>> searchPlaces(String query);
 
-  Future<TripEstimate> estimateTrip(Place pickup, Place drop);
+  /// R1.3: the ride types allowed for regular rides in the rider's city, in
+  /// config order, each with its suggested fare for [request]'s route.
+  Future<List<RideTypeOption>> rideTypeOptions(CommuteRequest request);
 
-  /// Ride types allowed for [flow] in the rider's city, with fares per ride.
-  Future<BookingOptions> bookingOptions({
-    required BookingFlow flow,
-    required Place pickup,
-    required Place drop,
-    required int pickupTime,
-  });
+  // ---- flow R1: the series request ----
 
-  /// Best match first. Empty when no driver can serve the commute.
-  Future<List<DriverMatch>> findDrivers(CommuteRequest request);
+  /// series.preview: start date, fare, per-slot pickup times. Nothing is saved.
+  /// 422 `start_too_soon`, `ride_type_not_allowed`, `invalid_time`.
+  Future<SeriesPreview> previewSeries(CommuteRequest request);
 
-  Future<Commute> confirmCommute({
-    required CommuteRequest request,
-    required DriverMatch match,
-    required PaymentMethod usualPayment,
-  });
+  /// series.create: the series, `finding_driver` with round 1 open (or
+  /// `no_driver_found` straight away when no driver is eligible).
+  Future<Series> createSeries(CommuteRequest request);
 
-  Future<void> joinWaitlist(CommuteRequest request);
+  /// series.get. 403 `forbidden`, 404 `not_found`.
+  Future<Series> getSeries(String id);
 
+  /// The rider's series, newest first.
+  Future<List<Series>> listSeries();
+
+  /// series.cancel_request: ends a `finding_driver` or `no_driver_found`
+  /// series. Once a driver is assigned: [ApiException] `already_assigned`
+  /// whose [ApiException.state] is the [Series] with its driver.
+  Future<void> cancelRequest(String id);
+
+  /// series.retry from `no_driver_found`, optionally with new times or ride
+  /// type ([changes] rewrites every slot). 409 `not_retryable` otherwise.
+  Future<Series> retrySeries(String id, {CommuteRequest? changes});
+
+  /// Home: the rider and their series that aren't ended.
   Future<HomeData> home();
 
-  // ---- flow R2: the daily ride ----
+  // ---- flow R2: the daily ride (reworked with R2) ----
 
   /// The rider's rides from today for [days] days, in pickup order.
   Future<List<Ride>> upcomingRides({int days = 7});

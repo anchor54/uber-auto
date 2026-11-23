@@ -56,10 +56,21 @@ class HttpRiderApi implements RiderApi {
       await store.clear();
     }
     final err = decoded is Map<String, Object?> ? decoded : const <String, Object?>{};
+    final state = err['state'];
     throw ApiException(
-      (err['error'] as String?) ?? 'http_${res.statusCode}',
+      (err['code'] as String?) ?? (err['error'] as String?) ?? 'http_${res.statusCode}',
       (err['message'] as String?) ?? 'Something went wrong. Try again.',
+      // A series in the state (e.g. 409 already_assigned) comes back as a Series.
+      state: state is Map<String, Object?> && state.containsKey('slots') && state.containsKey('rider_id') ? _seriesOrRaw(state) : state,
     );
+  }
+
+  static Object _seriesOrRaw(Map<String, Object?> j) {
+    try {
+      return seriesFromJson(j);
+    } catch (_) {
+      return j;
+    }
   }
 
   Future<Map<String, Object?>> _get(String path, {Map<String, String>? query}) async =>
@@ -71,7 +82,7 @@ class HttpRiderApi implements RiderApi {
   Future<RiderProfile?> restoreSession() async {
     if ((await store.read()) == null) return null;
     try {
-      return riderFromJson((await _get('/v1/home'))['rider'] as Map<String, Object?>);
+      return riderFromJson(await _get('/v1/me'));
     } on ApiException catch (e) {
       // Offline at launch: keep the token and let Home retry. Only a
       // rejected session sends the rider back to Welcome.
@@ -90,7 +101,7 @@ class HttpRiderApi implements RiderApi {
     final res = (await _post('/v1/auth/verify', {'phone': phone, 'code': code})) as Map<String, Object?>;
     _token = res['token'] as String;
     await store.write(_token!);
-    return riderFromJson(res['rider'] as Map<String, Object?>);
+    return riderFromJson((res['user'] ?? res['rider']) as Map<String, Object?>);
   }
 
   @override
@@ -99,59 +110,69 @@ class HttpRiderApi implements RiderApi {
     return [for (final p in res['places'] as List) placeFromJson(p as Map<String, Object?>)];
   }
 
+  /// The config's ride types, each priced by a preview of [request] with that
+  /// type. A type the backend refuses for this route is left out.
   @override
-  Future<TripEstimate> estimateTrip(Place pickup, Place drop) async {
-    final res = await _post('/v1/trips/estimate', {'pickup': placeToJson(pickup), 'drop': placeToJson(drop)});
-    return tripFromJson(res as Map<String, Object?>);
+  Future<List<RideTypeOption>> rideTypeOptions(CommuteRequest request) async {
+    final res = await _get('/v1/ride-types', query: {'flow': 'recurring'});
+    final types = [
+      for (final t in res['ride_types'] as List)
+        if (RideTypeInfo.tryKey((t as Map<String, Object?>)['ride_type'] as String?) case final type?) type,
+    ];
+    final fares = await Future.wait([
+      for (final type in types)
+        previewSeries(CommuteRequest(
+          pickup: request.pickup,
+          drop: request.drop,
+          slots: request.slots,
+          rideType: type,
+          preferences: request.preferences,
+          usualPayment: request.usualPayment,
+          startDate: request.startDate,
+        )).then<int?>((p) => p.suggestedFare).catchError((Object e) {
+          if (e is ApiException && e.code == 'ride_type_not_allowed') return null;
+          throw e;
+        }),
+    ]);
+    return [
+      for (var i = 0; i < types.length; i++)
+        if (fares[i] != null) RideTypeOption(type: types[i], fare: fares[i]!),
+    ];
   }
 
   @override
-  Future<BookingOptions> bookingOptions({
-    required BookingFlow flow,
-    required Place pickup,
-    required Place drop,
-    required int pickupTime,
-  }) async {
-    final res = await _post('/v1/booking-options', {
-      'flow': flow.configKey,
-      'pickup': placeToJson(pickup),
-      'drop': placeToJson(drop),
-      'pickupTime': pickupTime,
-    });
-    return bookingOptionsFromJson(res as Map<String, Object?>);
+  Future<SeriesPreview> previewSeries(CommuteRequest request) async =>
+      seriesPreviewFromJson((await _post('/v1/series/preview', commuteRequestToJson(request))) as Map<String, Object?>);
+
+  @override
+  Future<Series> createSeries(CommuteRequest request) async =>
+      seriesFromJson((await _post('/v1/series', commuteRequestToJson(request))) as Map<String, Object?>);
+
+  @override
+  Future<Series> getSeries(String id) async => seriesFromJson(await _get('/v1/series/$id'));
+
+  @override
+  Future<List<Series>> listSeries() async {
+    final res = await _get('/v1/series');
+    return [for (final s in res['series'] as List) seriesFromJson(s as Map<String, Object?>)];
   }
 
   @override
-  Future<List<DriverMatch>> findDrivers(CommuteRequest request) async {
-    final res = (await _post('/v1/commutes/proposals', {'request': commuteRequestToJson(request)})) as Map<String, Object?>;
-    return [for (final p in res['proposals'] as List) proposalFromJson(p as Map<String, Object?>)];
+  Future<void> cancelRequest(String id) async {
+    await _post('/v1/series/$id/cancel-request', const <String, Object?>{});
   }
 
   @override
-  Future<Commute> confirmCommute({
-    required CommuteRequest request,
-    required DriverMatch match,
-    required PaymentMethod usualPayment,
-  }) async {
-    final id = match.proposalId;
-    if (id == null) throw const ApiException('proposal_not_found', 'That match is no longer available. Search again.');
-    final res = await _post('/v1/commutes', {'proposalId': id, 'usualPayment': paymentKey(usualPayment)});
-    return commuteFromJson(res as Map<String, Object?>);
-  }
-
-  @override
-  Future<void> joinWaitlist(CommuteRequest request) async {
-    await _post('/v1/waitlist', {'request': commuteRequestToJson(request)});
-  }
+  Future<Series> retrySeries(String id, {CommuteRequest? changes}) async => seriesFromJson(
+      (await _post('/v1/series/$id/retry', changes == null ? const <String, Object?>{} : commuteRequestToJson(changes))) as Map<String, Object?>);
 
   @override
   Future<HomeData> home() async {
-    final res = await _get('/v1/home');
-    final commute = res['commute'];
+    final results = await Future.wait([_get('/v1/me'), listSeries()]);
+    final series = results[1] as List<Series>;
     return HomeData(
-      profile: riderFromJson(res['rider'] as Map<String, Object?>),
-      commute: commute == null ? null : commuteFromJson(commute as Map<String, Object?>),
-      recentRides: const [],
+      profile: riderFromJson(results[0] as Map<String, Object?>),
+      series: [for (final s in series) if (s.status != SeriesStatus.ended) s],
     );
   }
 
@@ -187,6 +208,6 @@ class HttpRiderApi implements RiderApi {
 
   @override
   Future<void> registerDevice(String pushToken, String platform) async {
-    await _send('PUT', '/v1/devices', body: {'pushToken': pushToken, 'platform': platform});
+    await _send('PUT', '/v1/devices', body: {'fcm_token': pushToken, 'platform': platform});
   }
 }
