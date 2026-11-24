@@ -7,8 +7,8 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 
 | Feature | Backend | Apps | Commit |
 |---|---|---|---|
-| R1+D2 Create a series, get a driver | done (30 integration tests green) | in progress | backend committed |
-| D1 Driver registration and subscription | – | – | – |
+| R1+D2 Create a series, get a driver | done (30 integration tests green) | done (rider + driver CI green incl. emulator, APK, web) | done |
+| D1 Driver registration and subscription | in progress | – | – |
 | R2+D3 Daily ride | – | – | – |
 | R3 Skip, change, pause | – | – | – |
 | R4+D4 Driver can't make it, time off | – | – | – |
@@ -30,3 +30,5 @@ Cutoff: 5-hour limit hit ~23:58 IST 23 Nov during R1+D2 apps; resumed 05:07 IST 
 - R1: the start date is the first chosen weekday from tomorrow on. R1-I1's "Mon 23 Nov" is treated as a spec error.
 - R1: rides are created for 14 days counted from the start date (Backend section), not the R1-I3 row's dates.
 - Seed: Koramangala is (12.9352, 77.6245) and Whitefield is (12.9698, 77.7178).
+
+Cutoff 2: 5-hour limit hit ~06:30 IST 24 Nov during D1 backend; resumed 10:08 IST.
