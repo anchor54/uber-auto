@@ -1,0 +1,188 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 request → finding → driver confirmed on small phone 360x640
+00:02 +1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: R2 normal leg on small phone 360x640
+00:03 +2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 request → finding → driver confirmed on iPhone 14 390x844
+00:03 +3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: R2 normal leg on iPhone 14 390x844
+00:04 +4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: R2 normal leg on iPhone 14 390x844
+00:04 +5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Bike driver
+00:05 +6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: R2 normal leg on Pixel 7 412x915
+00:05 +7: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: R2 normal leg on Pixel 7 412x915
+00:05 +8: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Cab · Hatchback driver
+00:06 +9: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: a no-show: the wait runs out, the rider is told, Home says so
+00:06 +10: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Cab · Sedan driver
+00:06 +11: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: a late driver: R2.1 shows the banner with Call
+00:07 +12: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 gets a Cab · SUV driver
+00:07 +13: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: "I'm 5 min late" once: the driver waits 10 minutes
+00:08 +14: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 per-day times: Friday later than the other days
+00:09 +15: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: SOS asks first, then dials 112
+00:09 +16: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 a Saturday-only ride, one way, cash
+00:09 +17: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: a finished ride left unmarked opens pay-and-rate on Home, once; Done without either is fine
+00:10 +18: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 no-driver path: three empty rounds, R1.7, try again, then cancel
+00:10 +19: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r2_flow_test.dart: Home: the next pickup comes from the ride records
+00:11 +20: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 cancel during a round: no driver is ever assigned
+00:11 +21: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +22: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +23: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +24: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +25: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +26: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +27: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +28: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +29: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +30: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +31: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:11 +32: /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart: R1 after cancelling, a new series can be set up
+00:12 +33: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 header, route, repeat and timing copy
+00:13 +34: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 header, route, repeat and timing copy
+00:13 +35: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 header and copy
+00:14 +36: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 header and copy
+00:14 +37: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 header and copy
+00:15 +38: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 header and copy
+00:15 +39: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 a day whose time differs from the first chosen day is tagged "Different"
+00:16 +40: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 a day whose time differs from the first chosen day is tagged "Different"
+00:16 +41: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 says the request goes to every driver of the selected type
+00:17 +42: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 the time picker moves in 5-minute steps
+00:17 +43: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 the footer shows "{ride type} · per ride" and the fare
+00:17 +44: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 the return trip row reads "{time} every day from {drop-off}"
+00:18 +45: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.3 Choose a ride type R1.3 only shows the types the config allows for regular rides
+00:18 +46: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 with "Same time every day" off, the return gets its own per-day rows
+00:18 +47: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 header, route, ride type, first ride and fare
+00:19 +48: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 header, route, ride type, first ride and fare
+00:19 +49: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 "× 2" only with a return trip
+00:19 +50: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 the schedule table groups days with the same times
+00:19 +51: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 a Saturday-only ride starts this Saturday
+00:19 +52: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 a one-way ride shows → instead of ⇄
+00:20 +53: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 "Choose ride type" needs a pickup, a drop-off and at least one day
+00:20 +54: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 arrive-by is converted to a pickup time: arrival − trip − 10 min, down to 5 min
+00:20 +55: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 arrive-by is converted to a pickup time: arrival − trip − 10 min, down to 5 min
+00:20 +56: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 the same place for pickup and drop-off is not allowed
+00:21 +57: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 "What happens next" panel
+00:21 +58: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 "What happens next" panel
+00:21 +59: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 per-day times reach R1.4 grouped by equal times
+00:21 +60: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/setup_test.dart: R1.2 Set up a regular ride R1.2 per-day times reach R1.4 grouped by equal times
+00:21 +61: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 no driver is promised: no names, no matches
+00:21 +62: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 no driver is promised: no names, no matches
+00:22 +63: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 requesting goes Home with the toast and sends the choices
+00:22 +64: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home, no ride R1.6b greets the rider and offers to set up a ride
+00:23 +65: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6b Home, no ride R1.6b greets the rider and offers to set up a ride
+00:23 +66: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride_type_review_test.dart: R1.4 Review and request R1.4 a network error keeps the screen and offers to retry
+00:24 +67: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 the request card, with no rounds, names or counts
+00:24 +68: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 the request card, with no rounds, names or counts
+00:25 +69: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 the request card, with no rounds, names or counts
+00:25 +70: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 per-day exceptions show in the time line
+00:26 +71: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 per-day exceptions show in the time line
+00:26 +72: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1 Welcome Send OTP stays disabled until 10 digits are entered
+00:26 +73: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:26 +74: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:27 +75: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:27 +76: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:27 +77: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:27 +78: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:27 +79: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 is still showing before the round closes
+00:27 +80: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/auth_test.dart: R1.1b Enter the code the right code signs in and lands on Home with no regular ride
+00:27 +81: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 "View request" opens R1.4 read-only
+00:28 +82: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 "View request" opens R1.4 read-only
+00:28 +83: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 "Cancel request" asks first; keeping it changes nothing
+00:29 +84: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: Home registers the device for pushes once the rider has a commute
+00:30 +85: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: Home registers the device for pushes once the rider has a commute
+00:30 +86: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: Home registers the device for pushes once the rider has a commute
+00:31 +87: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.5 Home: finding your driver R1.5 a result push makes Home read the series again
+00:31 +88: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: no push token (permission refused): nothing is registered
+00:32 +89: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: no push token (permission refused): nothing is registered
+00:32 +90: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.6 Home: driver confirmed R1.6 an active series stays active when Home opens again
+00:32 +91: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: tapping "Driver on the way" opens that ride on R2.1
+00:33 +92: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 is still finding after one and two empty rounds
+00:33 +93: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: opening the app from a notification goes to its ride
+00:34 +94: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 after three empty rounds: "No driver yet" with its three actions
+00:34 +95: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/push_test.dart: a push for the open ride asks for it at once, not at the next 5-second poll
+00:34 +96: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Try again" starts a new set of rounds: back to R1.5
+00:34 +97: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Try again" starts a new set of rounds: back to R1.5
+00:34 +98: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Change times or ride type" goes R1.2 → R1.3 → R1.4 and tries again with the changes
+00:35 +99: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Change times or ride type" goes R1.2 → R1.3 → R1.4 and tries again with the changes
+00:35 +100: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Change times or ride type" goes R1.2 → R1.3 → R1.4 and tries again with the changes
+00:35 +101: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Change times or ride type" goes R1.2 → R1.3 → R1.4 and tries again with the changes
+00:35 +102: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_tracker_test.dart: stops for good once the ride is over
+00:35 +103: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Cancel request" ends the series
+00:35 +104: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/home_test.dart: R1.7 Home: no driver yet R1.7 "Cancel request" ends the series
+00:36 +105: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart: before the driver departs there is no PIN, just the pickup time
+00:36 +106: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart: before the driver departs there is no PIN, just the pickup time
+00:39 +107: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.2 a start_too_soon error shows under "Starts"
+00:39 +108: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart: a position over 60 s old shows "Updating…" instead of a frozen ETA
+00:39 +109: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/ride/ride_screens_test.dart: a position over 60 s old shows "Updating…" instead of a frozen ETA
+00:40 +110: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:40 +111: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:40 +112: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:40 +113: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:40 +114: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:40 +115: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:40 +116: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.5 a failed cancel keeps the request and says why
+00:40 +117: /home/runner/work/uber-auto/uber-auto/apps/rider/test/features/network_errors_test.dart: R1.6b Home offline shows Try again, which reloads
+00:41 +118: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: formatTime morning, noon, evening and midnight
+00:41 +119: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: formatTime wraps past midnight
+00:41 +120: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: pickup window is five minutes either side
+00:41 +121: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: firstRideDate weekday commutes start the next working day
+00:41 +122: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: firstRideDate a Friday booking starts on Monday
+00:41 +123: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: firstRideDate Saturday-only rides start on the coming Saturday
+00:41 +124: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: firstRideDate never starts on the day of booking
+00:41 +125: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: rides per month weekdays with a return trip
+00:41 +126: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: rides per month one day a week, one way
+00:41 +127: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: daysLabel ranges, single days, lists and every day
+00:41 +128: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: arrive-by pickup leaves trip time plus a buffer
+00:41 +129: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: dates are formatted like the designs
+00:41 +130: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/schedule_test.dart: greeting follows the time of day
+00:41 +131: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: sign-in verifying the code saves the session and later calls send it
+00:41 +132: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: sign-in a saved session is restored at startup from /v1/me
+00:41 +133: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: sign-in no saved session means no request and Welcome
+00:41 +134: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: sign-in a rejected session is cleared so the next launch shows Welcome
+00:41 +135: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: sign-in offline at startup keeps the session and reports a network error
+00:41 +136: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: sign-in errors are {code, message, state} and become ApiExceptions
+00:41 +137: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.preview POST /v1/series/preview with one slot per weekday and direction
+00:41 +138: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.preview arrive-by slots are sent as arrive_by
+00:41 +139: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.preview 422 start_too_soon keeps its message
+00:41 +140: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.create POST /v1/series sends the usual payment and reads the finding_driver series
+00:41 +141: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.create no eligible driver: no_driver_found with no offer
+00:41 +142: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.create 422 ride_type_not_allowed
+00:41 +143: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.get GET /v1/series/{id}: an active series with its driver per slot
+00:41 +144: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.get 403 forbidden and 404 not_found
+00:41 +145: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.get home reads the rider and their series that are not ended
+00:41 +146: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.cancel_request POST /v1/series/{id}/cancel-request → 204
+00:41 +147: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.cancel_request 409 already_assigned carries the series with its driver
+00:41 +148: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.retry POST /v1/series/{id}/retry with no body tries the same request again
+00:41 +149: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.retry with changes, the new slots and ride type are sent
+00:41 +150: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: series.retry 409 not_retryable
+00:41 +151: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/http_api_test.dart: R1.3 ride types come from /v1/ride-types?flow=recurring; unknown types are skipped
+00:42 +152: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/polyline_test.dart: decodes Google's example polyline
+00:42 +153: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/polyline_test.dart: an empty route is no points; a cut-off one is an error
+00:42 +154: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/route_geometry_test.dart: at the start, the whole route is ahead
+00:42 +155: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/route_geometry_test.dart: partway up the first leg, it starts where the driver is
+00:42 +156: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/route_geometry_test.dart: on the second leg, the first leg is gone
+00:42 +157: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/route_geometry_test.dart: at the end, only the end is left
+00:42 +158: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: OTP rejects numbers that are not Indian mobiles
+00:42 +159: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: OTP accepts only the demo code
+00:42 +160: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: place search matches title or detail, case-insensitive
+00:42 +161: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.preview start date is the first chosen weekday from tomorrow on; nothing is saved
+00:42 +162: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.preview a Saturday-only ride starts on the coming Saturday
+00:42 +163: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.preview per-day times are kept per weekday
+00:42 +164: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.preview arrive-by: pickup = arrival − trip − 10 min, rounded down to 5 min
+00:42 +165: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.preview each ride type has its own fare
+00:42 +166: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.create and the rounds create opens round 1 for 15 minutes with no driver
+00:42 +167: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.create and the rounds round 1 closes 15 minutes later and the demo driver takes every slot
+00:42 +168: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.create and the rounds "Woman driver" finds nobody: three rounds, then no_driver_found
+00:42 +169: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.create and the rounds a type with no eligible driver is no_driver_found straight away, no rounds
+00:42 +170: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.create and the rounds closeRound closes the open round now
+00:42 +171: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.create and the rounds home lists series that are not ended
+00:42 +172: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.create and the rounds an unknown series is not_found
+00:42 +173: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.cancel_request during finding_driver: ended, round cancelled
+00:42 +174: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.cancel_request from no_driver_found: ended
+00:42 +175: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.cancel_request already ended: no error
+00:42 +176: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.cancel_request after the pick: already_assigned with the series and its driver
+00:42 +177: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.retry back to finding_driver with a fresh round 1
+00:42 +178: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.retry with changes: slots and preferences are rewritten, then a driver is found
+00:42 +179: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fake_api_test.dart: series.retry not_retryable unless no_driver_found
+00:43 +180: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: demo commute is about 9 km and 31 minutes by auto
+00:43 +181: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares per ride type for the demo commute
+00:43 +182: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: the spec example: Koramangala to Whitefield by auto is 51 min and Rs 197
+00:43 +183: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: short trips pay the minimum fare
+00:43 +184: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: fares are whole rupees, base plus per km, rounded to the nearest rupee
+00:43 +185: /home/runner/work/uber-auto/uber-auto/apps/rider/test/core/fares_test.dart: cab fares rise with the class
+00:43 +186: All tests passed!
