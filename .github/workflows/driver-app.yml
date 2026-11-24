@@ -27,7 +27,7 @@ jobs:
   test:
     name: Analyze, unit, widget and flow tests
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -44,7 +44,7 @@ jobs:
         run: flutter analyze --no-fatal-infos 2>&1 | tee "$OUT/analyze.txt"
       - name: Unit, widget and flow tests
         if: always()
-        run: flutter test --exclude-tags screenshots --reporter expanded --no-color 2>&1 | tee "$OUT/tests.txt"
+        run: flutter test --exclude-tags screenshots --timeout 60s --reporter expanded --no-color 2>&1 | tee "$OUT/tests.txt"
       - name: Publish logs
         if: always()
         working-directory: .

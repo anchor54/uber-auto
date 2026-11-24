@@ -15,7 +15,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Ravi picks you up at 9:26 AM'), findsOneWidget);
     expect(find.byKey(const Key('ride.pin')), findsNothing);
-    await r.advance(20);
+    await r.advanceMinutes(20);
     expect(find.byKey(const Key('ride.pin')), findsOneWidget);
   });
 
@@ -28,14 +28,14 @@ void main() {
     expect(find.byKey(const Key('ride.updating')), findsNothing);
 
     api.positionAge = const Duration(seconds: 61);
-    await r.advance(1);
+    await r.advanceMinutes(1);
     expect(find.byKey(const Key('ride.updating')), findsOneWidget);
     expect(find.text('Updating…'), findsOneWidget);
     expect(find.text('Ravi is on the way'), findsOneWidget, reason: 'no ETA from an old position');
     expect(find.text('Last known position'), findsOneWidget);
 
     api.positionAge = null; // positions flow again
-    await r.advance(1);
+    await r.advanceMinutes(1);
     expect(find.byKey(const Key('ride.updating')), findsNothing);
   });
 }

@@ -7,18 +7,28 @@ void main() {
   final home = demoPlaces.firstWhere((p) => p.id == 'home');
   final etv = demoPlaces.firstWhere((p) => p.id == 'etv');
 
-  test('demo commute is about 12 km and 38 minutes', () {
+  // The backend's rules (backend/internal/travel): road = straight line x 1.4,
+  // minutes at the type's speed rounded up, fare to the nearest rupee.
+  test('demo commute is about 9 km and 31 minutes by auto', () {
     final trip = estimateRoadTrip(home, etv);
-    expect(trip.distanceKm, 11.9);
-    expect(trip.minutes, 38);
+    expect(trip.distanceKm, 9.0);
+    expect(trip.minutes, 31);
   });
 
   test('fares per ride type for the demo commute', () {
-    expect(suggestedFare(RideType.bike, 11.9), 90);
-    expect(suggestedFare(RideType.auto, 11.9), 160);
-    expect(suggestedFare(RideType.cabHatchback, 11.9), 215);
-    expect(suggestedFare(RideType.cabSedan, 11.9), 250);
-    expect(suggestedFare(RideType.cabSuv, 11.9), 330);
+    expect(suggestedFare(RideType.bike, 9.0), 74);
+    expect(suggestedFare(RideType.auto, 9.0), 129);
+    expect(suggestedFare(RideType.cabHatchback, 9.0), 176);
+    expect(suggestedFare(RideType.cabSedan, 9.0), 204);
+    expect(suggestedFare(RideType.cabSuv, 9.0), 269);
+  });
+
+  test('the spec example: Koramangala to Whitefield by auto is 51 min and Rs 197', () {
+    final k = demoPlaces.firstWhere((p) => p.id == 'koramangala');
+    final w = demoPlaces.firstWhere((p) => p.id == 'whitefield');
+    final km = roadKm(k, w);
+    expect(travelMinutes(RideType.auto, km), 51);
+    expect(suggestedFare(RideType.auto, km), 197);
   });
 
   test('short trips pay the minimum fare', () {
@@ -26,12 +36,10 @@ void main() {
     expect(suggestedFare(RideType.cabSedan, 1), 110);
   });
 
-  test('fares are always multiples of five', () {
-    for (final type in RideType.values) {
-      for (var km = 0.5; km < 40; km += 0.7) {
-        expect(suggestedFare(type, km) % 5, 0, reason: '$type at $km km');
-      }
-    }
+  test('fares are whole rupees, base plus per km, rounded to the nearest rupee', () {
+    expect(suggestedFare(RideType.auto, 10), 140);
+    expect(suggestedFare(RideType.auto, 10.04), 140);
+    expect(suggestedFare(RideType.auto, 10.05), 141);
   });
 
   test('cab fares rise with the class', () {

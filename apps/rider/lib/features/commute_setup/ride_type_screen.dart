@@ -79,15 +79,16 @@ class _RideTypeScreenState extends State<RideTypeScreen> {
         child: Column(
           children: [
             const FlowHeader(label: 'Step 2 of 3'),
+            // Outside the list, so the title stays put while the rows scroll.
+            const ScreenTitle(
+              'Choose your ride type',
+              subtitle: "You'll get the same type on every ride. Fares are per ride, paid to your driver.",
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 14),
+            ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.only(bottom: 16),
                 children: [
-                  const ScreenTitle(
-                    'Choose your ride type',
-                    subtitle: "You'll get the same type on every ride. Fares are per ride, paid to your driver.",
-                    padding: EdgeInsets.fromLTRB(20, 0, 20, 14),
-                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(

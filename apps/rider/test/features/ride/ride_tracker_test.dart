@@ -6,6 +6,7 @@ import 'package:rider/core/models.dart';
 import 'package:rider/features/ride/ride_tracker.dart';
 
 import '../../helpers/app_harness.dart';
+import '../../helpers/series_fixtures.dart';
 
 /// The demo backend, counting live-view requests, with a way to make the
 /// driver's position go stale.
@@ -44,22 +45,15 @@ void main() {
     now = testNow;
     api = CountingApi(now: () => now);
     final places = await api.searchPlaces('');
-    final request = CommuteRequest(
+    final request = commuteRequest(
       pickup: places.firstWhere((p) => p.id == 'home'),
       drop: places.firstWhere((p) => p.id == 'etv'),
-      repeat: CommuteRepeat.everyWeekday,
-      weekdays: {1, 2, 3, 4, 5},
-      timing: TimingMode.pickupAt,
-      time: 520,
-      pickupTime: 520,
-      returnTrip: true,
-      returnTime: 1110,
-      startDate: DateTime(2026, 10, 22),
-      rideType: RideType.cabSedan,
-      preferences: const {},
     );
-    final match = (await api.findDrivers(request)).first;
-    await api.confirmCommute(request: request, match: match, usualPayment: PaymentMethod.upi);
+    // Request a series; the demo backend's first round closes 15 minutes
+    // later and picks Ravi, which creates the rides.
+    await api.createSeries(request);
+    now = now.add(const Duration(minutes: 15));
+    api.closeRound();
     api.playNextRide(at: now);
     rideId = (await api.upcomingRides()).first.id;
   }

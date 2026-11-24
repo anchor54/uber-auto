@@ -38,13 +38,14 @@ class R2Robot extends R1Robot {
     await refreshHome();
   }
 
+  @override
   Future<void> refreshHome() async {
     await tester.fling(find.byKey(const Key('home.commute')), const Offset(0, 400), 1000);
     await tester.pumpAndSettle();
   }
 
   /// Moves the backend's clock and lets the screen's next 5-second check see it.
-  Future<void> advance(int minutes) async {
+  Future<void> advanceMinutes(int minutes) async {
     clock.advance(Duration(minutes: minutes));
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();

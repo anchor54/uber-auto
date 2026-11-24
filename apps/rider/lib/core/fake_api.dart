@@ -393,7 +393,7 @@ class FakeRiderApi implements RiderApi {
     final minute = slot.pickupTime;
     final pickupAt = DateTime(day.year, day.month, day.day, minute ~/ 60, minute % 60);
     if (!pickupAt.isAfter(_now())) return;
-    final id = 'ride_${s.id}_${dateKey(day)}_${slot.direction.name}';
+    final id = 'ride_${dateKey(day)}_${slot.direction.name}';
     _rides[id] = Ride(
       id: id,
       date: day,

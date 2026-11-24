@@ -33,22 +33,22 @@ void main() {
       expect(pin, matches(RegExp(r'^\d{4}$')));
       expect(find.byKey(const Key('ride.map')), findsOneWidget);
 
-      await r.advance(3);
+      await r.advanceMinutes(3);
       expect(find.text('Ravi arrives in 3 min'), findsOneWidget, reason: 'the ETA falls as the driver moves');
 
       // Arrived: the wait countdown.
-      await r.advance(3);
+      await r.advanceMinutes(3);
       expect(find.byKey(const Key('ride.arrivedBanner')), findsOneWidget);
       expect(find.textContaining('(5:00 left)'), findsOneWidget);
 
       // R2.2 in the ride.
-      await r.advance(1);
+      await r.advanceMinutes(1);
       expect(find.byKey(const Key('ride.inRide')), findsOneWidget);
       expect(find.byKey(const Key('ride.sos')), findsOneWidget);
       expect(find.byKey(const Key('ride.pin')), findsNothing);
 
       // R2.3 arrived, pay and rate.
-      await r.advance(40);
+      await r.advanceMinutes(40);
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('ride.arrived')), findsOneWidget);
       // The demo fare: the backend's rules for a sedan, Home → Embassy Tech Village.
@@ -74,9 +74,9 @@ void main() {
     final r = await R2Robot.start(tester);
     await r.playRide(outcome: FakeRideOutcome.noShow);
     await r.trackRide();
-    await r.advance(6);
+    await r.advanceMinutes(6);
     expect(find.byKey(const Key('ride.arrivedBanner')), findsOneWidget);
-    await r.advance(5);
+    await r.advanceMinutes(5);
     await tester.pumpAndSettle();
     expect(find.text('Marked as a no-show'), findsOneWidget);
     await r.tap('ride.done');
@@ -108,7 +108,7 @@ void main() {
     await r.tap('ride.runningLate');
     expect(find.text("We told Ravi. They'll wait 10 minutes instead of 5."), findsOneWidget);
     expect(find.byKey(const Key('ride.runningLate')), findsNothing);
-    await r.advance(6);
+    await r.advanceMinutes(6);
     expect(find.textContaining('(10:00 left)'), findsOneWidget);
   });
 
@@ -116,7 +116,7 @@ void main() {
     final r = await R2Robot.start(tester);
     await r.playRide();
     await r.trackRide();
-    await r.advance(7);
+    await r.advanceMinutes(7);
     await tester.pumpAndSettle();
     final calls = <Uri>[];
     openUri = (uri) async {
@@ -134,7 +134,7 @@ void main() {
     final r = await R2Robot.start(tester);
     await r.playRide();
     // The rider never opens the ride; it finishes while they're on Home.
-    await r.advance(60);
+    await r.advanceMinutes(60);
     await r.refreshHome();
     expect(find.byKey(const Key('ride.arrived')), findsOneWidget);
     await r.tap('rate.done');
@@ -150,7 +150,7 @@ void main() {
     // Today's played ride is now the next one; no Track ride until departure.
     expect(find.textContaining('Today ·'), findsOneWidget);
     expect(find.byKey(const Key('home.track')), findsNothing);
-    await r.advance(20);
+    await r.advanceMinutes(20);
     await r.refreshHome();
     expect(find.byKey(const Key('home.track')), findsOneWidget);
   });

@@ -153,7 +153,7 @@ class _ReviewRequestScreenState extends State<ReviewRequestScreen> {
                     label: _retrying ? 'Try again with these changes' : 'Request a regular driver',
                     height: 54,
                     loading: _sending,
-                    onPressed: p == null ? null : _send,
+                    onPressed: p == null || _sending ? null : _send,
                   ),
                 ],
               ),

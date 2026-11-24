@@ -42,7 +42,7 @@ void main() {
 
   group('rides per month', () {
     test('weekdays with a return trip', () {
-      expect(ridesPerMonthLabel(weekdaysMonToFri, returnTrip: true), 'About 44 (22 days × 2)');
+      expect(ridesPerMonthLabel(weekdaysMonToFri, returnTrip: true), 'About 42 (21 days × 2)');
     });
 
     test('one day a week, one way', () {
