@@ -1,0 +1,7 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on small phone 360x640
+00:01 +1: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on iPhone 14 390x844
+00:01 +2: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on Pixel 7 412x915
+00:01 +3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, then withdrawn: the window closes with no win
+00:02 +4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, another driver picked: result card, no rides
+00:02 +5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 survives the slow network used in demo mode
