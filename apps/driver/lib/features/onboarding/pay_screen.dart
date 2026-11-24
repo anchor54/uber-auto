@@ -195,7 +195,7 @@ class _PayScreenState extends State<PayScreen> with DriverRefresh<PayScreen> {
                               key: const Key('pay.rejected'),
                               icon: Icons.error_outline,
                               color: AppColors.orange,
-                              text: "We couldn't find your payment: ${p?.rejectReason ?? 'not received'}",
+                              text: "We couldn't find your payment: ${p.rejectReason ?? 'not received'}",
                             ),
                           ],
                           if (_error != null) ...[
@@ -219,7 +219,7 @@ class _PayScreenState extends State<PayScreen> with DriverRefresh<PayScreen> {
                     const SizedBox(height: 8),
                     Text(
                       waiting
-                          ? "Paid on ${formatDate(p?.claimedAt ?? AppScope.of(context).clock.now())}. We'll notify you when it's confirmed."
+                          ? "Paid on ${formatDate(p.claimedAt ?? AppScope.of(context).clock.now())}. We'll notify you when it's confirmed."
                           : 'You go live as soon as we confirm it.',
                       key: const Key('pay.status'),
                       textAlign: TextAlign.center,
