@@ -114,6 +114,37 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const FlowHeader(label: 'Step 2 of 5'),
+            // The title and progress stay put while the rows scroll.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(header: true, child: Text('Your documents', style: AppText.display(28))),
+                  if (d != null) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Text('${d.documentsAdded} of 7 added', style: AppText.body(14, weight: FontWeight.w600)),
+                        const Spacer(),
+                        Text('Takes about 10 minutes', style: AppText.body(13, color: AppColors.muted)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        key: const Key('documents.progress'),
+                        value: d.documentsAdded / 7,
+                        minHeight: 6,
+                        color: AppColors.yellow,
+                        backgroundColor: AppColors.cardRaised,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
             Expanded(
               child: d == null
                   ? LoadingBody(error: _error, onRetry: _retry)
@@ -123,29 +154,8 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                       child: ListView(
                         key: const Key('documents.list'),
                         physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
                         children: [
-                          Semantics(header: true, child: Text('Your documents', style: AppText.display(28))),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Text('${d.documentsAdded} of 7 added', style: AppText.body(14, weight: FontWeight.w600)),
-                              const Spacer(),
-                              Text('Takes about 10 minutes', style: AppText.body(13, color: AppColors.muted)),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              key: const Key('documents.progress'),
-                              value: d.documentsAdded / 7,
-                              minHeight: 6,
-                              color: AppColors.yellow,
-                              backgroundColor: AppColors.cardRaised,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
                           for (final item in d.documents) ...[_row(d, item), const SizedBox(height: 10)],
                           const SizedBox(height: 6),
                           const NoteBox(

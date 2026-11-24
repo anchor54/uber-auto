@@ -131,12 +131,12 @@ Future<PickedImage?> choosePhoto(BuildContext context) async {
             const SizedBox(height: 12),
             _SheetOption(
               icon: Icons.photo_camera_outlined,
-              label: 'Take a photo',
+              label: 'Camera',
               onTap: () => Navigator.of(sheet).pop(ImageOrigin.camera),
             ),
             _SheetOption(
               icon: Icons.photo_library_outlined,
-              label: 'Choose from gallery',
+              label: 'Gallery',
               onTap: () => Navigator.of(sheet).pop(ImageOrigin.gallery),
             ),
           ],

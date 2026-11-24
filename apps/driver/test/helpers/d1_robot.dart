@@ -361,7 +361,23 @@ class D1Robot {
 
   /// Runs a backend call outside fake time (the demo latency waits on a
   /// real timer).
-  Future<T> call<T>(Future<T> Function() f) async => (await tester.runAsync(f)) as T;
+  /// Errors are rethrown here (runAsync on its own reports them and returns null).
+  Future<T> call<T>(Future<T> Function() f) async {
+    Object? error;
+    StackTrace? stack;
+    final result = await tester.runAsync(() async {
+      try {
+        return await f();
+      } catch (e, s) {
+        error = e;
+        stack = s;
+        return null;
+      }
+    });
+    final e = error;
+    if (e != null) Error.throwWithStackTrace(e, stack ?? StackTrace.current);
+    return result as T;
+  }
 
   /// Pumps frames until nothing more is scheduled, at most ~5 s of fake
   /// time past [minimum]. Unlike pumpAndSettle it never throws on a spinner

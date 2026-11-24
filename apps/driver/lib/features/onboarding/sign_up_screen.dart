@@ -107,11 +107,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await _register(scope.api);
     } on ApiException catch (e) {
       if (!mounted) return;
+      final wrongCode = e.code == 'invalid_code' || e.code == 'wrong_code' || e.code == 'code_expired';
+      // Clear first: the field's listener drops the error on any edit.
+      if (wrongCode) _code.clear();
       setState(() {
         _busy = false;
-        if (e.code == 'invalid_code' || e.code == 'wrong_code' || e.code == 'code_expired') {
+        if (wrongCode) {
           _codeError = e.code == 'code_expired' ? e.message : "That code didn't match";
-          _code.clear();
         } else {
           _error = e.message;
         }
