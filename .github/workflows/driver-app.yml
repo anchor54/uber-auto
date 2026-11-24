@@ -41,10 +41,15 @@ jobs:
           flutter --version | tee "$OUT/flutter-version.txt"
           flutter pub get 2>&1 | tee "$OUT/pub-get.txt"
       - name: Analyze
-        run: flutter analyze --no-fatal-infos 2>&1 | tee "$OUT/analyze.txt"
+        run: |
+          set +e
+          flutter analyze --no-fatal-infos > "$OUT/analyze.txt" 2>&1; rc=$?
+          cat "$OUT/analyze.txt"
+          exit $rc
       - name: Unit, widget and flow tests
         if: always()
-        run: flutter test --exclude-tags screenshots --timeout 60s --reporter expanded --no-color 2>&1 | tee "$OUT/tests.txt"
+        timeout-minutes: 10
+        run: timeout -k 30 540 flutter test --exclude-tags screenshots --timeout 60s --reporter expanded --no-color 2>&1 | tee "$OUT/tests.txt"
       - name: Publish logs
         if: always()
         working-directory: .

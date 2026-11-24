@@ -30,6 +30,7 @@ class NewCommuteScreen extends StatefulWidget {
 class _NewCommuteScreenState extends State<NewCommuteScreen> {
   CommuteSetup? _setup;
   int _previewId = 0;
+  final _scroll = ScrollController();
 
   CommuteSetup get setup => _setup!;
 
@@ -44,6 +45,7 @@ class _NewCommuteScreenState extends State<NewCommuteScreen> {
 
   @override
   void dispose() {
+    _scroll.dispose();
     // Not disposed here: screens pushed on top may still hold it.
     _setup?.removeListener(_changed);
     super.dispose();
@@ -102,8 +104,10 @@ class _NewCommuteScreenState extends State<NewCommuteScreen> {
     }
   }
 
-  void _continue() {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RideTypeScreen(setup: setup)));
+  Future<void> _continue() async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => RideTypeScreen(setup: setup)));
+    // Back from the next steps: show the route first, with everything kept.
+    if (mounted && _scroll.hasClients) _scroll.jumpTo(0);
   }
 
   @override
@@ -115,15 +119,17 @@ class _NewCommuteScreenState extends State<NewCommuteScreen> {
         child: Column(
           children: [
             const FlowHeader(label: 'Step 1 of 3'),
+            // Outside the list, so the title stays put while the form scrolls.
+            const ScreenTitle(
+              'New commute',
+              subtitle: "Same route, same time, every day you choose. We'll find you a regular driver for these days.",
+            ),
             Expanded(
               child: ListView(
                 key: const Key('setup.list'),
+                controller: _scroll,
                 padding: const EdgeInsets.only(bottom: 16),
                 children: [
-                  const ScreenTitle(
-                    'New commute',
-                    subtitle: "Same route, same time, every day you choose. We'll find you a regular driver for these days.",
-                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(

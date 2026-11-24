@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rider/core/schedule.dart';
 import 'package:rider/features/ride/ride_screen.dart';
 
 import '../../helpers/r2_robot.dart';
@@ -9,11 +10,14 @@ import 'ride_tracker_test.dart' show CountingApi;
 void main() {
   testWidgets('before the driver departs there is no PIN, just the pickup time', (tester) async {
     final r = await R2Robot.start(tester);
+    // R2Robot.start waits out the 15-minute offer round, so "now" is 9:15.
+    // The driver departs in 20 minutes and takes 6 to arrive.
+    final pickupAt = r.now.add(const Duration(minutes: 26));
     await r.playRide(inMinutes: 20);
     final id = (await r.api.upcomingRides()).first.id;
     tester.state<NavigatorState>(find.byType(Navigator)).push(MaterialPageRoute<void>(builder: (_) => RideScreen(rideId: id)));
     await tester.pumpAndSettle();
-    expect(find.text('Ravi picks you up at 9:26 AM'), findsOneWidget);
+    expect(find.text('Ravi picks you up at ${formatTime(pickupAt.hour * 60 + pickupAt.minute)}'), findsOneWidget);
     expect(find.byKey(const Key('ride.pin')), findsNothing);
     await r.advanceMinutes(20);
     expect(find.byKey(const Key('ride.pin')), findsOneWidget);
