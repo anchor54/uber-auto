@@ -1,0 +1,200 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on small phone 360x640
+00:01 +1: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on iPhone 14 390x844
+00:01 +2: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on Pixel 7 412x915
+00:01 +3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, then withdrawn: the window closes with no win
+00:01 +4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, another driver picked: result card, no rides
+00:02 +5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 survives the slow network used in demo mode
+00:02 +6: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart
+00:03 +6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 sign up → documents → vehicle → day off → approved → paid → live on small phone 360x640
+00:06 +7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 sign up → documents → vehicle → day off → approved → paid → live on iPhone 14 390x844
+00:07 +8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 survives the slow network used in demo mode
+00:10 +9: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 changes needed: the licence is rejected, replaced, submitted again, then approved
+00:11 +10: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 rejected: the reason, Contact support, no plan
+00:11 +11: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 a payment the admin could not find: claim again, then live
+00:11 +12: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart
+00:12 +12: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend signup: signing_up with a DRV-nnnnn reference, every document missing
+00:12 +13: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend items: upload_url under driver-docs/<id>/; uploaded items count; bad type, bad UPI refused
+00:12 +14: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend vehicle and day off: the plate is upper-cased; day off ISO or none
+00:12 +15: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend submit with two documents missing: 409 incomplete; still signing_up
+00:12 +16: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend submitted: locked; plan and claim not_approved
+00:12 +17: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend a rejected item: changes_needed, only it can be replaced, submit again
+00:12 +18: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend approved → plan → claim → confirmed: live until the period ends
+00:12 +19: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend a rejected claim can be claimed again
+00:12 +20: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend rejected for good: the reason; no plan
+00:12 +21: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart
+00:13 +21: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend (setUpAll)
+00:13 +21: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend a wrong code is invalid_code
+00:13 +22: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend offers.list shows a new request with its terms; offer.get agrees
+00:13 +23: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+00:13 +24: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend Not for me: dismissed requests leave the list
+00:13 +25: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend interested when the window closes: picked, a result card, new rides in the week
+00:13 +26: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend a late tap is 409 offer_closed with the offer as state
+00:13 +27: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend an offer the driver never received is not_found
+00:13 +28: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend (tearDownAll)
+00:13 +28: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart
+00:13 +28: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 header, seven rows with names and hints, note, button
+00:14 +29: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 Upload offers camera or gallery, shows a preview, then "Uploaded" with Replace
+00:14 +30: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 from the gallery works too
+00:14 +31: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 cancelling the picker changes nothing
+00:14 +32: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 a failed upload: "Upload failed. Try again." in the row; trying again works
+00:14 +33: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 a photo over 5 MB is refused and nothing is saved
+00:15 +34: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 UPI ID: Add, then saved and counted
+00:15 +35: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 all seven: "7 of 7 added"
+00:15 +36: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 an item uploaded earlier shows "Uploaded" when the screen opens
+00:15 +37: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 "Continue to vehicle" is enabled with items missing
+00:15 +38: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 changes needed: "Fix" with the reason; verified rows locked; the rejected one can be replaced
+00:16 +39: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 after submit: read only, no Replace
+00:16 +40: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart
+00:16 +40: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 copy: step, title, line, seven chips and "No fixed day off", note, button
+00:17 +41: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 nothing is pre-selected and a choice is required
+00:17 +42: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 single choice: the last tapped day wins; submit → D1.5
+00:17 +43: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 "No fixed day off" is a choice
+00:17 +44: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 incomplete: a sheet lists the missing items, each opening its screen
+00:17 +45: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart
+00:18 +45: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 copy: step, title, benefits, fields, terms, buttons
+00:18 +46: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 Get code needs a 2+ character name, 10 digits and the tick
+00:19 +47: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 without the tick, Get code does nothing
+00:19 +48: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 a wrong code: "That code didn't match" under the field
+00:19 +49: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 the right code registers the driver and opens D1.2
+00:19 +50: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 "Already registered? Log in" goes to sign-in
+00:19 +51: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_6_plan_test.dart
+00:20 +51: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_6_plan_test.dart: D1.6 Plan D1.6 copy: title, the auto plan card, the note
+00:20 +52: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_6_plan_test.dart: D1.6 Plan D1.6 "Continue to payment" opens D1.7
+00:20 +53: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart
+00:21 +53: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 copy: step, title, types, fields, switches, tiles, note
+00:21 +54: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 Cab adds Hatchback / Sedan / SUV and the Working AC switch
+00:22 +55: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 an auto with three photos: saved, plate upper-cased, then D1.4
+00:22 +56: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 a sedan cab
+00:23 +57: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 a photo tile takes, then replaces, its photo
+00:23 +58: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 opens with the saved vehicle
+00:23 +59: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart
+00:23 +59: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 submitted: "We're checking your details", everything waiting
+00:24 +60: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 changes needed: the rejected item, its reason and "Fix now"
+00:24 +61: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 changes needed: "Submit again" does nothing until the item is replaced
+00:24 +62: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 "Fix now" opens the documents screen at the rejected item
+00:24 +63: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 fixed via "Fix now": back on D1.5, "Submit again" → submitted
+00:24 +64: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 replaced before opening: "Submit again" submits
+00:24 +65: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 a rejected vehicle: the Vehicle row says "Fix"; "Fix now" opens D1.3
+00:25 +66: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 approved: "You're approved", all verified, approval done, "Choose your plan"
+00:25 +67: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 rejected: "We can't approve you", the reason and Contact support only
+00:25 +68: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 reads driver.get each time it opens
+00:25 +69: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart
+00:25 +69: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 header and bottom bar
+00:26 +70: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 series request card
+00:26 +71: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the countdown chip counts down on the clock
+00:26 +72: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 one-ride card, compact
+00:27 +73: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 newest first
+00:27 +74: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 "I'm interested" turns into "Interested" and says when we'll tell
+00:27 +75: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 "Not for me" hides the request for good
+00:27 +76: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 a win shows the green banner until tapped, which opens D2.3
+00:28 +77: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 not picked: "Went to another driver", kept 24 hours
+00:28 +78: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the rider withdrew: "The rider withdrew this request"
+00:28 +79: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 no result card for a request the driver was not interested in
+00:28 +80: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 empty state
+00:28 +81: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the list empties once every window has passed
+00:29 +82: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart
+00:29 +82: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 before I've paid: plan, amount now, UPI ID and reference, the button
+00:30 +83: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 Copy puts the UPI ID and the reference on the clipboard
+00:30 +84: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 after I've paid: "Checking your payment" (disabled) and "Paid on …"
+00:30 +85: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 opened with a claim in: the waiting state
+00:30 +86: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 a rejected claim: the orange note with the reason; "I've paid" works again
+00:30 +87: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: Going live Requests: the green "You're live" banner and the empty state
+00:30 +88: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart
+00:30 +88: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 header: rider, start date, ride type, rating, route and trip time
+00:32 +89: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 schedule table: Days, Pickup, "Drop, about", grouped by equal times
+00:32 +90: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 earnings: fare per ride, rides a month, usual payment
+00:32 +91: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 before interest: countdown, "Not for me" and "I'm interested"
+00:32 +92: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 after interest: the panel, the note and "Not interested any more"
+00:33 +93: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 withdrawing interest before the window closes
+00:33 +94: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 interest shows on the D2.1 card on the way back
+00:33 +95: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 "Not for me" hides the request and goes back to the list
+00:33 +96: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 after the window closes the button reads "Closed"
+00:33 +97: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 a late tap gets 409 offer_closed and the screen redraws as "Closed"
+00:34 +98: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart
+00:34 +98: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 header: week range and ride count
+00:35 +99: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 win banner names the rider and the start date
+00:35 +100: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 the new rider has a row tagged "New rider" with rides on their days
+00:36 +101: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 free time and buttons
+00:36 +102: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 rides.week: the won rides from the start date, flagged new, 14 days ahead
+00:36 +103: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 opened from the bottom bar without a win shows no banner
+00:36 +104: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart
+00:37 +104: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register signup: signing_up, a DRV-nnnnn reference, every item missing
+00:37 +105: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register "Bengaluru" is accepted as the city
+00:37 +106: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register 422 terms_not_accepted, invalid_name, city_not_served; 409 already_registered
+00:37 +107: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register a rider's number: 409 phone_in_use_as_rider
+00:37 +108: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register offers are 403 not_eligible until live
+00:37 +109: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items upload_url: a path under driver-docs/<driver id>/, 5 MB, JPEG or PNG only
+00:37 +110: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items an uploaded document is "uploaded" and counts towards {n} of 7 added
+00:37 +111: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items uploading again replaces the item (same path) until submit
+00:37 +112: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items over 5 MB: file_too_large, nothing saved
+00:37 +113: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items UPI ID: name@handle, counted as the seventh document
+00:37 +114: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items all six photos and the UPI ID: 7 of 7 added
+00:37 +115: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle: the plate is upper-cased; the type is saved
+00:37 +116: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle: a cab with its class; 422 bad_vehicle_type
+00:37 +117: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle: another driver's plate, in lower case and without spaces, is 409 plate_in_use
+00:37 +118: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle photos are items too
+00:37 +119: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items day off: one ISO weekday, or none ("No fixed day off")
+00:37 +120: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit missing items: 409 incomplete listing them; still signing_up
+00:37 +121: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit without a vehicle or a day off: incomplete
+00:37 +122: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit complete: submitted, and everything is locked
+00:37 +123: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit plans.get and claim_payment before approval: 409 not_approved
+00:37 +124: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review a rejected item: changes_needed with the reason; the rest verified
+00:37 +125: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review changes_needed: only the rejected item can be replaced; submit again keeps verified items
+00:37 +126: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review changes_needed: submit before replacing is 409 incomplete
+00:37 +127: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review a rejected vehicle: its details can be set again
+00:37 +128: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review approve: approved, every item verified
+00:37 +129: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review reject: rejected for good with the reason; no plan, no claim
+00:37 +130: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment plans.get on Sat 21 Nov: the auto plan, 10 of 30 days due now, rounded up
+00:37 +131: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment I've paid: a claimed payment for the period; twice is 409 already_claimed
+00:37 +132: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment confirmed: live until 30 Nov, eligible, offers readable
+00:37 +133: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment a rejected claim: the reason shows and the driver can claim again
+00:37 +134: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: approved on the last day of the month: one day due
+00:37 +135: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: a 31-day month: 1 Dec is 31 of 31 days, the whole price
+00:37 +136: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart
+00:37 +136: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: driver sign-in uses /v1/driver/auth/* and saves the token
+00:37 +137: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: 403 not_a_driver on sign-in
+00:37 +138: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offers.list: GET /v1/offers maps offers and result cards
+00:37 +139: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offers.list: 403 not_eligible
+00:37 +140: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offer.get: GET /v1/offers/{id}; a closing offer cannot be answered
+00:37 +141: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: mark-interested, withdraw-interest and dismiss are POSTs answered 204
+00:37 +142: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: a late tap: 409 offer_closed carries the offer as state
+00:37 +143: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: rides.week: GET /v1/rides/week?start=… maps rides and the new flag
+00:37 +144: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: rides.week without a start lets the server pick this week
+00:38 +145: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart
+00:38 +145: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.register: POST /v1/driver/signup {name, city, terms_accepted}
+00:38 +146: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.register: 409 phone_in_use_as_rider and already_registered; 422 terms_not_accepted
+00:38 +147: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: GET /v1/driver maps status, items, reasons, vehicle, day off
+00:38 +148: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: every status maps
+00:38 +149: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: a missing item, no vehicle yet, no day off
+00:38 +150: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: rejected with a reason; live with subscription_until and the latest payment
+00:38 +151: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get before signup: 404 not_registered
+00:38 +152: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.upload_url: POST /v1/driver/upload-url {kind, content_type}
+00:38 +153: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument upload-url, PUT the bytes to the signed link, then PUT /v1/driver/documents/{kind}
+00:38 +154: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument the store refuses the file: an ApiException, and the item is not marked uploaded
+00:38 +155: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument 409 locked from upload-url
+00:38 +156: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument 403 not_your_path from documents/{kind}
+00:38 +157: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_upi: PUT /v1/driver/upi {upi_id}; 422 bad_upi
+00:38 +158: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_vehicle: PUT /v1/driver/vehicle with every field
+00:38 +159: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_vehicle: a cab sends its class; 409 plate_in_use
+00:38 +160: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_day_off: PUT /v1/driver/day-off {day_off: 1..7 | null}
+00:38 +161: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.submit: POST /v1/driver/submit → submitted
+00:38 +162: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.submit: 409 incomplete keeps the driver (with missing) as state
+00:38 +163: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: plans.get: GET /v1/driver/plan maps price, amount due, period and reference
+00:38 +164: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: plans.get: 409 not_approved
+00:38 +165: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.claim_payment (I've paid): POST /v1/driver/payments → claimed
+00:38 +166: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.claim_payment with a period sends period_start
+00:38 +167: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.claim_payment: 409 already_claimed; a rejected payment maps its reason
+00:38 +168: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: 409 locked carries the driver as state
+00:38 +169: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart
+00:39 +169: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: sign-in takes only the demo code
+00:39 +170: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: the seed: a series offer with a 15-minute window and a one-ride offer with 5
+00:39 +171: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: empty when not seeded
+00:39 +172: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: mark and withdraw interest; marking twice or withdrawing without interest is a no-op
+00:39 +173: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: after expires_at: 409 offer_closed with the offer as state; canRespond false
+00:39 +174: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: dismiss: gone from the list for good; offer.get on an unknown id is not_found
+00:39 +175: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: interested when the window passes: picked, a result card and rides flagged new
+00:39 +176: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: goesToAnotherDriver: "Went to another driver", kept 24 hours
+00:39 +177: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: riderWithdraws: "The rider withdrew this request"
+00:39 +178: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: a request the driver ignored leaves no result card
+00:39 +179: All tests passed!
