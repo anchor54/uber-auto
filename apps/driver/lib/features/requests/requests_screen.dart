@@ -16,9 +16,12 @@ final _seenWins = Expando<Set<String>>();
 /// D2.1 Requests: open offers newest first, the win banner, result cards
 /// for requests the driver was interested in, and the empty state.
 class RequestsScreen extends StatefulWidget {
-  const RequestsScreen({super.key, this.profile, this.onOpenWeek});
+  const RequestsScreen({super.key, this.profile, this.onOpenWeek, this.showLiveBanner = false});
 
   final DriverProfile? profile;
+
+  /// D1 "Going live": the green "You're live" banner at the top.
+  final bool showLiveBanner;
 
   /// Opens D2.3 at the week starting [start] (the win banner). Null: push it.
   final void Function(DateTime? start)? onOpenWeek;
@@ -210,6 +213,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
     final win = d.win;
     final losses = [for (final r in d.list.results) if (r.result != 'picked') r];
     return [
+      if (widget.showLiveBanner) ...[_liveBanner(d), const SizedBox(height: 14)],
       if (win != null) ...[_winBanner(win), const SizedBox(height: 14)],
       for (final o in d.list.offers) ...[
         if (o.kind == OfferKind.ride) _rideCard(o, now) else _seriesCard(o, now),
@@ -226,6 +230,25 @@ class _RequestsScreenState extends State<RequestsScreen> {
         ),
     ];
   }
+
+  /// "You're live. New requests for auto drivers show up here."
+  Widget _liveBanner(_RequestsData? d) => Container(
+        key: const Key('requests.liveBanner'),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: AppColors.green, borderRadius: BorderRadius.circular(16)),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle, color: AppColors.onYellow),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "You're live. New requests for ${_rideTypeNoun(d)} drivers show up here.",
+                style: AppText.body(14, weight: FontWeight.w600, color: AppColors.onYellow, height: 1.4),
+              ),
+            ),
+          ],
+        ),
+      );
 
   /// "You got it: Priya's Mon, Wed, Fri 8:30 AM rides are yours from Mon 23 Nov."
   Widget _winBanner(Offer o) {

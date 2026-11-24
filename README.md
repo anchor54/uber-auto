@@ -27,7 +27,9 @@ tokens and widgets).
 | D2 driver app (step 7): Requests, Request detail (I'm interested / withdraw), Your week | Built: demo and real mode; Today shows Your week until D3 |
 | R2 Daily commute ride | App screens kept from the first build; backend being rewritten with R2 + D3 (its end-to-end test is skipped until then) |
 | R3 Skip or pause, R4 Driver can't make it, R5 Account, R6 One-time ride | To do |
-| D1, D3–D6 Driver app screens (Today, Earnings, Account) | To do |
+| D1 Driver registration, verification and subscription: backend and `cmd/admin` | Built |
+| D1 driver app: Sign up, Documents, Vehicle, Day off, Verification, Plan, Pay and go live, "You're live" on Requests | Built: demo and real mode |
+| D3–D6 Driver app screens (Today, Earnings, Account) | To do |
 
 ## Rider app
 
@@ -72,11 +74,30 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080    # real backend
 flutter test                                                   # unit, widget and flow tests
 ```
 
-**Demo mode** signs in as Ravi Kumar (auto) with any number and the code `123456`. Requests shows
-Priya's regular ride (Koramangala → Whitefield, Mon/Wed/Fri 08:30) and a one-ride cover. Tap
-"I'm interested" on Priya's: when its window closes (90 seconds in demo mode, 15 minutes on the
-backend) you're picked, a green banner says so, and Your week shows her rides tagged "New rider".
-In real mode, sign in with a seeded driver's number (Ravi is `9000000201`).
+**Demo mode** uses the code `123456` for every number.
+
+* `9000000201` signs in as Ravi Kumar (auto), already live. Requests shows Priya's regular ride
+  (Koramangala → Whitefield, Mon/Wed/Fri 08:30) and a one-ride cover. Tap "I'm interested" on
+  Priya's: when its window closes (90 seconds in demo mode, 15 minutes on the backend) you're
+  picked, a green banner says so, and Your week shows her rides tagged "New rider".
+* Any other number is a new driver (D1). Use "New driver? Sign up" on the first screen (or sign in
+  with the new number): name, city, terms, code; then the seven documents (photos from the camera
+  or gallery, plus a UPI ID), the vehicle and its three photos, the day off, and Submit for review.
+  A pretend admin approves everything 5 seconds later; choose the plan, tap "I've paid", and 5
+  seconds later you're live on Requests. `9000000101` is a rider's number and can't sign up.
+
+**Real mode.** Sign in with a seeded driver's number (Ravi is `9000000201`), or sign up a new
+number and play the admin with `go run ./cmd/admin` (`pending`, `show`, `verify`, `reject-item`,
+`approve`, `reject`, `confirm-payment`, `reject-payment`). The app routes by the driver's status
+on launch (sign-up, documents, verification, Requests). There is no push channel yet: the
+verification and payment screens read the driver when opened, on resume, on pull-down and every
+15 seconds while waiting. Upload links the backend signs for `localhost` are sent to the app's
+API host instead, so `PUBLIC_URL` can stay at its default for the emulator.
+
+Photos go through `ImageSource` (`lib/core/image_source.dart`): the app uses `image_picker`; tests
+inject their own. The demo backend's admin hooks (`adminApprove`, `adminRequestChanges`,
+`adminReject`, `adminConfirmPayment`, `adminRejectPayment`) also send the push the backend would,
+so open screens update.
 
 ## Backend
 

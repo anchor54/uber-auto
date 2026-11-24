@@ -15,6 +15,9 @@ abstract final class AppColors {
   static const green = Color(0xFF8FE0B9);
   static const greenDark = Color(0xFF173A2C);
   static const red = Color(0xFFFF8A7A);
+
+  /// Problems to fix (D1: "Fix", a rejected payment).
+  static const orange = Color(0xFFF59E6C);
   static const mapGround = Color(0xFF232B31);
   static const mapRoad = Color(0xFF323C44);
 }

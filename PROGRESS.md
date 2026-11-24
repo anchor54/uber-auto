@@ -25,6 +25,7 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 | R1+D2 app implementer | 493,884 |
 | D1 backend test writer | 157,388 (post-cutoff part only) |
 | D1 backend implementer | 231,403 (post-cutoff part only) |
+| D1 app test writer | 261,379 |
 
 Cutoff: 5-hour limit hit ~23:58 IST 23 Nov during R1+D2 apps; resumed 05:07 IST 24 Nov.
 

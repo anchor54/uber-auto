@@ -5,10 +5,11 @@ import '../../app_scope.dart';
 import '../../core/models.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
+import '../onboarding/sign_up_screen.dart';
 import 'otp_screen.dart';
 
-/// Driver sign-in: phone number, then the code. Drivers are onboarded by
-/// ops (D1), so only a registered driver's number gets a code.
+/// Driver sign-in: phone number, then the code. A number without a driver
+/// profile continues to sign-up (D1.1); "New driver? Sign up" opens it.
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -96,6 +97,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     const SizedBox(height: 6),
                     Text(_error!, key: const Key('welcome.error'), style: AppText.body(13, color: AppColors.red)),
                   ],
+                  const SizedBox(height: 16),
+                  Center(
+                    child: LinkButton(
+                      label: 'New driver? Sign up',
+                      onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const SignUpScreen())),
+                    ),
+                  ),
                 ],
               ),
             ),

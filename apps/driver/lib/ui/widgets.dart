@@ -15,11 +15,14 @@ Key labelKey(String label) {
 
 /// Back button plus a quiet label, as at the top of every pushed screen.
 class FlowHeader extends StatelessWidget {
-  const FlowHeader({super.key, this.label, this.onBack, this.trailing});
+  const FlowHeader({super.key, this.label, this.onBack, this.trailing, this.showBack = true});
 
   final String? label;
   final VoidCallback? onBack;
   final Widget? trailing;
+
+  /// False on a screen nothing sits under (e.g. Verification).
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +30,18 @@ class FlowHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 16, 4),
       child: Row(
         children: [
-          Semantics(
-            button: true,
-            label: 'Back',
-            child: InkResponse(
-              key: const Key('back'),
-              onTap: onBack ?? () => Navigator.of(context).maybePop(),
-              radius: 22,
-              child: const SizedBox(width: 44, height: 44, child: Icon(Icons.arrow_back, color: AppColors.ink)),
+          if (!showBack) const SizedBox(width: 8, height: 44),
+          if (showBack)
+            Semantics(
+              button: true,
+              label: 'Back',
+              child: InkResponse(
+                key: const Key('back'),
+                onTap: onBack ?? () => Navigator.of(context).maybePop(),
+                radius: 22,
+                child: const SizedBox(width: 44, height: 44, child: Icon(Icons.arrow_back, color: AppColors.ink)),
+              ),
             ),
-          ),
           const SizedBox(width: 4),
           if (label != null) Expanded(child: Text(label!, style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted))),
           if (label == null) const Spacer(),

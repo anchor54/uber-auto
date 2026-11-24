@@ -12,10 +12,13 @@ import '../week/week_screen.dart';
 /// Until the daily run (D3) exists, Today shows "Your week" (D2.3).
 /// Earnings and Account come with their own flows.
 class DriverShell extends StatefulWidget {
-  const DriverShell({super.key, this.profile, this.initialTab = DriverTab.requests});
+  const DriverShell({super.key, this.profile, this.initialTab = DriverTab.requests, this.showLiveBanner = false});
 
   final DriverProfile? profile;
   final DriverTab initialTab;
+
+  /// Just went live (D1): Requests shows the green "You're live" banner.
+  final bool showLiveBanner;
 
   @override
   State<DriverShell> createState() => _DriverShellState();
@@ -55,6 +58,7 @@ class _DriverShellState extends State<DriverShell> {
           key: ValueKey('requests.$_opened'),
           profile: widget.profile,
           onOpenWeek: _openWeek,
+          showLiveBanner: widget.showLiveBanner,
         ),
       DriverTab.earnings => const _ComingSoon(key: ValueKey('earnings'), title: 'Earnings', flow: 'D4'),
       DriverTab.account => _ComingSoon(

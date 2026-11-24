@@ -4,10 +4,12 @@ import '../../app_scope.dart';
 import '../../core/models.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
-import '../shell/driver_shell.dart';
+import '../onboarding/onboarding_common.dart';
 import 'welcome_screen.dart';
 
-/// First screen: the app if a saved session is still valid, Welcome otherwise.
+/// First screen: with a saved session still valid, wherever the driver's
+/// status says (sign-up, documents, verification, Requests); Welcome
+/// otherwise.
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
 
@@ -16,19 +18,26 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
-  Future<DriverProfile?>? _session;
+  Future<Widget?>? _session;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _session ??= AppScope.of(context).api.restoreSession();
+    _session ??= _home();
   }
 
-  void _retry() => setState(() => _session = AppScope.of(context).api.restoreSession());
+  Future<Widget?> _home() async {
+    final scope = AppScope.of(context);
+    final profile = await scope.api.restoreSession();
+    if (profile == null) return null;
+    return driverHome(scope.api, scope.clock.now(), signedIn: profile);
+  }
+
+  void _retry() => setState(() => _session = _home());
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DriverProfile?>(
+    return FutureBuilder<Widget?>(
       future: _session,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
@@ -53,7 +62,7 @@ class _StartScreenState extends State<StartScreen> {
             ),
           );
         }
-        return snap.data == null ? const WelcomeScreen() : DriverShell(profile: snap.data);
+        return snap.data ?? const WelcomeScreen();
       },
     );
   }

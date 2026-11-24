@@ -6,7 +6,7 @@ import '../../core/fake_api.dart';
 import '../../core/models.dart';
 import '../../ui/tokens.dart';
 import '../../ui/widgets.dart';
-import '../shell/driver_shell.dart';
+import '../onboarding/onboarding_common.dart';
 
 /// Enter the code (a fixed code in dev builds and demo mode).
 class OtpScreen extends StatefulWidget {
@@ -40,14 +40,13 @@ class _OtpScreenState extends State<OtpScreen> {
 
   Future<void> _verify() async {
     setState(() => _verifying = true);
-    final api = AppScope.of(context).api;
+    final scope = AppScope.of(context);
     try {
-      final profile = await api.verifyOtp(widget.phone, _code.text);
+      final profile = await scope.api.verifyOtp(widget.phone, _code.text);
+      // Where this driver belongs: sign-up, onboarding, review or Requests.
+      final home = await driverHome(scope.api, scope.clock.now(), signedIn: profile);
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(builder: (_) => DriverShell(profile: profile)),
-        (_) => false,
-      );
+      openAsRoot(context, home);
     } on ApiException catch (e) {
       if (!mounted) return;
       _verifying = false;
