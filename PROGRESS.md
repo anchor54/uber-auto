@@ -8,8 +8,8 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 | Feature | Backend | Apps | Commit |
 |---|---|---|---|
 | R1+D2 Create a series, get a driver | done (30 integration tests green) | done (rider + driver CI green incl. emulator, APK, web) | done |
-| D1 Driver registration and subscription | done (37 tests; 66 total green) | in progress | backend committed |
-| R2+D3 Daily ride | – | – | – |
+| D1 Driver registration and subscription | done (37 tests; 66 total green) | done (driver CI green, 179 tests, APK + web) | done |
+| R2+D3 Daily ride | in progress | – | – |
 | R3 Skip, change, pause | – | – | – |
 | R4+D4 Driver can't make it, time off | – | – | – |
 | R6+D6 One-time rides | – | – | – |
