@@ -1,0 +1,71 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on small phone 360x640
+00:01 +1: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on iPhone 14 390x844
+00:01 +2: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on Pixel 7 412x915
+00:02 +3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, then withdrawn: the window closes with no win
+00:02 +4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, another driver picked: result card, no rides
+00:02 +5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 survives the slow network used in demo mode
+00:03 +6: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart
+00:04 +6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend (setUpAll)
+00:04 +6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend a wrong code is invalid_code
+00:04 +7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend offers.list shows a new request with its terms; offer.get agrees
+00:04 +8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+00:04 +9: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend Not for me: dismissed requests leave the list
+00:04 +10: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend interested when the window closes: picked, a result card, new rides in the week
+00:04 +11: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend a late tap is 409 offer_closed with the offer as state
+00:04 +12: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend an offer the driver never received is not_found
+00:04 +13: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend (tearDownAll)
+00:04 +13: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart
+00:05 +13: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 header and bottom bar
+00:06 +14: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 series request card
+00:06 +15: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the countdown chip counts down on the clock
+00:06 +16: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 one-ride card, compact
+00:07 +17: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 newest first
+00:07 +18: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 "I'm interested" turns into "Interested" and says when we'll tell
+00:07 +19: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 "Not for me" hides the request for good
+00:07 +20: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 a win shows the green banner until tapped, which opens D2.3
+00:08 +21: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 not picked: "Went to another driver", kept 24 hours
+00:08 +22: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the rider withdrew: "The rider withdrew this request"
+00:08 +23: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 no result card for a request the driver was not interested in
+00:09 +24: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 empty state
+00:09 +25: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the list empties once every window has passed
+00:09 +26: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart
+00:10 +26: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 header: rider, start date, ride type, rating, route and trip time
+00:11 +27: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 schedule table: Days, Pickup, "Drop, about", grouped by equal times
+00:11 +28: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 earnings: fare per ride, rides a month, usual payment
+00:11 +29: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 before interest: countdown, "Not for me" and "I'm interested"
+00:12 +30: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 after interest: the panel, the note and "Not interested any more"
+00:12 +31: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 withdrawing interest before the window closes
+00:12 +32: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 interest shows on the D2.1 card on the way back
+00:12 +33: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 "Not for me" hides the request and goes back to the list
+00:13 +34: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 after the window closes the button reads "Closed"
+00:13 +35: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 a late tap gets 409 offer_closed and the screen redraws as "Closed"
+00:13 +36: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart
+00:14 +36: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 header: week range and ride count
+00:15 +37: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 win banner names the rider and the start date
+00:15 +38: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 the new rider has a row tagged "New rider" with rides on their days
+00:16 +39: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 free time and buttons
+00:16 +40: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 rides.week: the won rides from the start date, flagged new, 14 days ahead
+00:16 +41: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 opened from the bottom bar without a win shows no banner
+00:16 +42: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart
+00:17 +42: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: driver sign-in uses /v1/driver/auth/* and saves the token
+00:17 +43: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: 403 not_a_driver on sign-in
+00:17 +44: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offers.list: GET /v1/offers maps offers and result cards
+00:17 +45: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offers.list: 403 not_eligible
+00:17 +46: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offer.get: GET /v1/offers/{id}; a closing offer cannot be answered
+00:17 +47: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: mark-interested, withdraw-interest and dismiss are POSTs answered 204
+00:17 +48: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: a late tap: 409 offer_closed carries the offer as state
+00:17 +49: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: rides.week: GET /v1/rides/week?start=… maps rides and the new flag
+00:17 +50: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: rides.week without a start lets the server pick this week
+00:17 +51: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart
+00:18 +51: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: sign-in takes only the demo code
+00:18 +52: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: the seed: a series offer with a 15-minute window and a one-ride offer with 5
+00:18 +53: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: empty when not seeded
+00:18 +54: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: mark and withdraw interest; marking twice or withdrawing without interest is a no-op
+00:18 +55: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: after expires_at: 409 offer_closed with the offer as state; canRespond false
+00:18 +56: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: dismiss: gone from the list for good; offer.get on an unknown id is not_found
+00:18 +57: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: interested when the window passes: picked, a result card and rides flagged new
+00:18 +58: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: goesToAnotherDriver: "Went to another driver", kept 24 hours
+00:18 +59: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: riderWithdraws: "The rider withdrew this request"
+00:18 +60: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: a request the driver ignored leaves no result card
+00:18 +61: All tests passed!
