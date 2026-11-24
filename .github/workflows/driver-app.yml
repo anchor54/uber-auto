@@ -49,7 +49,7 @@ jobs:
       - name: Unit, widget and flow tests
         if: always()
         timeout-minutes: 10
-        run: timeout -k 30 540 flutter test --exclude-tags screenshots --timeout 60s --reporter expanded --no-color 2>&1 | tee "$OUT/tests.txt"
+        run: timeout -k 30 540 flutter test -j 1 --exclude-tags screenshots --timeout 60s --reporter expanded --no-color 2>&1 | tee "$OUT/tests.txt"
       - name: Publish logs
         if: always()
         working-directory: .

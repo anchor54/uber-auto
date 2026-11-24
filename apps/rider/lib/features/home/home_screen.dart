@@ -207,6 +207,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// R1.7: R1.2 filled in, then R1.3 and R1.4, whose button retries.
   void _changeRequest(Series s) => _push(NewCommuteScreen(setup: CommuteSetup.fromSeries(s, today: _today)));
 
+  /// After a cancel or retry: read Home again, and only then let the card
+  /// go idle, so its progress shows until the new state is on screen.
+  Future<void> _settle(Series s) async {
+    if (mounted) {
+      setState(_load);
+      try {
+        await _data;
+      } catch (_) {
+        // The error state shows on screen.
+      }
+    }
+    _busy.remove(s.id);
+    if (mounted) setState(() {});
+  }
+
   Future<void> _retry(Series s) async {
     if (!_busy.add(s.id)) return;
     setState(() {});
@@ -216,8 +231,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } on ApiException catch (e) {
       if (mounted) showInfo(context, e.message);
     } finally {
-      _busy.remove(s.id);
-      _reload();
+      await _settle(s);
     }
   }
 
@@ -250,13 +264,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } on ApiException catch (e) {
       if (!mounted) return;
       if (e.code == 'already_assigned') {
+        // No progress bar under the dialog: it would never stop animating.
+        setState(() => _busy.remove(s.id));
         await _justAssigned(e.state is Series ? e.state as Series : s);
       } else {
         showInfo(context, e.message);
       }
     } finally {
-      _busy.remove(s.id);
-      _reload();
+      await _settle(s);
     }
   }
 
@@ -553,6 +568,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             style: AppText.body(13, color: AppColors.ink, height: 1.45),
           ),
           const SizedBox(height: 14),
+          if (busy) ...[
+            const LinearProgressIndicator(key: Key('home.busy'), color: AppColors.green, backgroundColor: AppColors.greenTint),
+            const SizedBox(height: 10),
+          ],
           if (noDriver) ...[
             PrimaryButton(
               key: const Key('noDriver.retry'),

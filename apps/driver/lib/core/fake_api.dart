@@ -42,7 +42,10 @@ class FakeDriverApi implements DriverApi {
   final List<_FakeOffer> _offers = [];
   final List<WeekRide> _rides = [];
   final List<String> pushTokens = [];
-  int _ids = 0;
+
+  /// Shared by every instance, so offer ids never repeat across fresh
+  /// backends (a test that remembers ids it used would otherwise loop).
+  static int _ids = 0;
 
   Future<void> _wait() => latency == Duration.zero ? Future<void>.value() : Future<void>.delayed(latency);
 
