@@ -10,14 +10,20 @@ import (
 	"commute-backend/internal/scheduling"
 )
 
-// rideWindow is the dates rides exist for: 14 days from the start date, or
-// from today once the series has started.
+// rideWindow is the dates rides exist for: from the start date (or today
+// once the series has started) up to today + 14, and at least the first 14
+// days counted from the start date (R1's win creates those). Ruling: end =
+// max(start + 13, today + 14).
 func rideWindow(start, today time.Time) (from, to time.Time) {
 	from = start
 	if today.After(from) {
 		from = today
 	}
-	return from, scheduling.AddDays(from, scheduling.HorizonDays-1)
+	to = scheduling.AddDays(today, scheduling.HorizonDays)
+	if first := scheduling.AddDays(start, scheduling.HorizonDays-1); first.After(to) {
+		to = first
+	}
+	return from, to
 }
 
 // RideDatesFor lists the dates a slot on [weekday] gets rides for: the pure
@@ -60,29 +66,47 @@ func (s *Service) generateRides(ctx context.Context, tx pgx.Tx, seriesID uuid.UU
 			if sl.DriverID != nil {
 				status = "assigned"
 			}
-			n, err := insertRide(ctx, tx, se, sl, date, pickup, drop, status, sl.DriverID, now)
+			id, err := insertRide(ctx, tx, se, sl, date, pickup, drop, status, sl.DriverID, now)
 			if isExclusionViolation(err) {
 				if strict {
 					return made, errRideOverlap
 				}
 				s.log().Warn("generate_rides: overlap; ride needs a driver", "slot", sl.ID, "date", scheduling.FormatDate(date))
-				n, err = insertRide(ctx, tx, se, sl, date, pickup, drop, "needs_driver", nil, now)
+				status = "needs_driver"
+				id, err = insertRide(ctx, tx, se, sl, date, pickup, drop, status, nil, now)
 			}
 			if err != nil {
 				return made, err
 			}
-			made += n
+			if id == uuid.Nil {
+				continue
+			}
+			made++
+			if status == "needs_driver" {
+				// A ride without a driver opens its one-ride offer in the same transaction.
+				r, err := lockRide(ctx, tx, id)
+				if err != nil {
+					return made, err
+				}
+				c, err := s.rideContext(ctx, tx, r)
+				if err != nil {
+					return made, err
+				}
+				if err := s.openRideOffer(ctx, tx, r, c, 1, now); err != nil {
+					return made, err
+				}
+			}
 		}
 	}
 	return made, nil
 }
 
 // insertRide inserts one ride in a savepoint, so a refused insert leaves the
-// transaction usable. Returns 0 when the ride already exists.
-func insertRide(ctx context.Context, tx pgx.Tx, se seriesRow, sl slotRow, date, pickup, drop time.Time, status string, driver *uuid.UUID, now time.Time) (int, error) {
+// transaction usable. Returns uuid.Nil when the ride already exists.
+func insertRide(ctx context.Context, tx pgx.Tx, se seriesRow, sl slotRow, date, pickup, drop time.Time, status string, driver *uuid.UUID, now time.Time) (uuid.UUID, error) {
 	sp, err := tx.Begin(ctx)
 	if err != nil {
-		return 0, err
+		return uuid.Nil, err
 	}
 	var id uuid.UUID
 	err = sp.QueryRow(ctx, `insert into rides (series_id, slot_id, rider_id, driver_id, local_date, pickup_at, drop_at, busy_until,
@@ -91,17 +115,17 @@ func insertRide(ctx context.Context, tx pgx.Tx, se seriesRow, sl slotRow, date, 
 		on conflict (slot_id, local_date) do nothing returning id`,
 		se.ID, sl.ID, se.RiderID, driver, date, pickup, drop, drop.Add(scheduling.Buffer), status, se.SuggestedFare, now).Scan(&id)
 	if noRows(err) {
-		return 0, sp.Commit(ctx)
+		return uuid.Nil, sp.Commit(ctx)
 	}
 	if err != nil {
 		sp.Rollback(ctx)
-		return 0, err
+		return uuid.Nil, err
 	}
 	if err := event(ctx, sp, now, nil, "ride", id, "ride.created", map[string]any{"status": status, "series_id": se.ID}); err != nil {
 		sp.Rollback(ctx)
-		return 0, err
+		return uuid.Nil, err
 	}
-	return 1, sp.Commit(ctx)
+	return id, sp.Commit(ctx)
 }
 
 // GenerateDueRides is the sweep's generate_rides step: every active series

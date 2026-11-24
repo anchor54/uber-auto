@@ -157,6 +157,12 @@ var SpecPeople = []Person{
 // bike driver, Vijay. svc's clock should read SpecNow. Returns user ids by
 // first name.
 func Spec(ctx context.Context, pool *pgxpool.Pool, svc *offers.Service) (map[string]uuid.UUID, error) {
+	return people(ctx, pool, svc, "spec")
+}
+
+// people adds the spec people (riders and live, paid drivers); for the
+// "spec" seed also Ankit's and Kavya's active series with their rides.
+func people(ctx context.Context, pool *pgxpool.Pool, svc *offers.Service, seedRidesFor string) (map[string]uuid.UUID, error) {
 	ids := map[string]uuid.UUID{}
 	paidUntil := time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC)
 	for _, p := range SpecPeople {
@@ -183,6 +189,9 @@ func Spec(ctx context.Context, pool *pgxpool.Pool, svc *offers.Service) (map[str
 			return nil, err
 		}
 		ids[offers.FirstName(p.Name)] = id
+	}
+	if seedRidesFor == "r2" {
+		return ids, nil
 	}
 	// Ravi drives Ankit every weekday at 09:50 from Whitefield.
 	if err := activeSeries(ctx, pool, svc, ids["Ankit"], ids["Ravi"], Whitefield, Indiranagar, []int{1, 2, 3, 4, 5}, "09:50", "2026-11-02"); err != nil {
@@ -218,4 +227,55 @@ func activeSeries(ctx context.Context, pool *pgxpool.Pool, svc *offers.Service, 
 		}
 	}
 	return svc.ActivateWithDriver(ctx, id, driver)
+}
+
+// R2 loads the R2+D3 Integration tests seed (after Config): the spec people
+// (riders Priya, Ankit, Kavya; live, paid auto drivers Ravi, Meena, Anil,
+// Suresh; bike driver Vijay), the admin, Priya's active series S-17 (auto,
+// Koramangala → Whitefield, Mon/Wed/Fri 08:30, Ravi on every slot) and
+// Ankit's (Whitefield → Indiranagar, weekdays 09:50, Ravi). No rides: the
+// sweeper's generate_rides makes them, at whatever time the test sets.
+// Nothing here reads the clock.
+func R2(ctx context.Context, pool *pgxpool.Pool) (map[string]uuid.UUID, error) {
+	ids, err := people(ctx, pool, nil, "r2")
+	if err != nil {
+		return nil, err
+	}
+	admin, err := Admin(ctx, pool)
+	if err != nil {
+		return nil, err
+	}
+	ids[AdminPerson.Name] = admin
+	if _, err := seriesWithDriver(ctx, pool, ids["Priya"], ids["Ravi"], Koramangala, Whitefield, []int{1, 3, 5}, "08:30", "2026-11-02"); err != nil {
+		return nil, fmt.Errorf("Priya's series: %w", err)
+	}
+	if _, err := seriesWithDriver(ctx, pool, ids["Ankit"], ids["Ravi"], Whitefield, Indiranagar, []int{1, 2, 3, 4, 5}, "09:50", "2026-11-02"); err != nil {
+		return nil, fmt.Errorf("Ankit's series: %w", err)
+	}
+	return ids, nil
+}
+
+// seriesWithDriver inserts an active auto series whose slots all have
+// [driver], without rides.
+func seriesWithDriver(ctx context.Context, pool *pgxpool.Pool, rider, driver uuid.UUID,
+	from, to offers.Place, weekdays []int, at, start string) (uuid.UUID, error) {
+	road := travel.RoadKm(travel.Point{Lat: from.Lat, Lng: from.Lng}, travel.Point{Lat: to.Lat, Lng: to.Lng})
+	auto := RideTypes[1]
+	requested := time.Date(2026, 10, 20, 4, 30, 0, 0, time.UTC)
+	var id uuid.UUID
+	err := pool.QueryRow(ctx, `insert into series (rider_id, status, city, vehicle_type, pickup_lat, pickup_lng, pickup_label,
+		drop_lat, drop_lng, drop_label, time_zone, start_date, distance_km, travel_minutes, suggested_fare, usual_payment, requested_at)
+		values ($1, 'active', $2, 'auto', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 'upi', $14) returning id`,
+		rider, City, from.Lat, from.Lng, from.Label, to.Lat, to.Lng, to.Label, scheduling.DefaultTimeZone, start,
+		travel.RoundKm(road), travel.Minutes(road, auto.Speed), travel.Fare(auto.Fare, road), requested).Scan(&id)
+	if err != nil {
+		return id, err
+	}
+	for _, w := range weekdays {
+		if _, err := pool.Exec(ctx, `insert into series_slots (series_id, weekday, direction, timing, local_pickup_time, driver_id)
+			values ($1, $2, 'outbound', 'pickup_at', $3::time, $4)`, id, w, at, driver); err != nil {
+			return id, err
+		}
+	}
+	return id, nil
 }

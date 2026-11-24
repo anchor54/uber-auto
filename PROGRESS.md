@@ -9,7 +9,7 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 |---|---|---|---|
 | R1+D2 Create a series, get a driver | done (30 integration tests green) | done (rider + driver CI green incl. emulator, APK, web) | done |
 | D1 Driver registration and subscription | done (37 tests; 66 total green) | done (driver CI green, 179 tests, APK + web) | done |
-| R2+D3 Daily ride | in progress | – | – |
+| R2+D3 Daily ride | done (33 tests; 99 total green) | in progress | backend committed |
 | R3 Skip, change, pause | – | – | – |
 | R4+D4 Driver can't make it, time off | – | – | – |
 | R6+D6 One-time rides | – | – | – |
@@ -27,6 +27,8 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 | D1 backend implementer | 231,403 (post-cutoff part only) |
 | D1 app test writer | 261,379 |
 | D1 app implementer | 330,991 |
+| R2+D3 backend test writer | 166,555 |
+| R2+D3 backend implementer | 279,492 |
 
 Cutoff: 5-hour limit hit ~23:58 IST 23 Nov during R1+D2 apps; resumed 05:07 IST 24 Nov.
 
@@ -34,6 +36,7 @@ Cutoff: 5-hour limit hit ~23:58 IST 23 Nov during R1+D2 apps; resumed 05:07 IST 
 - D1: first payment period = today to month end; null day_off valid; wrong code may be invalid_code; rider phone → 409 phone_in_use_as_rider at signup.
 - R1: the start date is the first chosen weekday from tomorrow on. R1-I1's "Mon 23 Nov" is treated as a spec error.
 - R1: rides are created for 14 days counted from the start date (Backend section), not the R1-I3 row's dates.
+- R2 (supersedes the sweep part): the generation window ends at max(start+13, today+14), per the R2 sweeper table. R1’s first batch is unchanged.
 - Seed: Koramangala is (12.9352, 77.6245) and Whitefield is (12.9698, 77.7178).
 
 Cutoff 2: 5-hour limit hit ~06:30 IST 24 Nov during D1 backend; resumed 10:08 IST.

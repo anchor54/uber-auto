@@ -16,7 +16,7 @@ package testkit
 func Start(t *testing.T, opts ...Option) *Env
 
 type Option func(*config)
-func WithSeed(name string) Option      // "spec" = the seed described in each doc's Integration tests section (default)
+func WithSeed(name string) Option      // "spec" (R1+D2, default), "d1", "r2" (R2+D3: Priya's and Ankit's active series with Ravi, admin, no rides), "empty"
 func WithShuffle(order ...string) Option // fixed shuffle: driver first names in pick order
 
 type Env struct {

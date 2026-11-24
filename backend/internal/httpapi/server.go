@@ -170,6 +170,7 @@ func (s *Server) Handler() http.Handler {
 	s.authRoutes(handle)
 	s.seriesRoutes(handle)
 	s.offerRoutes(handle)
+	s.rideRoutes(handle)
 	if s.Drivers != nil {
 		s.driverRoutes(handle)
 		s.adminRoutes(handle)

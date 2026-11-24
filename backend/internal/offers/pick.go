@@ -65,19 +65,26 @@ func (s *Service) CloseDueOffers(ctx context.Context) (CloseCounts, error) {
 }
 
 type offerRow struct {
-	ID       uuid.UUID
-	Kind     string
-	SeriesID *uuid.UUID
-	Attempt  int
-	Round    int
-	Status   string
+	ID        uuid.UUID
+	Kind      string
+	SeriesID  *uuid.UUID
+	RideID    *uuid.UUID
+	Attempt   int
+	Round     int
+	Status    string
+	ExpiresAt time.Time
+}
+
+const offerCols = "id, kind, series_id, ride_id, attempt, round, status, expires_at"
+
+func scanOffer(row pgx.Row) (offerRow, error) {
+	var o offerRow
+	err := row.Scan(&o.ID, &o.Kind, &o.SeriesID, &o.RideID, &o.Attempt, &o.Round, &o.Status, &o.ExpiresAt)
+	return o, err
 }
 
 func lockOffer(ctx context.Context, q querier, id uuid.UUID) (offerRow, error) {
-	var o offerRow
-	err := q.QueryRow(ctx, "select id, kind, series_id, attempt, round, status from offers where id = $1 for update", id).
-		Scan(&o.ID, &o.Kind, &o.SeriesID, &o.Attempt, &o.Round, &o.Status)
-	return o, err
+	return scanOffer(q.QueryRow(ctx, "select "+offerCols+" from offers where id = $1 for update", id))
 }
 
 type attempt int
@@ -92,14 +99,15 @@ const (
 // order, each tried in its own transaction, first fit wins; with no fit the
 // next round opens (or, after the last, no_driver_found).
 func (s *Service) pick(ctx context.Context, offerID uuid.UUID) (bool, error) {
-	var o offerRow
-	err := s.DB.QueryRow(ctx, "select id, kind, series_id, attempt, round, status from offers where id = $1", offerID).
-		Scan(&o.ID, &o.Kind, &o.SeriesID, &o.Attempt, &o.Round, &o.Status)
+	o, err := scanOffer(s.DB.QueryRow(ctx, "select "+offerCols+" from offers where id = $1", offerID))
 	if err != nil {
 		return false, err
 	}
+	if o.Kind == "ride" && o.RideID != nil {
+		return s.pickRide(ctx, o)
+	}
 	if o.Kind != "series" || o.SeriesID == nil {
-		// Slot and one-ride offers are raised by later flows (R3, R4).
+		// Slot offers are raised by a later flow (R3).
 		_, err := s.DB.Exec(ctx, "update offers set status = 'closed', outcome = 'no_fit', closed_at = $2 where id = $1 and status = 'closing'",
 			o.ID, s.Clock.Now())
 		return false, err

@@ -1,15 +1,19 @@
-// Package lifecycle is the R2 ride lifecycle carried over from the old
-// backend, kept for R2+D3 (statuses will be aligned to the new rides table then).
+// Package lifecycle is the daily ride's rules (R2 + D3), as pure functions:
+// which moves each state allows, when each driver action opens, the
+// sweeper's due times and too-late limits, the live ETA and the PIN. No
+// database and no clock of its own; the offers service and the sweeper call
+// these so the rules live in one place.
+//
+//	assigned ─ On my way ─▶ on_the_way ─ End ride ─▶ completed
+//	   │                        └─ no-show ─▶ rider_no_show
+//	   ├─ give up / no On my way by pickup − 15 min ─▶ needs_driver ─ pick ─▶ assigned
+//	   ├─ check only runs after pickup (outage) ─▶ failed (missed_by_outage)
+//	   └─ rider skips ─▶ skipped (R3)
+//	needs_driver ─ nobody in time ─▶ failed (no_driver)
+//
+// "I've arrived" and "Start ride" are timestamps on an on_the_way ride, not
+// states.
 package lifecycle
-
-// Flow R2 ride lifecycle, as pure functions: no database, no clock of its own.
-//
-//	scheduled → on_the_way → arrived → in_ride → completed
-//	exits: no_show (from arrived), skipped (from scheduled),
-//	       cancelled (from scheduled or on_the_way); stale rides are closed.
-//
-// The endpoints, the worker and the simulator all go through Transition,
-// so the rules live in one place. Anything it refuses is an *ApiError.
 
 import (
 	"crypto/rand"
@@ -17,240 +21,158 @@ import (
 	"math"
 	"math/big"
 	"slices"
-	"strings"
 	"time"
 )
 
-var RideStates = []string{"scheduled", "on_the_way", "arrived", "in_ride", "completed", "no_show", "skipped", "cancelled"}
-
-var Moves = []string{"depart", "arrive", "start", "end", "no_show", "skip", "cancel", "close_stale"}
-
-// OpenStates are the states of a ride under way.
-var OpenStates = []string{"on_the_way", "arrived", "in_ride"}
-
-// RideFacts are the fields of a ride the rules read.
-type RideFacts struct {
-	State          string
-	PickupAt       time.Time
-	WindowStart    time.Time
-	WindowEnd      time.Time
-	ArrivedAt      *time.Time
-	WaitEndsAt     *time.Time
-	RiderLateUsed  bool
-	Pin            string
-	PinTries       int
-	LastActivityAt time.Time
-}
-
-// MoveContext is what the caller looked up so the rules can stay pure.
-type MoveContext struct {
-	Now   time.Time
-	Actor string // rider | driver | system | ops
-	// depart: the driver is on duty.
-	DriverOnDuty bool
-	// depart: the driver already has another ride on the way, arrived or in ride.
-	DriverBusy bool
-	// arrive: metres from the driver's last position to the pickup; nil if none sent.
-	MetresToPickup *float64
-	// start: the PIN the driver typed.
-	Pin string
-	// end: metres from where the driver ended to the drop-off; nil if unknown.
-	MetresToDrop *float64
-	// end: why the driver ended away from the drop-off.
-	EndReason string
-	// no_show: the driver called or alerted the rider at least once.
-	ContactLogged bool
-}
-
-// MoveSet is the columns a move changes; nil fields are left alone.
-type MoveSet struct {
-	DepartedAt *time.Time
-	ArrivedAt  *time.Time
-	StartedAt  *time.Time
-	EndedAt    *time.Time
-	ClosedAt   *time.Time
-	WaitEndsAt *time.Time
-	EndReason  *string
-}
-
-// Columns lists the set columns and values, in a fixed order.
-func (s MoveSet) Columns() ([]string, []any) {
-	var cols []string
-	var vals []any
-	add := func(col string, t *time.Time) {
-		if t != nil {
-			cols = append(cols, col)
-			vals = append(vals, *t)
-		}
-	}
-	add("departed_at", s.DepartedAt)
-	add("arrived_at", s.ArrivedAt)
-	add("started_at", s.StartedAt)
-	add("ended_at", s.EndedAt)
-	add("closed_at", s.ClosedAt)
-	add("wait_ends_at", s.WaitEndsAt)
-	if s.EndReason != nil {
-		cols = append(cols, "end_reason")
-		vals = append(vals, *s.EndReason)
-	}
-	return cols, vals
-}
-
-// MoveResult is the changes a move makes. The caller writes them and a
-// ride_events row.
-type MoveResult struct {
-	To  string
-	Set MoveSet
-}
-
+// Ride states.
 const (
-	PinTries               = 3
-	WindowMinutes          = 5
-	WaitMinutes            = 5
-	RiderLateExtraMinutes  = 5
-	DepartBeforeMinutes    = 90
-	ArriveWithinMetres     = 300
-	EndWithinMetres        = 500
-	StaleAfterHours        = 3
-	LateAfterWindowMinutes = 5 // ETA this far past the window's end flags the driver as late
+	Assigned    = "assigned"
+	NeedsDriver = "needs_driver"
+	OnTheWay    = "on_the_way"
+	Completed   = "completed"
+	RiderNoShow = "rider_no_show"
+	Skipped     = "skipped"
+	Failed      = "failed"
+	Cancelled   = "cancelled"
 )
 
-var allowedActors = map[string][]string{
-	"depart":      {"driver"},
-	"arrive":      {"driver"},
-	"start":       {"driver"},
-	"end":         {"driver"},
-	"no_show":     {"driver"},
-	"skip":        {"rider", "system"},
-	"cancel":      {"ops", "system"},
-	"close_stale": {"system"},
+// States is every ride state.
+var States = []string{Assigned, NeedsDriver, OnTheWay, Completed, RiderNoShow, Skipped, Failed, Cancelled}
+
+// Final states never change again.
+var Final = []string{Completed, RiderNoShow, Failed, Skipped, Cancelled}
+
+// moves: the states each move starts from, and where it goes.
+var moves = map[string]struct {
+	from []string
+	to   string
+}{
+	"on_my_way": {[]string{Assigned}, OnTheWay},
+	"give_up":   {[]string{Assigned}, NeedsDriver},
+	"check":     {[]string{Assigned}, NeedsDriver},
+	"outage":    {[]string{Assigned, NeedsDriver}, Failed},
+	"no_driver": {[]string{NeedsDriver}, Failed},
+	"picked":    {[]string{NeedsDriver}, Assigned},
+	"no_show":   {[]string{OnTheWay}, RiderNoShow},
+	"complete":  {[]string{OnTheWay}, Completed},
+	"autoclose": {[]string{OnTheWay}, Completed},
+	"skip":      {[]string{Assigned, NeedsDriver}, Skipped},
 }
 
-var fromStates = map[string][]string{
-	"depart":      {"scheduled"},
-	"arrive":      {"on_the_way"},
-	"start":       {"arrived"},
-	"end":         {"in_ride"},
-	"no_show":     {"arrived"},
-	"skip":        {"scheduled"},
-	"cancel":      {"scheduled", "on_the_way"},
-	"close_stale": {"on_the_way", "arrived", "in_ride"},
-}
-
-func InvalidTransition(state, move string) *ApiError {
-	return NewApiError(409, "invalid_transition",
-		fmt.Sprintf("Can't %s a ride that is %s", strings.Replace(move, "_", " ", 1), strings.ReplaceAll(state, "_", " ")))
-}
-
-// WaitEndsAt is the end of the rider's wait: 5 minutes after the later of
-// arrival and the window opening (an early driver doesn't start it early),
-// 10 if the rider said they're running late.
-func WaitEndsAt(arrivedAt, windowStart time.Time, riderLateUsed bool) time.Time {
-	from := arrivedAt
-	if windowStart.After(from) {
-		from = windowStart
+// Allowed tells whether [move] may start from [state], and where it goes.
+func Allowed(state, move string) (to string, ok bool) {
+	m, found := moves[move]
+	if !found || !slices.Contains(m.from, state) {
+		return "", false
 	}
-	m := WaitMinutes
-	if riderLateUsed {
-		m += RiderLateExtraMinutes
-	}
-	return from.Add(time.Duration(m) * time.Minute)
+	return m.to, true
 }
 
-// WrongPin is the error for a wrong PIN; the caller records the try first.
-func WrongPin(triesLeft int) *ApiError {
-	if triesLeft > 0 {
-		word := "tries"
-		if triesLeft == 1 {
-			word = "try"
-		}
-		return NewApiError(422, "wrong_pin", fmt.Sprintf("That PIN isn't right. %d %s left.", triesLeft, word))
+// Timing rules.
+const (
+	OnMyWayOpensBefore = 60 * time.Minute // On my way allowed from pickup − 60 min
+	CheckBefore        = 15 * time.Minute // the sweeper's check at pickup − 15 min
+	NoShowWait         = 10 * time.Minute // after the later of arrival and pickup
+	StaleAfter         = 4 * time.Hour    // close_stale_rides: pickup + 4 h
+	ReminderHour       = 20               // 20:00 local, the day before
+	ReminderTooLateHr  = 23               // no push after 23:00 local
+	TrackOpensBefore   = 60 * time.Minute // Track ride from pickup − 60 min
+	PositionStaleAfter = time.Minute      // "Last seen {n} min ago"
+	Buffer             = 10 * time.Minute // busy_until = drop + 10 min
+)
+
+// OnMyWayOpensAt is when On my way becomes tappable.
+func OnMyWayOpensAt(pickup time.Time) time.Time { return pickup.Add(-OnMyWayOpensBefore) }
+
+// CheckAt is when the sweeper hands the ride over if On my way wasn't tapped.
+func CheckAt(pickup time.Time) time.Time { return pickup.Add(-CheckBefore) }
+
+// CheckIsTooLate is the check's too-late limit: run at or after pickup (an
+// outage), the ride fails instead of being offered.
+func CheckIsTooLate(pickup, now time.Time) bool { return !now.Before(pickup) }
+
+// NoShowOpensAt is when "Rider not here?" opens: 10 minutes after the later
+// of arrival and pickup time. Without an arrival it counts from pickup.
+func NoShowOpensAt(pickup time.Time, arrivedAt *time.Time) time.Time {
+	from := pickup
+	if arrivedAt != nil && arrivedAt.After(from) {
+		from = *arrivedAt
 	}
-	return NewApiError(423, "pin_locked", "Too many wrong PINs. Call support to start this ride.")
+	return from.Add(NoShowWait)
 }
 
-// IsWrongPin tells whether [err] came from a wrong or locked PIN.
-func IsWrongPin(err error) bool {
-	e, ok := err.(*ApiError)
-	return ok && (e.Code == "wrong_pin" || e.Code == "pin_locked")
+// StaleAt is when an on-the-way ride is closed automatically.
+func StaleAt(pickup time.Time) time.Time { return pickup.Add(StaleAfter) }
+
+// BusyUntil is the end of the driver's hold on a ride: pickup + trip + 10 min.
+func BusyUntil(pickup time.Time, travelMinutes int) time.Time {
+	return pickup.Add(time.Duration(travelMinutes)*time.Minute + Buffer)
 }
 
-// Transition applies [move] to [ride], or returns why it isn't allowed.
-func Transition(ride RideFacts, move string, c MoveContext) (MoveResult, error) {
-	if !slices.Contains(allowedActors[move], c.Actor) {
-		return MoveResult{}, NewApiError(403, "not_allowed", fmt.Sprintf("A %s can't %s a ride", c.Actor, strings.Replace(move, "_", " ", 1)))
-	}
-	if !slices.Contains(fromStates[move], ride.State) {
-		return MoveResult{}, InvalidTransition(ride.State, move)
-	}
-	now := c.Now
-	switch move {
-	case "depart":
-		if !c.DriverOnDuty {
-			return MoveResult{}, NewApiError(409, "off_duty", "Go on duty before starting navigation")
-		}
-		if c.DriverBusy {
-			return MoveResult{}, NewApiError(409, "driver_busy", "Finish your current ride first")
-		}
-		if now.Before(ride.PickupAt.Add(-DepartBeforeMinutes * time.Minute)) {
-			return MoveResult{}, NewApiError(409, "too_early", fmt.Sprintf("You can start navigation %d minutes before pickup", DepartBeforeMinutes))
-		}
-		return MoveResult{To: "on_the_way", Set: MoveSet{DepartedAt: &now}}, nil
-	case "arrive":
-		if c.MetresToPickup == nil || *c.MetresToPickup > ArriveWithinMetres {
-			return MoveResult{}, NewApiError(422, "too_far", fmt.Sprintf("Mark arrived within %d m of the pickup point", ArriveWithinMetres))
-		}
-		wait := WaitEndsAt(now, ride.WindowStart, ride.RiderLateUsed)
-		return MoveResult{To: "arrived", Set: MoveSet{ArrivedAt: &now, WaitEndsAt: &wait}}, nil
-	case "start":
-		if ride.PinTries >= PinTries {
-			return MoveResult{}, WrongPin(0)
-		}
-		if c.Pin != ride.Pin {
-			return MoveResult{}, WrongPin(PinTries - ride.PinTries - 1)
-		}
-		return MoveResult{To: "in_ride", Set: MoveSet{StartedAt: &now}}, nil
-	case "end":
-		far := c.MetresToDrop == nil || *c.MetresToDrop > EndWithinMetres
-		reason := strings.TrimSpace(c.EndReason)
-		if far && reason == "" {
-			return MoveResult{}, NewApiError(422, "too_far", fmt.Sprintf("You're more than %d m from the drop-off. Say why you're ending here.", EndWithinMetres))
-		}
-		set := MoveSet{EndedAt: &now}
-		if far {
-			set.EndReason = &reason
-		}
-		return MoveResult{To: "completed", Set: set}, nil
-	case "no_show":
-		if ride.WaitEndsAt == nil || now.Before(*ride.WaitEndsAt) {
-			return MoveResult{}, NewApiError(425, "wait_not_over", "The rider still has time. Wait until the countdown ends.")
-		}
-		if !c.ContactLogged {
-			return MoveResult{}, NewApiError(409, "no_contact_logged", "Call or alert the rider before marking a no-show")
-		}
-		return MoveResult{To: "no_show", Set: MoveSet{ClosedAt: &now}}, nil
-	case "skip":
-		return MoveResult{To: "skipped", Set: MoveSet{ClosedAt: &now}}, nil
-	case "cancel":
-		return MoveResult{To: "cancelled", Set: MoveSet{ClosedAt: &now}}, nil
-	case "close_stale":
-		if now.Sub(ride.LastActivityAt) < StaleAfterHours*time.Hour {
-			return MoveResult{}, NewApiError(409, "not_stale", "The ride is still active")
-		}
-		// A ride that started is assumed done; one that never started didn't happen.
-		if ride.State == "in_ride" {
-			reason := "closed_stale"
-			return MoveResult{To: "completed", Set: MoveSet{EndedAt: &now, ClosedAt: &now, EndReason: &reason}}, nil
-		}
-		return MoveResult{To: "cancelled", Set: MoveSet{ClosedAt: &now}}, nil
-	}
-	return MoveResult{}, fmt.Errorf("unknown move %q", move)
+func midnight(date time.Time, loc *time.Location) time.Time {
+	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, loc)
 }
 
-// ---- payment status, worked out from the two marks and never stored ----
+// ReminderDueAt is 20:00 local the day before the ride's local date.
+func ReminderDueAt(localDate time.Time, loc *time.Location) time.Time {
+	return midnight(localDate, loc).Add(-24*time.Hour + ReminderHour*time.Hour)
+}
 
-// PaymentStatus is paid if either side says so, unless the driver says not
-// paid yet. Empty strings mean unmarked.
+// ReminderTooLateAt is 23:00 local the day before: after it the push is
+// skipped (the marker is still set).
+func ReminderTooLateAt(localDate time.Time, loc *time.Location) time.Time {
+	return midnight(localDate, loc).Add(-24*time.Hour + ReminderTooLateHr*time.Hour)
+}
+
+// PaymentMarksCloseAt is midnight at the end of the ride's local date: the
+// driver's payment mark can be changed until then.
+func PaymentMarksCloseAt(localDate time.Time, loc *time.Location) time.Time {
+	return midnight(localDate, loc).Add(24 * time.Hour)
+}
+
+// Road distance factor and minimum for the live ETA.
+const EtaRoadFactor = 1.4
+
+// EtaMinutes is the live ETA: straight-line distance × 1.4 at the vehicle
+// type's speed, rounded up, at least 1 minute.
+func EtaMinutes(straightKm, speedKmh float64) int {
+	if speedKmh <= 0 {
+		speedKmh = 18
+	}
+	m := math.Round(straightKm*EtaRoadFactor/speedKmh*60*1e6) / 1e6
+	return max(1, int(math.Ceil(m)))
+}
+
+// HaversineKm is the straight-line distance in km.
+func HaversineKm(lat1, lng1, lat2, lng2 float64) float64 {
+	const r = 6371
+	rad := func(d float64) float64 { return d * math.Pi / 180 }
+	dLat := rad(lat2 - lat1)
+	dLng := rad(lng2 - lng1)
+	a := math.Pow(math.Sin(dLat/2), 2) + math.Cos(rad(lat1))*math.Cos(rad(lat2))*math.Pow(math.Sin(dLng/2), 2)
+	return 2 * r * math.Asin(math.Sqrt(a))
+}
+
+// NewPin is four random digits from a secure source.
+func NewPin() string {
+	n, err := rand.Int(rand.Reader, big.NewInt(10_000))
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%04d", n.Int64())
+}
+
+// Payment marks.
+var (
+	DriverPaidMarks = []string{"upi", "cash", "not_paid"}
+	RiderPaidMarks  = []string{"upi", "cash"}
+	GiveUpReasons   = []string{"vehicle", "personal", "other"}
+	RiderTags       = []string{"on_time", "smooth_driving", "clean_vehicle", "good_route"}
+	DriverFlags     = []string{"all_good", "kept_me_waiting", "pickup_unclear"}
+)
+
+// PaymentStatus is worked out from the two marks and never stored: paid if
+// either side says so, unless the driver says not paid yet.
 func PaymentStatus(rider, driver string) string {
 	switch {
 	case driver == "not_paid" && rider != "":
@@ -263,69 +185,4 @@ func PaymentStatus(rider, driver string) string {
 		return "paid_by_rider"
 	}
 	return "unmarked"
-}
-
-// ---- ETA and lateness ----
-
-// Straight line × 1.85 at 22 km/h, for live ETAs without a road route.
-const (
-	EtaRoadFactor = 1.85
-	EtaKmh        = 22
-)
-
-func EtaMinutes(straightLineKm float64) int {
-	return max(1, int(JSRound(straightLineKm*EtaRoadFactor/EtaKmh*60)))
-}
-
-// IsLate is true when now + ETA lands more than 5 minutes after the window ends.
-func IsLate(now time.Time, etaMins int, windowEnd time.Time) bool {
-	return now.Add(time.Duration(etaMins) * time.Minute).After(windowEnd.Add(LateAfterWindowMinutes * time.Minute))
-}
-
-// NewPin is four random digits from a secure source.
-func NewPin() string {
-	n, err := rand.Int(rand.Reader, big.NewInt(10_000))
-	if err != nil {
-		panic(err)
-	}
-	return fmt.Sprintf("%04d", n.Int64())
-}
-
-// MetresBetween is the straight-line distance in metres.
-func MetresBetween(a, b LatLng) float64 {
-	return HaversineKm(a.Lat, a.Lng, b.Lat, b.Lng) * 1000
-}
-
-// ---- carried over from the old domain package ----
-
-// ApiError is a refused move: an HTTP status, a code and a message.
-type ApiError struct {
-	Status  int
-	Code    string
-	Message string
-}
-
-func (e *ApiError) Error() string { return e.Message }
-
-func NewApiError(status int, code, message string) *ApiError {
-	return &ApiError{Status: status, Code: code, Message: message}
-}
-
-// LatLng is a point.
-type LatLng struct {
-	Lat float64 `json:"lat"`
-	Lng float64 `json:"lng"`
-}
-
-// JSRound rounds half up, as JavaScript's Math.round does.
-func JSRound(x float64) float64 { return math.Floor(x + 0.5) }
-
-// HaversineKm is the straight-line distance in km.
-func HaversineKm(lat1, lng1, lat2, lng2 float64) float64 {
-	const r = 6371
-	rad := func(d float64) float64 { return d * math.Pi / 180 }
-	dLat := rad(lat2 - lat1)
-	dLng := rad(lng2 - lng1)
-	a := math.Pow(math.Sin(dLat/2), 2) + math.Cos(rad(lat1))*math.Cos(rad(lat2))*math.Pow(math.Sin(dLng/2), 2)
-	return 2 * r * math.Asin(math.Sqrt(a))
 }

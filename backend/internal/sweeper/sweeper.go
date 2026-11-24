@@ -35,6 +35,7 @@ type Sweeper struct {
 type Counts struct {
 	CloseOffers   offers.CloseCounts `json:"close_offers"`
 	GenerateRides int                `json:"generate_rides"`
+	Rides         offers.RideCounts  `json:"rides"`
 	SendOutbox    int                `json:"send_outbox"`
 }
 
@@ -45,8 +46,10 @@ func (s *Sweeper) log() *slog.Logger {
 	return s.Log
 }
 
-// RunOnce runs close_offers, generate_rides and send_outbox once, and
-// records the run in sweeper_runs.
+// RunOnce runs close_offers, generate_rides, the ride tasks
+// (on_my_way_check with its outage limit, unfilled rides, evening_reminder,
+// close_stale_rides) and send_outbox once, and records the run in
+// sweeper_runs.
 func (s *Sweeper) RunOnce(ctx context.Context) (Counts, error) {
 	var c Counts
 	started := s.Clock.Now()
@@ -68,6 +71,8 @@ func (s *Sweeper) RunOnce(ctx context.Context) (Counts, error) {
 	note("close_offers", err)
 	c.GenerateRides, err = s.Offers.GenerateDueRides(ctx)
 	note("generate_rides", err)
+	c.Rides, err = s.Offers.RunRideTasks(ctx)
+	note("ride_tasks", err)
 	c.SendOutbox, err = s.Outbox.SendDue(ctx)
 	note("send_outbox", err)
 

@@ -58,6 +58,11 @@ type OfferView struct {
 	FarePerMonth  int         `json:"fare_per_month"`
 	UsualPayment  string      `json:"usual_payment"`
 	Slots         []OfferSlot `json:"slots"`
+	// One-ride offers (kind "ride") only: the ride offered.
+	RideID          *uuid.UUID `json:"ride_id,omitempty"`
+	LocalDate       *string    `json:"local_date,omitempty"`
+	PickupAt        *time.Time `json:"pickup_at,omitempty"`
+	LocalPickupTime *string    `json:"local_pickup_time,omitempty"`
 }
 
 // OfferResult is a result card for a request the driver was interested in,
@@ -153,13 +158,13 @@ func (s *Service) GetOffer(ctx context.Context, driverID, offerID uuid.UUID) (Of
 
 func (s *Service) offerView(ctx context.Context, q querier, driverID, offerID uuid.UUID, now time.Time) (OfferView, error) {
 	var v OfferView
-	var seriesID *uuid.UUID
+	var seriesID, rideID *uuid.UUID
 	var interestedAt, dismissedAt *time.Time
-	err := q.QueryRow(ctx, `select o.id, o.kind, o.series_id, o.round, o.status, o.outcome, o.opened_at, o.expires_at,
+	err := q.QueryRow(ctx, `select o.id, o.kind, o.series_id, o.ride_id, o.round, o.status, o.outcome, o.opened_at, o.expires_at,
 			r.interested_at, r.dismissed_at, r.result
 		from offers o join offer_recipients r on r.offer_id = o.id and r.driver_id = $2
 		where o.id = $1`, offerID, driverID).
-		Scan(&v.ID, &v.Kind, &seriesID, &v.Round, &v.Status, &v.Outcome, &v.OpenedAt, &v.ExpiresAt, &interestedAt, &dismissedAt, &v.Result)
+		Scan(&v.ID, &v.Kind, &seriesID, &rideID, &v.Round, &v.Status, &v.Outcome, &v.OpenedAt, &v.ExpiresAt, &interestedAt, &dismissedAt, &v.Result)
 	if noRows(err) {
 		return v, errNotFound("offer")
 	}
@@ -208,6 +213,29 @@ func (s *Service) offerView(ctx context.Context, q querier, driverID, offerID uu
 	}
 	v.RidesPerMonth = scheduling.RidesPerMonth(len(slots))
 	v.FarePerMonth = v.RidesPerMonth * v.FarePerRide
+	if rideID != nil {
+		r, err := readRide(ctx, q, *rideID)
+		if err != nil {
+			return v, err
+		}
+		c, err := s.rideContext(ctx, q, r)
+		if err != nil {
+			return v, err
+		}
+		v.RideID, v.PickupAt = rideID, &r.PickupAt
+		v.LocalDate = ptr(scheduling.FormatDate(r.LocalDate))
+		v.LocalPickupTime = ptr(s.localClock(r.PickupAt, se.TimeZone))
+		v.Pickup, v.Drop, v.FarePerRide, v.RidesPerMonth, v.FarePerMonth = c.From, c.To, r.Fare, 1, r.Fare
+		v.Slots = []OfferSlot{}
+		if r.SlotID != nil {
+			for _, sl := range slots {
+				if sl.ID == *r.SlotID {
+					v.Slots = append(v.Slots, OfferSlot{Weekday: sl.Weekday, Day: scheduling.WeekdayName(sl.Weekday), Direction: sl.Direction,
+						Timing: sl.Timing, LocalPickupTime: scheduling.FormatClock(sl.Pickup), EstimatedDropTime: scheduling.FormatClock(sl.Pickup + se.TravelMinutes)})
+				}
+			}
+		}
+	}
 	return v, nil
 }
 

@@ -1,4 +1,4 @@
-# ride-api endpoints (R1 + D2 + D1)
+# ride-api endpoints (R1 + D2 + D1 + R2 + D3)
 
 JSON in and out, `snake_case`. Times are UTC RFC 3339 (`2026-11-19T04:45:00Z`); dates are
 `YYYY-MM-DD` in the series' zone (Asia/Kolkata); local clock times are `HH:MM`. Weekdays are ISO:
@@ -19,10 +19,10 @@ without another call.
 |---|---|
 | 400 | `invalid_request`, `bad_request`, `invalid_phone`, `invalid_code` |
 | 401 | `unauthorized`, `code_expired`, `invalid_code` |
-| 403 | `riders_only`, `drivers_only`, `admins_only`, `forbidden` (not your series), `not_eligible`, `not_a_driver`, `not_your_path` |
+| 403 | `riders_only`, `drivers_only`, `admins_only`, `forbidden` (not your series or ride), `not_eligible`, `not_a_driver`, `not_your_path` |
 | 404 | `not_found`, `not_registered` |
-| 409 | `offer_closed`, `already_assigned`, `not_retryable`, `phone_in_use_as_rider`, `already_registered`, `locked`, `not_uploaded`, `plate_in_use`, `incomplete`, `wrong_status`, `not_approved`, `already_claimed`, `items_not_verified` |
-| 422 | `ride_type_not_allowed`, `start_too_soon`, `invalid_time`, `invalid_name`, `city_not_served`, `terms_not_accepted`, `bad_kind`, `bad_content_type`, `bad_upi`, `bad_vehicle_type`, `bad_cab_class`, `bad_plate`, `bad_year`, `bad_weekday`, `bad_period`, `bad_decision`, `reason_required` |
+| 409 | `offer_closed`, `already_assigned`, `not_retryable`, `phone_in_use_as_rider`, `already_registered`, `locked`, `not_uploaded`, `plate_in_use`, `incomplete`, `wrong_status`, `not_approved`, `already_claimed`, `items_not_verified`, `too_early`, `too_soon`, `too_late`, `ride_reassigned`, `not_started`, `not_completed`, `not_on_the_way`, `already_sent`, `already_rated` |
+| 422 | `ride_type_not_allowed`, `start_too_soon`, `invalid_time`, `invalid_name`, `city_not_served`, `terms_not_accepted`, `bad_kind`, `bad_content_type`, `bad_upi`, `bad_vehicle_type`, `bad_cab_class`, `bad_plate`, `bad_year`, `bad_weekday`, `bad_period`, `bad_decision`, `reason_required`, `bad_mark`, `bad_stars` |
 | 429 | `resend_too_soon`, `too_many_codes`, `too_many_attempts` |
 
 ## Sign-in (unchanged flow: phone + code; dev builds use `123456`)
@@ -222,6 +222,143 @@ The driver's rides for 7 days from `start` (default: this week's Monday), except
 ```
 `new`: created in the last 24 hours (a new rider's rides after a win).
 
+## The daily ride (R2 rider, D3 driver)
+
+Ride states: `assigned` (has a driver, not started) → `on_the_way` (On my way tapped) → `completed` or
+`rider_no_show`; `assigned` → `needs_driver` (the driver gave it up, or no On my way by pickup − 15 min)
+→ `assigned` (another driver picked) or `failed`; `skipped`, `cancelled`. There is no confirmed state;
+"I've arrived" and "Start ride" are timestamps on an `on_the_way` ride. **HLD: no PIN step for now** —
+no PIN is made and Start ride needs none (`pin` is always null).
+
+Every change is one transaction with a conditional update and an events row (`data.old_status`,
+`data.new_status`); a driver's change locks the driver row, then the ride. **Every 409 carries the
+ride as it is now in `state`.**
+
+### Ride object (every ride endpoint returns it)
+```json
+{
+  "id": "…", "series_id": "…", "slot_id": "…", "local_date": "2026-11-18", "weekday": 3, "day": "WED",
+  "direction": "outbound", "pickup_at": "2026-11-18T03:00:00Z", "drop_at": "…", "busy_until": "…",
+  "local_pickup_time": "08:30", "local_drop_time": "09:21", "time_zone": "Asia/Kolkata",
+  "status": "on_the_way", "state_label": "Ravi is on the way",
+  "fare": 197, "usual_payment": "upi", "vehicle_type": "auto", "travel_minutes": 51, "distance_km": 15.1,
+  "pickup": { "lat": 12.9352, "lng": 77.6245, "label": "Koramangala" }, "drop": { … },
+  "rider_id": "…", "rider": { "id", "name", "first_name", "phone" },
+  "driver_id": "…", "driver": { "id", "name", "first_name", "phone", "vehicle_type", "vehicle_number", "plate",
+                                "vehicle_desc", "rating", "upi_id" } | null,
+  "version": 3,
+  "reminder_sent_at", "on_the_way_at", "arrived_at", "picked_up_at", "completed_at", "no_show_at",
+  "failed_at", "late_notice_at": "…" | null, "running_late": false,
+  "on_my_way_opens_at": "…", "sets_off_by": "…", "no_show_opens_at": "…" | null,
+  "give_up_reason", "fail_reason" ("no_driver" | "missed_by_outage"), "close_reason" ("auto_closed"),
+  "driver_paid_mark" ("upi" | "cash" | "not_paid"), "rider_paid_mark" ("upi" | "cash"),
+  "payment_status": "unmarked" | "paid" | "paid_by_rider" | "unpaid" | "disputed",
+  "rider_stars", "rider_tags": [], "rider_note", "driver_flags": []
+}
+```
+`state_label` is R2.1's chip: "Driver confirmed", "{driver} is on the way", "{driver} has arrived",
+"In the ride", "Finding another driver", "No driver found", "Skipped", "Completed", "Missed".
+`no_show_opens_at` (while on the way, before pickup) = 10 minutes after the later of arrival and pickup.
+
+### Rider (rider session; a driver gets 403 `riders_only`)
+
+#### `GET /v1/rides/next` → 200 (rides.next)
+`{ "rides": [ <ride> … ] }`: per active or paused series, its next ride: the earliest that is on the way,
+or (not cancelled) whose pickup is still ahead, or that completed / was a no-show / failed in the last hour.
+
+#### `GET /v1/rides?from=2026-11-18&days=14` → 200
+The rider's rides (Schedule; pay and rate later): `{ "rides": [ … ] }`.
+
+#### `GET /v1/rides/{id}` → 200 (ride.get)
+The ride, for its rider or its driver. 403 `forbidden`, 404 `not_found`.
+
+#### `GET /v1/rides/{id}/live` → 200 (ride.live)
+```json
+{ "ride_id": "…", "status": "on_the_way", "state_label": "Ravi is on the way",
+  "pickup_at": "…", "sets_off_by": "…", "on_the_way_at": "…", "arrived_at": null, "picked_up_at": null,
+  "position": { "lat": 12.9397, "lng": 77.6245, "accuracy_m": 12, "recorded_at": "…", "age_seconds": 20 },
+  "driver_position": <same>, "position_age_seconds": 20, "stale": false,
+  "eta_minutes": 2, "arrival_at": "…", "pin": null, "running_late": false,
+  "driver": { … }, "pickup": { … }, "drop": { … }, "ride": <ride> }
+```
+Polled every 10 s. `position` (and `eta_minutes`) only while the ride is `on_the_way` and only a position
+sent for this ride; otherwise null. ETA = straight line × 1.4 at the vehicle type's speed, rounded up, at
+least 1 min, to the pickup (to the drop-off once picked up). `stale` once the position is over 1 minute
+old ("Last seen {n} min ago"). Only the ride's own rider: 403 `forbidden` (or `riders_only`), 404.
+
+#### `POST /v1/rides/{id}/running-late` → 204 (ride.running_late)
+Pushes the driver "{rider} is running about 5 minutes late."; doesn't change the wait. Once per ride:
+409 `already_sent`; only while on the way and not picked up: 409 `wrong_status`.
+
+#### `POST /v1/rides/{id}/paid` → 200 (ride.rider_paid)
+`{ "mark": "upi" | "cash" }` → the ride. 409 `not_completed`; 422 `bad_mark`.
+
+#### `POST /v1/rides/{id}/rate` → 200 (ride.rate)
+`{ "stars": 1..5, "tags": ["on_time", "smooth_driving", "clean_vehicle", "good_route"], "note": "…" }` →
+the ride. Once: 409 `already_rated`; 409 `not_completed`; 422 `bad_stars`. The driver's rating becomes the
+mean of their rated rides.
+
+### Driver (driver session; a rider gets 403 `drivers_only`; another driver's ride 403 `forbidden`)
+
+#### `GET /v1/driver/run?from=2026-11-18&days=1` → 200 (rides.schedule, D3.1 Today)
+```json
+{ "from": "2026-11-18", "to": "2026-11-18", "days": 1, "plan_paid_till": "2026-12-31",
+  "ride_count": 2, "regular_riders": 2, "rides": [ <ride> … ] }
+```
+`from` defaults to today, `days` to 1 (max 14; more is 400). Only rides the driver holds (not cancelled),
+in pickup order; a ride handed to another driver drops out.
+
+#### `POST /v1/driver/rides/{id}/on-my-way` → 200 (ride.on_my_way)
+`assigned` → `on_the_way`, from 60 minutes before pickup (409 `too_early` with `opens_at`). A ride that
+went to another driver (the check or a give-up got there first): 409 `ride_reassigned` ("This ride has gone
+to another driver."). Else 409 `wrong_status`. Rider push "Ravi is on his way."
+
+#### `POST /v1/driver/rides/{id}/location` → 204 (ride.location)
+`{ "lat", "lng", "accuracy" }` every 10 s while on the way: one `driver_locations` row per driver,
+overwritten. A ride that isn't on the way: 409 `not_on_the_way` (the app stops sending).
+
+#### `POST /v1/driver/rides/{id}/arrived` → 200 (ride.arrived)
+Sets `arrived_at`; rider push "Ravi has arrived at Koramangala." 409 `wrong_status` (not on the way, or
+already arrived or started).
+
+#### `POST /v1/driver/rides/{id}/start` → 200 (ride.start)
+`{}` (no PIN step for now) → the ride with `picked_up_at`. 409 `wrong_status` (not on the way, or started).
+
+#### `POST /v1/driver/rides/{id}/no-show` → 200 (ride.no_show)
+→ `rider_no_show`, from 10 minutes after the later of arrival and pickup: before that 409 `too_soon` with
+`opens_at` (top level). Rider push "{driver} waited 10 minutes and had to leave. This ride is marked as
+missed." Later rides are unaffected. 409 `wrong_status`.
+
+#### `POST /v1/driver/rides/{id}/end` → 200 (ride.complete)
+→ `completed`. Before Start ride: 409 `not_started`; 409 `wrong_status`. Rider push "You've arrived. Pay
+Ravi ₹197 by UPI or cash."
+
+#### `POST /v1/driver/rides/{id}/payment` → 200 (ride.driver_paid)
+`{ "mark": "upi" | "cash" | "not_paid" }`. Changeable until midnight (local) at the end of the ride's day,
+then 409 `too_late` (with `closed_at`); 409 `not_completed`; 422 `bad_mark`. Earnings read this mark.
+
+#### `POST /v1/driver/rides/{id}/flag` → 200 (ride.flag_rider)
+`{ "tags": ["all_good" | "kept_me_waiting" | "pickup_unclear"] }`. 409 `not_completed`.
+
+#### `POST /v1/driver/rides/{id}/cant-make-it` → 200 (ride.give_up)
+`{ "reason": "vehicle" | "personal" | "other" }` (optional). While `assigned` (409 `wrong_status`) and
+before pickup (409 `too_late`). In one transaction: `needs_driver`, `driver_id` null
+(`previous_driver_id` = this driver), the reason recorded, the rider told "{driver} can't make your
+{time} ride on {day}. We're finding you another driver.", and a one-ride offer opened. Only that ride
+moves.
+
+### One-ride offers (`offers.kind = 'ride'`)
+Opened for a ride that needs a driver (give-up, the On my way check, or generation for a slot with no
+driver): every live, paid driver of the ride's vehicle type and city except the previous driver (and
+those who dismissed, clashed or withdrew in an earlier round of this ride), 5-minute window, push
+`offer_ride` "One ride" / "Wed 18 Nov at 08:30 · Koramangala → Whitefield · ₹197". Drivers use the D2
+offer endpoints (the offer object adds `ride_id`, `local_date`, `pickup_at`, `local_pickup_time`). At the
+close the interested drivers are shuffled and tried one by one under a lock (driver → ride → offer), with
+the day off and the clash check; the first fit gets the ride (`assigned`), the rider is told "{driver}
+will pick you up at {time} on {day}.", the others "This one went to another driver." With no fit, the
+next round opens while it can close before pickup (up to 3 rounds); else the ride fails (`no_driver`)
+and the rider is told to make their own way.
+
 ## Driver sign-up and verification (D1)
 
 All with a driver session (403 `drivers_only` otherwise). Every error carries the driver as it is
@@ -358,9 +495,23 @@ for their vehicle type and city. Every events row for a status change has
 ## Internal and dev
 
 ### `POST /internal/sweep` → 200
-Runs the sweeper once: `close_offers`, `generate_rides`, `send_outbox`; records a `sweeper_runs` row.
+Runs the sweeper once and records a `sweeper_runs` row. Steps, each finding what is due from `pickup_at`
+offsets and marker columns (no deadlines table):
+
+| Step | Due | Action | Too-late limit |
+|---|---|---|---|
+| `close_offers` | `expires_at` passed | the pick (series and one-ride offers) | a one-ride pick after pickup: failed (`missed_by_outage` when the round was due well before pickup, + admin push) |
+| `generate_rides` | every run | rides up to max(start + 13, today + 14), `assigned` with the slot's driver, else `needs_driver` with its one-ride offer | — |
+| `on_my_way_check` | `assigned` and now ≥ pickup − 15 min | driver → ride locks; `needs_driver`; rider "{driver} hasn't started yet. We're finding you another driver."; one-ride offer | now ≥ pickup: `failed`, `missed_by_outage`, no offer, one admin push "{n} rides missed by outage" per run |
+| `fail_unfilled` | `needs_driver`, pickup passed, no live offer | `failed`, `no_driver`; rider told | — |
+| `evening_reminder` | `assigned`, `reminder_sent_at` null, 20:00 local the day before | one push per driver "Tomorrow: 2 rides. First at 08:30, Priya, Koramangala → Whitefield." (`data.ride_ids`), marker set | from 23:00 no push, markers still set |
+| `close_stale_rides` | `on_the_way` and now ≥ pickup + 4 h | `completed`, `close_reason` `auto_closed` (event data `reason`), admin push "Ride {id} closed automatically" | — |
+| `send_outbox` | unsent rows | FCM, retries with backoff, 5 tries | — |
+
 Needs `Authorization: Bearer $SWEEP_TOKEN` when `SWEEP_TOKEN` is set.
-`{ "close_offers": { "closed": 1, "assigned": 1, "errors": 0 }, "generate_rides": 0, "send_outbox": 7 }`
+`{ "close_offers": { "closed": 1, "assigned": 1, "errors": 0 }, "generate_rides": 0,
+  "rides": { "evening_reminder": 1, "evening_reminder_too_late": 0, "on_my_way_check": 0, "missed_by_outage": 0,
+             "failed_no_driver": 0, "close_stale_rides": 0 }, "send_outbox": 7 }`
 
 ### `POST /dev/clock/advance` → 200 (only with `ENABLE_DEV_ROUTES=true`; refused in production)
 `{ "minutes": 15 }` moves the server clock forward, so `sim close-offers` can close rounds at once.
@@ -391,3 +542,17 @@ Written to `notification_outbox` in the same transaction as the change; sent by 
 | `driver_payment_rejected` | driver | "Payment not found" / "We couldn't find your payment. Open the app to try again." |
 | `admin_driver_submitted` | every admin | "Driver to review" / "Ravi Kumar is waiting for review" |
 | `admin_payment_claimed` | every admin | "Payment to confirm" / "Ravi Kumar says they've paid ₹400" |
+| `driver_reminder` | driver, 20:00 the day before | "Tomorrow's rides" / "Tomorrow: 2 rides. First at 08:30, Priya, Koramangala → Whitefield." (`ride_ids`, `date`) |
+| `ride_on_the_way` | rider | "Ravi is on the way" / "Ravi is on his way." |
+| `ride_arrived` | rider | "Ravi has arrived" / "Ravi has arrived at Koramangala." |
+| `ride_rider_late` | driver | "Rider running late" / "Priya is running about 5 minutes late." |
+| `ride_no_show` | rider | "Ride missed" / "Ravi waited 10 minutes and had to leave. This ride is marked as missed." |
+| `ride_completed` | rider | "You've arrived" / "You've arrived. Pay Ravi ₹197 by UPI or cash." |
+| `ride_needs_driver` | rider | "Finding another driver" / "Ravi can't make your 08:30 ride on Wednesday. We're finding you another driver." or "Ravi hasn't started yet. We're finding you another driver." |
+| `ride_driver_found` | rider | "New driver" / "Suresh will pick you up at 08:30 on Wednesday." |
+| `ride_failed` | rider | "No driver for this ride" / "We couldn't find a driver for your 08:30 ride on Wednesday. Please make your own way." |
+| `offer_ride` | eligible drivers | "One ride" (later rounds "Still open") / "Wed 18 Nov at 08:30 · Koramangala → Whitefield · ₹197" |
+| `admin_rides_missed` | every admin | "Rides missed" / "1 ride missed by outage" |
+| `admin_ride_auto_closed` | every admin | "Ride closed" / "Ride {id} closed automatically" |
+
+Ride pushes carry `ride_id` (and `series_id`) in `data`.

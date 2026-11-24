@@ -1,201 +1,133 @@
 package lifecycle
 
 import (
-	"errors"
-	"fmt"
-	"reflect"
+	"regexp"
 	"testing"
 	"time"
 )
 
-var pickupAt = time.Date(2026, 10, 22, 3, 10, 0, 0, time.UTC) // Thu 8:40 IST
+var ist = time.FixedZone("IST", 330*60)
 
-func eq[T any](t *testing.T, got, want T, what ...any) {
-	t.Helper()
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("%v: got %#v, want %#v", what, got, want)
-	}
-}
+func istAt(day, h, m int) time.Time { return time.Date(2026, 11, day, h, m, 0, 0, ist) }
 
-func at(minutesFromPickup int) time.Time {
-	return pickupAt.Add(time.Duration(minutesFromPickup) * time.Minute)
-}
-
-func ptr[T any](v T) *T { return &v }
-
-func ride(state string, f func(*RideFacts)) RideFacts {
-	r := RideFacts{State: state, PickupAt: pickupAt, WindowStart: at(-5), WindowEnd: at(5), Pin: "4821", LastActivityAt: at(0)}
-	if f != nil {
-		f(&r)
-	}
-	return r
-}
-
-// okContext is a context in which [move] is allowed from its usual state.
-func okContext(move string) MoveContext {
-	switch move {
-	case "depart":
-		return MoveContext{Now: at(-20), Actor: "driver", DriverOnDuty: true}
-	case "arrive":
-		return MoveContext{Now: at(0), Actor: "driver", MetresToPickup: ptr(120.0)}
-	case "start":
-		return MoveContext{Now: at(0), Actor: "driver", Pin: "4821"}
-	case "end":
-		return MoveContext{Now: at(0), Actor: "driver", MetresToDrop: ptr(80.0)}
-	case "no_show":
-		return MoveContext{Now: at(10), Actor: "driver", ContactLogged: true}
-	case "skip":
-		return MoveContext{Now: at(-600), Actor: "rider"}
-	case "cancel":
-		return MoveContext{Now: at(0), Actor: "ops"}
-	case "close_stale":
-		return MoveContext{Now: at(200), Actor: "system"}
-	}
-	panic(move)
-}
-
-func with(move string, f func(*MoveContext)) MoveContext {
-	c := okContext(move)
-	f(&c)
-	return c
-}
-
-func code(_ MoveResult, err error) string {
-	var e *ApiError
-	if errors.As(err, &e) {
-		return e.Code
-	}
-	return ""
-}
-
-func TestTransitionTable(t *testing.T) {
-	expected := map[string]struct {
-		from []string
-		to   string
+func TestAllowedMoves(t *testing.T) {
+	cases := []struct {
+		state, move, to string
+		ok              bool
 	}{
-		"depart":      {[]string{"scheduled"}, "on_the_way"},
-		"arrive":      {[]string{"on_the_way"}, "arrived"},
-		"start":       {[]string{"arrived"}, "in_ride"},
-		"end":         {[]string{"in_ride"}, "completed"},
-		"no_show":     {[]string{"arrived"}, "no_show"},
-		"skip":        {[]string{"scheduled"}, "skipped"},
-		"cancel":      {[]string{"scheduled", "on_the_way"}, "cancelled"},
-		"close_stale": {[]string{"on_the_way", "arrived", "in_ride"}, "completed"},
+		{Assigned, "on_my_way", OnTheWay, true},
+		{NeedsDriver, "on_my_way", "", false},
+		{Assigned, "give_up", NeedsDriver, true},
+		{OnTheWay, "give_up", "", false},
+		{OnTheWay, "complete", Completed, true},
+		{Assigned, "complete", "", false},
+		{OnTheWay, "no_show", RiderNoShow, true},
+		{Completed, "no_show", "", false},
+		{Assigned, "outage", Failed, true},
+		{NeedsDriver, "picked", Assigned, true},
+		{Assigned, "nonsense", "", false},
 	}
-	for _, move := range Moves {
-		for _, state := range RideStates {
-			allowed := false
-			for _, s := range expected[move].from {
-				allowed = allowed || s == state
-			}
-			t.Run(fmt.Sprintf("%s from %s", move, state), func(t *testing.T) {
-				facts := ride(state, func(r *RideFacts) { r.WaitEndsAt = ptr(at(5)) })
-				r, err := Transition(facts, move, okContext(move))
-				if allowed {
-					want := expected[move].to
-					if move == "close_stale" && state != "in_ride" {
-						want = "cancelled"
-					}
-					eq(t, err, nil)
-					eq(t, r.To, want)
-				} else {
-					eq(t, code(r, err), "invalid_transition")
-				}
-			})
+	for _, c := range cases {
+		to, ok := Allowed(c.state, c.move)
+		if to != c.to || ok != c.ok {
+			t.Errorf("%s from %s: got %q %v, want %q %v", c.move, c.state, to, ok, c.to, c.ok)
 		}
 	}
 }
 
-func TestOnlyTheRightActor(t *testing.T) {
-	eq(t, code(Transition(ride("scheduled", nil), "depart", with("depart", func(c *MoveContext) { c.Actor = "rider" }))), "not_allowed")
-	eq(t, code(Transition(ride("scheduled", nil), "skip", with("skip", func(c *MoveContext) { c.Actor = "driver" }))), "not_allowed")
-	eq(t, code(Transition(ride("on_the_way", nil), "close_stale", with("close_stale", func(c *MoveContext) { c.Actor = "driver" }))), "not_allowed")
-}
-
-func TestDepart(t *testing.T) {
-	eq(t, code(Transition(ride("scheduled", nil), "depart", with("depart", func(c *MoveContext) { c.DriverOnDuty = false }))), "off_duty")
-	eq(t, code(Transition(ride("scheduled", nil), "depart", with("depart", func(c *MoveContext) { c.DriverBusy = true }))), "driver_busy")
-	eq(t, code(Transition(ride("scheduled", nil), "depart", with("depart", func(c *MoveContext) { c.Now = at(-91) }))), "too_early")
-	r, _ := Transition(ride("scheduled", nil), "depart", with("depart", func(c *MoveContext) { c.Now = at(-90) }))
-	eq(t, r.To, "on_the_way")
-}
-
-func TestArriveAndTheWait(t *testing.T) {
-	eq(t, code(Transition(ride("on_the_way", nil), "arrive", with("arrive", func(c *MoveContext) { c.MetresToPickup = ptr(301.0) }))), "too_far")
-	eq(t, code(Transition(ride("on_the_way", nil), "arrive", with("arrive", func(c *MoveContext) { c.MetresToPickup = nil }))), "too_far")
-	// Arrives 8:28; the window opens 8:35, so the wait ends 8:40.
-	r, _ := Transition(ride("on_the_way", nil), "arrive", with("arrive", func(c *MoveContext) { c.Now = at(-12) }))
-	eq(t, *r.Set.WaitEndsAt, at(0))
-	eq(t, WaitEndsAt(at(-2), at(-5), false), at(3))
-	eq(t, WaitEndsAt(at(12), at(-5), false), at(17))
-	eq(t, WaitEndsAt(at(-2), at(-5), true), at(8))
-	r, _ = Transition(ride("on_the_way", func(r *RideFacts) { r.RiderLateUsed = true }), "arrive", with("arrive", func(c *MoveContext) { c.Now = at(-2) }))
-	eq(t, *r.Set.WaitEndsAt, at(8))
-}
-
-func TestStartWithThePin(t *testing.T) {
-	wrong := with("start", func(c *MoveContext) { c.Pin = "0000" })
-	tries := func(n int) RideFacts { return ride("arrived", func(r *RideFacts) { r.PinTries = n }) }
-	eq(t, code(Transition(tries(0), "start", wrong)), "wrong_pin")
-	eq(t, code(Transition(tries(1), "start", wrong)), "wrong_pin")
-	eq(t, code(Transition(tries(2), "start", wrong)), "pin_locked")
-	eq(t, code(Transition(tries(3), "start", okContext("start"))), "pin_locked")
-}
-
-func TestEndAwayNeedsReason(t *testing.T) {
-	eq(t, code(Transition(ride("in_ride", nil), "end", with("end", func(c *MoveContext) { c.MetresToDrop = ptr(900.0) }))), "too_far")
-	r, err := Transition(ride("in_ride", nil), "end", with("end", func(c *MoveContext) {
-		c.MetresToDrop = ptr(900.0)
-		c.EndReason = "Rider asked to stop early"
-	}))
-	eq(t, err, nil)
-	eq(t, r.To, "completed")
-	eq(t, *r.Set.EndReason, "Rider asked to stop early")
-}
-
-func TestNoShow(t *testing.T) {
-	waiting := ride("arrived", func(r *RideFacts) { r.WaitEndsAt = ptr(at(3)) })
-	eq(t, code(Transition(waiting, "no_show", with("no_show", func(c *MoveContext) { c.Now = at(2) }))), "wait_not_over")
-	eq(t, code(Transition(waiting, "no_show", with("no_show", func(c *MoveContext) { c.Now = at(3); c.ContactLogged = false }))), "no_contact_logged")
-	r, _ := Transition(waiting, "no_show", with("no_show", func(c *MoveContext) { c.Now = at(3) }))
-	eq(t, r.To, "no_show")
-}
-
-func TestCloseStale(t *testing.T) {
-	eq(t, code(Transition(ride("on_the_way", nil), "close_stale", with("close_stale", func(c *MoveContext) { c.Now = at(179) }))), "not_stale")
-	r, _ := Transition(ride("in_ride", nil), "close_stale", okContext("close_stale"))
-	eq(t, r.To, "completed")
-	r, _ = Transition(ride("arrived", nil), "close_stale", okContext("close_stale"))
-	eq(t, r.To, "cancelled")
-}
-
-func TestPaymentStatus(t *testing.T) {
-	for _, c := range [][3]string{
-		{"upi", "cash", "paid"},
-		{"cash", "cash", "paid"},
-		{"", "upi", "paid"},
-		{"upi", "", "paid_by_rider"},
-		{"", "not_paid", "unpaid"},
-		{"cash", "not_paid", "disputed"},
-		{"", "", "unmarked"},
-	} {
-		eq(t, PaymentStatus(c[0], c[1]), c[2], c)
+func TestNoShowOpening(t *testing.T) {
+	pickup := istAt(18, 8, 30)
+	late := istAt(18, 8, 33)
+	if got := NoShowOpensAt(pickup, &late); !got.Equal(istAt(18, 8, 43)) {
+		t.Errorf("late arrival: %v", got)
+	}
+	early := istAt(18, 8, 20)
+	if got := NoShowOpensAt(pickup, &early); !got.Equal(istAt(18, 8, 40)) {
+		t.Errorf("early arrival: %v", got)
+	}
+	if got := NoShowOpensAt(pickup, nil); !got.Equal(istAt(18, 8, 40)) {
+		t.Errorf("no arrival: %v", got)
 	}
 }
 
-func TestEtaAndLateFlag(t *testing.T) {
-	eq(t, EtaMinutes(1), 5) // 1.85 km at 22 km/h ≈ 5 min
-	eq(t, EtaMinutes(0), 1)
-	// The doc example: at 8:36 an ETA of 15 minutes means late.
-	eq(t, IsLate(at(-4), 15, at(5)), true)
-	eq(t, IsLate(at(-4), 14, at(5)), false)
+func TestOnMyWayAndCheckTimes(t *testing.T) {
+	pickup := istAt(18, 8, 30)
+	if !OnMyWayOpensAt(pickup).Equal(istAt(18, 7, 30)) {
+		t.Error("on my way opens at 07:30")
+	}
+	if !CheckAt(pickup).Equal(istAt(18, 8, 15)) {
+		t.Error("check at 08:15")
+	}
+	if CheckIsTooLate(pickup, istAt(18, 8, 29)) || !CheckIsTooLate(pickup, istAt(18, 8, 30)) {
+		t.Error("too late from pickup on")
+	}
+	if !StaleAt(pickup).Equal(istAt(18, 12, 30)) {
+		t.Error("stale at 12:30")
+	}
 }
 
-func TestNewPin(t *testing.T) {
-	for range 50 {
+func TestReminderTimesAcrossMidnight(t *testing.T) {
+	// Ride on Wed 18 Nov: reminder Tue 17 Nov 20:00, too late from 23:00.
+	date := time.Date(2026, 11, 18, 0, 0, 0, 0, time.UTC)
+	if got := ReminderDueAt(date, ist); !got.Equal(istAt(17, 20, 0)) {
+		t.Errorf("due %v", got)
+	}
+	if got := ReminderTooLateAt(date, ist); !got.Equal(istAt(17, 23, 0)) {
+		t.Errorf("too late %v", got)
+	}
+	// A ride on 1 Dec: reminder on 30 Nov.
+	dec := time.Date(2026, 12, 1, 0, 0, 0, 0, time.UTC)
+	if got := ReminderDueAt(dec, ist); !got.Equal(istAt(30, 20, 0)) {
+		t.Errorf("month boundary %v", got)
+	}
+	if got := PaymentMarksCloseAt(date, ist); !got.Equal(istAt(19, 0, 0)) {
+		t.Errorf("marks close %v", got)
+	}
+}
+
+func TestEta(t *testing.T) {
+	if got := EtaMinutes(0, 18); got != 1 {
+		t.Errorf("zero distance: %d", got)
+	}
+	// 3 km straight → 4.2 km road at 18 km/h = 14 min.
+	if got := EtaMinutes(3, 18); got != 14 {
+		t.Errorf("3 km: %d", got)
+	}
+	km := HaversineKm(12.9352, 77.6245, 12.9698, 77.7178)
+	if km < 10.7 || km > 10.9 {
+		t.Errorf("Koramangala → Whitefield %.2f km", km)
+	}
+	if got := EtaMinutes(km, 18); got != 51 {
+		t.Errorf("Koramangala → Whitefield ETA %d", got)
+	}
+}
+
+func TestPin(t *testing.T) {
+	re := regexp.MustCompile(`^[0-9]{4}$`)
+	seen := map[string]bool{}
+	for range 200 {
 		p := NewPin()
-		if len(p) != 4 {
-			t.Fatalf("pin %q", p)
+		if !re.MatchString(p) {
+			t.Fatalf("bad pin %q", p)
+		}
+		seen[p] = true
+	}
+	if len(seen) < 100 {
+		t.Errorf("pins not random enough: %d distinct of 200", len(seen))
+	}
+}
+
+func TestBusyUntil(t *testing.T) {
+	if got := BusyUntil(istAt(18, 8, 30), 51); !got.Equal(istAt(18, 9, 31)) {
+		t.Errorf("busy until %v", got)
+	}
+}
+
+func TestPaymentStatus(t *testing.T) {
+	cases := [][3]string{{"", "", "unmarked"}, {"upi", "", "paid_by_rider"}, {"", "cash", "paid"}, {"", "not_paid", "unpaid"}, {"upi", "not_paid", "disputed"}}
+	for _, c := range cases {
+		if got := PaymentStatus(c[0], c[1]); got != c[2] {
+			t.Errorf("%v: %s", c, got)
 		}
 	}
 }

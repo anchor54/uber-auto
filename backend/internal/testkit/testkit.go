@@ -50,7 +50,8 @@ type config struct {
 }
 
 // WithSeed picks the seed: "spec" (default; the doc's Integration tests
-// seed), "d1" (the D1 doc's seed: config and plans, rider Priya, the admin
+// seed), "r2" (the R2+D3 doc's seed: Priya's and Ankit's active series
+// with Ravi, the live drivers, the admin, no rides), "d1" (the D1 doc's seed: config and plans, rider Priya, the admin
 // "Admin"; no drivers) or "empty" (config only: ride types, fare rules and
 // plans, no users).
 func WithSeed(name string) Option { return func(c *config) { c.seed = name } }
@@ -160,6 +161,17 @@ func Start(t *testing.T, opts ...Option) *Env {
 		ids, err := seed.D1(ctx, pool)
 		if err != nil {
 			t.Fatalf("testkit: d1 seed: %v", err)
+		}
+		for name, id := range ids {
+			env.users[name] = id
+			env.names[id] = name
+		}
+	case "r2":
+		// R2+D3: the spec people, the admin, Priya's and Ankit's active
+		// series with Ravi; no rides (the sweeper makes them).
+		ids, err := seed.R2(ctx, pool)
+		if err != nil {
+			t.Fatalf("testkit: r2 seed: %v", err)
 		}
 		for name, id := range ids {
 			env.users[name] = id
