@@ -1,0 +1,9 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/rider/test/flows/r1_flow_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens
+00:03 +1: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens
+00:05 +2: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r1_screenshots_test.dart: R1 screens
+00:05 +3: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r2_screenshots_test.dart: R2 normal leg
+00:07 +4: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r2_screenshots_test.dart: R2 normal leg
+00:07 +5: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r2_screenshots_test.dart: R2 normal leg
+00:07 +6: /home/runner/work/uber-auto/uber-auto/apps/rider/test/screenshots/r2_screenshots_test.dart: R2 late driver and no-show
+00:13 +7: All tests passed!
