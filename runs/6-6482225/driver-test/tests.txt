@@ -1,0 +1,518 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on small phone 360x640
+00:01 +1: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on iPhone 14 390x844
+00:01 +2: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on Pixel 7 412x915
+00:02 +3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, then withdrawn: the window closes with no win
+00:02 +4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 interested, another driver picked: result card, no rides
+00:03 +5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 survives the slow network used in demo mode
+00:03 +6: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart
+00:04 +6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 sign up → documents → vehicle → day off → approved → paid → live on small phone 360x640
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:887:30)
+#2      WidgetController.dragUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2488:38)
+<asynchronous suspension>
+#3      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#4      WidgetController.scrollUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2438:7)
+<asynchronous suspension>
+#5      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#6      D1Robot.scrollTo (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:411:36)
+<asynchronous suspension>
+#7      d1HappyPath (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:679:3)
+<asynchronous suspension>
+#8      main.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart:22:7)
+<asynchronous suspension>
+#9      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  D1 sign up → documents → vehicle → day off → approved → paid → live on small phone 360x640
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +6 -1: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 sign up → documents → vehicle → day off → approved → paid → live on small phone 360x640 [E]
+  Test failed. See exception logs above.
+  The test description was: D1 sign up → documents → vehicle → day off → approved → paid → live on small phone 360x640
+  
+00:07 +6 -1: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 sign up → documents → vehicle → day off → approved → paid → live on iPhone 14 390x844
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:887:30)
+#2      WidgetController.dragUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2488:38)
+<asynchronous suspension>
+#3      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#4      WidgetController.scrollUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2438:7)
+<asynchronous suspension>
+#5      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#6      D1Robot.scrollTo (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:411:36)
+<asynchronous suspension>
+#7      d1HappyPath (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:679:3)
+<asynchronous suspension>
+#8      main.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart:22:7)
+<asynchronous suspension>
+#9      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  D1 sign up → documents → vehicle → day off → approved → paid → live on iPhone 14 390x844
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +6 -2: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 sign up → documents → vehicle → day off → approved → paid → live on iPhone 14 390x844 [E]
+  Test failed. See exception logs above.
+  The test description was: D1 sign up → documents → vehicle → day off → approved → paid → live on iPhone 14 390x844
+  
+00:08 +6 -2: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 survives the slow network used in demo mode
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:887:30)
+#2      WidgetController.dragUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2488:38)
+<asynchronous suspension>
+#3      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#4      WidgetController.scrollUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2438:7)
+<asynchronous suspension>
+#5      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#6      D1Robot.scrollTo (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:411:36)
+<asynchronous suspension>
+#7      d1HappyPath (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:679:3)
+<asynchronous suspension>
+#8      main.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart:35:5)
+<asynchronous suspension>
+#9      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  D1 survives the slow network used in demo mode
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:09 +6 -3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 survives the slow network used in demo mode [E]
+  Test failed. See exception logs above.
+  The test description was: D1 survives the slow network used in demo mode
+  
+00:09 +6 -3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 changes needed: the licence is rejected, replaced, submitted again, then approved
+00:11 +7 -3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 rejected: the reason, Contact support, no plan
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following ApiException was thrown while running async test code:
+ApiException(not_approved): Your plan shows once you're approved.
+
+When the exception was thrown, this was the stack:
+#0      FakeDriverApi._quote (package:driver/core/fake_api.dart:745:7)
+#1      FakeDriverApi.plan (package:driver/core/fake_api.dart:768:12)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      D1Robot.call (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:364:55)
+<asynchronous suspension>
+#4      Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#5      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+<asynchronous suspension>
+#7      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#8      main.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart:104:5)
+<asynchronous suspension>
+#9      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#10     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: throws <Instance of 'ApiException'> with `code`: 'not_approved'
+  Actual: <Instance of 'Future<PlanQuote>'>
+   Which: threw _TypeError:<type 'Null' is not a subtype of type 'PlanQuote' in type cast>
+          stack test/helpers/d1_robot.dart 364:81                   D1Robot.call
+                ===== asynchronous gap ===========================
+                package:matcher                                     expectLater
+                package:flutter_test/src/widget_tester.dart 507:8   expectLater
+                test/flows/d1_flow_test.dart 104:11                 main.<fn>
+                ===== asynchronous gap ===========================
+                dart:async                                          Zone.registerUnaryCallback
+                test/flows/d1_flow_test.dart 95:19                  main.<fn>
+                package:flutter_test/src/widget_tester.dart 192:29  testWidgets.<fn>.<fn>
+                ===== asynchronous gap ===========================
+                dart:async                                          Zone.registerUnaryCallback
+                package:flutter_test/src/widget_tester.dart 189:25  testWidgets.<fn>.<fn>
+                package:flutter_test/src/binding.dart 1968:19
+TestWidgetsFlutterBinding._runTestBody
+                ===== asynchronous gap ===========================
+                dart:async                                          Zone.registerUnaryCallback
+                package:flutter_test/src/binding.dart 1962:5
+TestWidgetsFlutterBinding._runTestBody
+                dart:async                                          Zone.runBinary
+                package:flutter_test/src/binding.dart 1942:10
+TestWidgetsFlutterBinding._runTest
+                package:flutter_test/src/binding.dart 2598:24
+AutomatedTestWidgetsFlutterBinding.runTest.<fn>
+                package:fake_async/fake_async.dart 182:47           FakeAsync.run.<fn>.<fn>
+                dart:async                                          runZoned
+                package:clock/src/default.dart 52:10                withClock
+                package:fake_async/fake_async.dart 182:15           FakeAsync.run.<fn>
+                dart:async                                          runZoned
+                package:fake_async/fake_async.dart 181:52           FakeAsync.run
+                package:flutter_test/src/binding.dart 2595:15
+AutomatedTestWidgetsFlutterBinding.runTest
+                package:flutter_test/src/widget_tester.dart 184:24  testWidgets.<fn>
+
+          which is not an instance of 'ApiException'
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:155:13)
+<asynchronous suspension>
+<asynchronous suspension>
+#6      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#7      main.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart:104:5)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 5 frames from package:stack_trace)
+
+The test description was:
+  D1 rejected: the reason, Contact support, no plan
+════════════════════════════════════════════════════════════════════════════════════════════════════
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:12 +7 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 rejected: the reason, Contact support, no plan [E]
+  Test failed. See exception logs above.
+  The test description was: D1 rejected: the reason, Contact support, no plan
+  
+00:12 +7 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d1_flow_test.dart: D1 a payment the admin could not find: claim again, then live
+00:13 +8 -4: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart
+00:13 +8 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend signup: signing_up with a DRV-nnnnn reference, every document missing
+00:13 +9 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend items: upload_url under driver-docs/<id>/; uploaded items count; bad type, bad UPI refused
+00:13 +10 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend vehicle and day off: the plate is upper-cased; day off ISO or none
+00:13 +11 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend submit with two documents missing: 409 incomplete; still signing_up
+00:13 +12 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend submitted: locked; plan and claim not_approved
+00:13 +13 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend a rejected item: changes_needed, only it can be replaced, submit again
+00:13 +14 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend approved → plan → claim → confirmed: live until the period ends
+00:13 +15 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend a rejected claim can be claimed again
+00:13 +16 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/d1_driver_api_contract_test.dart: D1 on demo backend rejected for good: the reason; no plan
+00:14 +17 -4: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart
+00:14 +17 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend (setUpAll)
+00:14 +17 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend a wrong code is invalid_code
+00:14 +18 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend offers.list shows a new request with its terms; offer.get agrees
+00:14 +19 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+00:14 +20 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend Not for me: dismissed requests leave the list
+00:14 +21 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend interested when the window closes: picked, a result card, new rides in the week
+00:14 +22 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend a late tap is 409 offer_closed with the offer as state
+00:14 +23 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend an offer the driver never received is not_found
+00:14 +24 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend (tearDownAll)
+00:14 +24 -4: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart
+00:15 +24 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 header, seven rows with names and hints, note, button
+00:15 +25 -4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 Upload offers camera or gallery, shows a preview, then "Uploaded" with Replace
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: at least one matching candidate
+  Actual: _TextContainingWidgetFinder:<Found 0 widgets with text containing RegExp: pattern=camera
+flags=i: []>
+   Which: means none were found but some were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart:45:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart line 45
+The test description was:
+  D1.2 Upload offers camera or gallery, shows a preview, then "Uploaded" with Replace
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:16 +25 -5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 Upload offers camera or gallery, shows a preview, then "Uploaded" with Replace [E]
+  Test failed. See exception logs above.
+  The test description was: D1.2 Upload offers camera or gallery, shows a preview, then "Uploaded" with Replace
+  
+00:16 +25 -5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 from the gallery works too
+00:16 +26 -5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 cancelling the picker changes nothing
+00:16 +27 -5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 a failed upload: "Upload failed. Try again." in the row; trying again works
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "0 of 7 added": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart:96:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart line 96
+The test description was:
+  D1.2 a failed upload: "Upload failed. Try again." in the row; trying again works
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:16 +27 -6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 a failed upload: "Upload failed. Try again." in the row; trying again works [E]
+  Test failed. See exception logs above.
+  The test description was: D1.2 a failed upload: "Upload failed. Try again." in the row; trying again works
+  
+00:16 +27 -6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 a photo over 5 MB is refused and nothing is saved
+00:17 +28 -6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 UPI ID: Add, then saved and counted
+00:17 +29 -6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 all seven: "7 of 7 added"
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.element (package:flutter_test/src/controller.dart:887:30)
+#2      WidgetController.dragUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2488:38)
+<asynchronous suspension>
+#3      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#4      WidgetController.scrollUntilVisible.<anonymous closure> (package:flutter_test/src/controller.dart:2438:7)
+<asynchronous suspension>
+#5      TestAsyncUtils.guard.<anonymous closure> (package:flutter_test/src/test_async_utils.dart:130:27)
+<asynchronous suspension>
+#6      D1Robot.scrollTo (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/helpers/d1_robot.dart:411:36)
+<asynchronous suspension>
+#7      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart:132:7)
+<asynchronous suspension>
+#8      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  D1.2 all seven: "7 of 7 added"
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:18 +29 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 all seven: "7 of 7 added" [E]
+  Test failed. See exception logs above.
+  The test description was: D1.2 all seven: "7 of 7 added"
+  
+00:18 +29 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 an item uploaded earlier shows "Uploaded" when the screen opens
+00:18 +30 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 "Continue to vehicle" is enabled with items missing
+00:18 +31 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 changes needed: "Fix" with the reason; verified rows locked; the rejected one can be replaced
+00:19 +32 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 after submit: read only, no Replace
+00:19 +33 -7: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart
+00:19 +33 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 copy: step, title, line, seven chips and "No fixed day off", note, button
+00:20 +34 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 nothing is pre-selected and a choice is required
+00:20 +35 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 single choice: the last tapped day wins; submit → D1.5
+00:20 +36 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 "No fixed day off" is a choice
+00:20 +37 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_4_day_off_test.dart: D1.4 Day off D1.4 incomplete: a sheet lists the missing items, each opening its screen
+00:20 +38 -7: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart
+00:21 +38 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 copy: step, title, benefits, fields, terms, buttons
+00:22 +39 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 Get code needs a 2+ character name, 10 digits and the tick
+00:22 +40 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 without the tick, Get code does nothing
+00:22 +41 -7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 a wrong code: "That code didn't match" under the field
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "That code didn't match": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart:77:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1968:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart line 77
+The test description was:
+  D1.1 a wrong code: "That code didn't match" under the field
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:23 +41 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 a wrong code: "That code didn't match" under the field [E]
+  Test failed. See exception logs above.
+  The test description was: D1.1 a wrong code: "That code didn't match" under the field
+  
+00:23 +41 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 the right code registers the driver and opens D1.2
+00:23 +42 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 "Already registered? Log in" goes to sign-in
+00:24 +43 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_6_plan_test.dart
+00:24 +43 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_6_plan_test.dart: D1.6 Plan D1.6 copy: title, the auto plan card, the note
+00:25 +44 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_6_plan_test.dart: D1.6 Plan D1.6 "Continue to payment" opens D1.7
+00:25 +45 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart
+00:25 +45 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 copy: step, title, types, fields, switches, tiles, note
+00:26 +46 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 Cab adds Hatchback / Sedan / SUV and the Working AC switch
+00:26 +47 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 an auto with three photos: saved, plate upper-cased, then D1.4
+00:27 +48 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 a sedan cab
+00:28 +49 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 a photo tile takes, then replaces, its photo
+00:28 +50 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_3_vehicle_test.dart: D1.3 Vehicle D1.3 opens with the saved vehicle
+00:28 +51 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart
+00:29 +51 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 submitted: "We're checking your details", everything waiting
+00:29 +52 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 changes needed: the rejected item, its reason and "Fix now"
+00:29 +53 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 changes needed: "Submit again" does nothing until the item is replaced
+00:29 +54 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 "Fix now" opens the documents screen at the rejected item
+00:29 +55 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 fixed via "Fix now": back on D1.5, "Submit again" → submitted
+00:30 +56 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 replaced before opening: "Submit again" submits
+00:30 +57 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 a rejected vehicle: the Vehicle row says "Fix"; "Fix now" opens D1.3
+00:30 +58 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 approved: "You're approved", all verified, approval done, "Choose your plan"
+00:30 +59 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 rejected: "We can't approve you", the reason and Contact support only
+00:30 +60 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_5_verification_test.dart: D1.5 Verification D1.5 reads driver.get each time it opens
+00:30 +61 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart
+00:31 +61 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 header and bottom bar
+00:32 +62 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 series request card
+00:32 +63 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the countdown chip counts down on the clock
+00:32 +64 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 one-ride card, compact
+00:33 +65 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 newest first
+00:33 +66 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 "I'm interested" turns into "Interested" and says when we'll tell
+00:33 +67 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 "Not for me" hides the request for good
+00:34 +68 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 a win shows the green banner until tapped, which opens D2.3
+00:34 +69 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 not picked: "Went to another driver", kept 24 hours
+00:34 +70 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the rider withdrew: "The rider withdrew this request"
+00:35 +71 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 no result card for a request the driver was not interested in
+00:35 +72 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 empty state
+00:35 +73 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_1_requests_test.dart: D2.1 Requests D2.1 the list empties once every window has passed
+00:35 +74 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart
+00:36 +74 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 before I've paid: plan, amount now, UPI ID and reference, the button
+00:36 +75 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 Copy puts the UPI ID and the reference on the clipboard
+00:37 +76 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 after I've paid: "Checking your payment" (disabled) and "Paid on …"
+00:37 +77 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 opened with a claim in: the waiting state
+00:37 +78 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: D1.7 Pay D1.7 a rejected claim: the orange note with the reason; "I've paid" works again
+00:37 +79 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_7_pay_test.dart: Going live Requests: the green "You're live" banner and the empty state
+00:37 +80 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart
+00:37 +80 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 header: rider, start date, ride type, rating, route and trip time
+00:39 +81 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 schedule table: Days, Pickup, "Drop, about", grouped by equal times
+00:39 +82 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 earnings: fare per ride, rides a month, usual payment
+00:39 +83 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 before interest: countdown, "Not for me" and "I'm interested"
+00:40 +84 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 after interest: the panel, the note and "Not interested any more"
+00:40 +85 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 withdrawing interest before the window closes
+00:40 +86 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 interest shows on the D2.1 card on the way back
+00:40 +87 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 "Not for me" hides the request and goes back to the list
+00:41 +88 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 after the window closes the button reads "Closed"
+00:41 +89 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_2_request_detail_test.dart: D2.2 Request detail D2.2 a late tap gets 409 offer_closed and the screen redraws as "Closed"
+00:41 +90 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart
+00:42 +90 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 header: week range and ride count
+00:43 +91 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 win banner names the rider and the start date
+00:43 +92 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 the new rider has a row tagged "New rider" with rides on their days
+00:44 +93 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 free time and buttons
+00:44 +94 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 Your week D2.3 rides.week: the won rides from the start date, flagged new, 14 days ahead
+00:44 +95 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d2_3_week_test.dart: D2.3 opened from the bottom bar without a win shows no banner
+00:44 +96 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart
+00:45 +96 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register signup: signing_up, a DRV-nnnnn reference, every item missing
+00:45 +97 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register "Bengaluru" is accepted as the city
+00:45 +98 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register 422 terms_not_accepted, invalid_name, city_not_served; 409 already_registered
+00:45 +99 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register a rider's number: 409 phone_in_use_as_rider
+00:45 +100 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.register offers are 403 not_eligible until live
+00:45 +101 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items upload_url: a path under driver-docs/<driver id>/, 5 MB, JPEG or PNG only
+00:45 +102 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items an uploaded document is "uploaded" and counts towards {n} of 7 added
+00:45 +103 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items uploading again replaces the item (same path) until submit
+00:45 +104 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items over 5 MB: file_too_large, nothing saved
+00:45 +105 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items UPI ID: name@handle, counted as the seventh document
+00:45 +106 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items all six photos and the UPI ID: 7 of 7 added
+00:45 +107 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle: the plate is upper-cased; the type is saved
+00:45 +108 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle: a cab with its class; 422 bad_vehicle_type
+00:45 +109 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle: another driver's plate, in lower case and without spaces, is 409 plate_in_use
+00:45 +110 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items vehicle photos are items too
+00:45 +111 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: items day off: one ISO weekday, or none ("No fixed day off")
+00:45 +112 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit missing items: 409 incomplete listing them; still signing_up
+00:45 +113 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit without a vehicle or a day off: incomplete
+00:45 +114 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit complete: submitted, and everything is locked
+00:45 +115 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: driver.submit plans.get and claim_payment before approval: 409 not_approved
+00:45 +116 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review a rejected item: changes_needed with the reason; the rest verified
+00:45 +117 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review changes_needed: only the rejected item can be replaced; submit again keeps verified items
+00:45 +118 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review changes_needed: submit before replacing is 409 incomplete
+00:45 +119 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review a rejected vehicle: its details can be set again
+00:45 +120 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review approve: approved, every item verified
+00:45 +121 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: review reject: rejected for good with the reason; no plan, no claim
+00:45 +122 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment plans.get on Sat 21 Nov: the auto plan, 10 of 30 days due now, rounded up
+00:45 +123 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment I've paid: a claimed payment for the period; twice is 409 already_claimed
+00:45 +124 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment confirmed: live until 30 Nov, eligible, offers readable
+00:45 +125 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: plan and payment a rejected claim: the reason shows and the driver can claim again
+00:45 +126 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: approved on the last day of the month: one day due
+00:45 +127 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_fake_api_test.dart: a 31-day month: 1 Dec is 31 of 31 days, the whole price
+00:45 +128 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart
+00:46 +128 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: driver sign-in uses /v1/driver/auth/* and saves the token
+00:46 +129 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: 403 not_a_driver on sign-in
+00:46 +130 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offers.list: GET /v1/offers maps offers and result cards
+00:46 +131 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offers.list: 403 not_eligible
+00:46 +132 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: offer.get: GET /v1/offers/{id}; a closing offer cannot be answered
+00:46 +133 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: mark-interested, withdraw-interest and dismiss are POSTs answered 204
+00:46 +134 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: a late tap: 409 offer_closed carries the offer as state
+00:46 +135 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: rides.week: GET /v1/rides/week?start=… maps rides and the new flag
+00:46 +136 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/http_api_test.dart: rides.week without a start lets the server pick this week
+00:46 +137 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart
+00:47 +137 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.register: POST /v1/driver/signup {name, city, terms_accepted}
+00:47 +138 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.register: 409 phone_in_use_as_rider and already_registered; 422 terms_not_accepted
+00:47 +139 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: GET /v1/driver maps status, items, reasons, vehicle, day off
+00:47 +140 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: every status maps
+00:47 +141 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: a missing item, no vehicle yet, no day off
+00:47 +142 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get: rejected with a reason; live with subscription_until and the latest payment
+00:47 +143 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.get before signup: 404 not_registered
+00:47 +144 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.upload_url: POST /v1/driver/upload-url {kind, content_type}
+00:47 +145 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument upload-url, PUT the bytes to the signed link, then PUT /v1/driver/documents/{kind}
+00:47 +146 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument the store refuses the file: an ApiException, and the item is not marked uploaded
+00:47 +147 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument 409 locked from upload-url
+00:47 +148 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: uploadDocument 403 not_your_path from documents/{kind}
+00:47 +149 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_upi: PUT /v1/driver/upi {upi_id}; 422 bad_upi
+00:47 +150 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_vehicle: PUT /v1/driver/vehicle with every field
+00:47 +151 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_vehicle: a cab sends its class; 409 plate_in_use
+00:47 +152 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.set_day_off: PUT /v1/driver/day-off {day_off: 1..7 | null}
+00:47 +153 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.submit: POST /v1/driver/submit → submitted
+00:47 +154 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.submit: 409 incomplete keeps the driver (with missing) as state
+00:47 +155 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: plans.get: GET /v1/driver/plan maps price, amount due, period and reference
+00:47 +156 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: plans.get: 409 not_approved
+00:47 +157 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.claim_payment (I've paid): POST /v1/driver/payments → claimed
+00:47 +158 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.claim_payment with a period sends period_start
+00:47 +159 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: driver.claim_payment: 409 already_claimed; a rejected payment maps its reason
+00:47 +160 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/d1_http_api_test.dart: 409 locked carries the driver as state
+00:47 +161 -8: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart
+00:47 +161 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: sign-in takes only the demo code
+00:47 +162 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: the seed: a series offer with a 15-minute window and a one-ride offer with 5
+00:47 +163 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: empty when not seeded
+00:47 +164 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: mark and withdraw interest; marking twice or withdrawing without interest is a no-op
+00:47 +165 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: after expires_at: 409 offer_closed with the offer as state; canRespond false
+00:47 +166 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: dismiss: gone from the list for good; offer.get on an unknown id is not_found
+00:47 +167 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: interested when the window passes: picked, a result card and rides flagged new
+00:47 +168 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: goesToAnotherDriver: "Went to another driver", kept 24 hours
+00:47 +169 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: riderWithdraws: "The rider withdrew this request"
+00:47 +170 -8: /home/runner/work/uber-auto/uber-auto/apps/driver/test/core/fake_api_test.dart: a request the driver ignored leaves no result card
+00:47 +171 -8: Some tests failed.
+
+Failing tests:
+  /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_1_sign_up_test.dart: D1.1 Sign up D1.1 a wrong code: "That code didn't match" under the field
+  /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 Upload offers camera or gallery, shows a preview, then "Uploaded" with Replace
+  /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 a failed upload: "Upload failed. Try again." in the row; trying again works
+  /home/runner/work/uber-auto/uber-auto/apps/driver/test/features/d1_2_documents_test.dart: D1.2 Documents D1.2 all seven: "7 of 7 added"
+  ... and 4 more
