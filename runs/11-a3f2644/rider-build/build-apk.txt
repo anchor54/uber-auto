@@ -1,0 +1,60 @@
+Running Gradle task 'assembleRelease'...                        
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Settings file '/home/runner/work/uber-auto/uber-auto/apps/rider/android/settings.gradle.kts' line: 20
+
+* What went wrong:
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> A problem occurred configuring project ':gradle'.
+   > Could not resolve all artifacts for configuration 'classpath'.
+      > Could not resolve org.jetbrains.kotlin:kotlin-stdlib:2.2.21.
+        Required by:
+            buildscript of project ':gradle'
+         > Repository Gradle Central Plugin Repository is disabled due to earlier error below:
+            > Could not resolve org.jetbrains.kotlin:kotlin-gradle-plugins-bom:2.2.20.
+               > Could not get resource 'https://plugins.gradle.org/m2/org/jetbrains/kotlin/kotlin-gradle-plugins-bom/2.2.20/kotlin-gradle-plugins-bom-2.2.20.pom'.
+                  > Could not GET 'https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-gradle-plugins-bom/2.2.20/kotlin-gradle-plugins-bom-2.2.20.pom'. Received status code 429 from server: Too Many Requests
+> There are 6 more failures with identical causes.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 29s
+Running Gradle task 'assembleRelease'...                           31.7s
+[!] Gradle threw an error while downloading artifacts from the network.
+Retrying Gradle Build: #1, wait time: 100ms
+Running Gradle task 'assembleRelease'...                        
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Settings file '/home/runner/work/uber-auto/uber-auto/apps/rider/android/settings.gradle.kts' line: 20
+
+* What went wrong:
+Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+> A problem occurred configuring project ':gradle'.
+   > Could not resolve all artifacts for configuration 'classpath'.
+      > Could not resolve org.jetbrains.kotlin:kotlin-stdlib:2.2.21.
+        Required by:
+            buildscript of project ':gradle'
+         > Repository Gradle Central Plugin Repository is disabled due to earlier error below:
+            > Could not resolve org.jetbrains.kotlin:kotlin-gradle-plugins-bom:2.2.20.
+               > Could not get resource 'https://plugins.gradle.org/m2/org/jetbrains/kotlin/kotlin-gradle-plugins-bom/2.2.20/kotlin-gradle-plugins-bom-2.2.20.pom'.
+                  > Could not GET 'https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-gradle-plugins-bom/2.2.20/kotlin-gradle-plugins-bom-2.2.20.pom'. Received status code 429 from server: Too Many Requests
+> There are 6 more failures with identical causes.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 6s
+Running Gradle task 'assembleRelease'...                            6.9s
+[!] Gradle threw an error while downloading artifacts from the network.
+Gradle task assembleRelease failed with exit code 1
