@@ -108,11 +108,15 @@ class DriverRobot {
   }
 
   /// The seeded series request (the newest series offer).
-  Future<Offer> seriesOffer() async =>
-      (await api.offers()).offers.firstWhere((o) => o.kind == OfferKind.series);
+  Future<Offer> seriesOffer() async => (await _offers()).offers.firstWhere((o) => o.kind == OfferKind.series);
 
   /// The seeded one-ride offer.
-  Future<Offer> rideOffer() async => (await api.offers()).offers.firstWhere((o) => o.kind == OfferKind.ride);
+  Future<Offer> rideOffer() async => (await _offers()).offers.firstWhere((o) => o.kind == OfferKind.ride);
+
+  /// Reads the offers outside the test's fake clock. With the demo latency
+  /// on, the backend waits on a timer, and awaiting it directly in the test
+  /// body would hang: nothing advances fake time while the test awaits.
+  Future<OfferList> _offers() async => (await tester.runAsync(() => api.offers()))!;
 
   Future<void> interested(Offer o) => tap('requests.interested.${o.id}');
 
