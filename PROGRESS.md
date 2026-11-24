@@ -8,7 +8,7 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 | Feature | Backend | Apps | Commit |
 |---|---|---|---|
 | R1+D2 Create a series, get a driver | done (30 integration tests green) | done (rider + driver CI green incl. emulator, APK, web) | done |
-| D1 Driver registration and subscription | in progress | – | – |
+| D1 Driver registration and subscription | done (37 tests; 66 total green) | in progress | backend committed |
 | R2+D3 Daily ride | – | – | – |
 | R3 Skip, change, pause | – | – | – |
 | R4+D4 Driver can't make it, time off | – | – | – |
@@ -23,10 +23,13 @@ Per feature: backend (test-writer + implementer subagents, run here against Post
 | R1+D2 backend implementer | 331,786 |
 | R1+D2 app test writer | 279,322 |
 | R1+D2 app implementer | 493,884 |
+| D1 backend test writer | 157,388 (post-cutoff part only) |
+| D1 backend implementer | 231,403 (post-cutoff part only) |
 
 Cutoff: 5-hour limit hit ~23:58 IST 23 Nov during R1+D2 apps; resumed 05:07 IST 24 Nov.
 
 ## Spec rulings (orchestrator)
+- D1: first payment period = today to month end; null day_off valid; wrong code may be invalid_code; rider phone → 409 phone_in_use_as_rider at signup.
 - R1: the start date is the first chosen weekday from tomorrow on. R1-I1's "Mon 23 Nov" is treated as a spec error.
 - R1: rides are created for 14 days counted from the start date (Backend section), not the R1-I3 row's dates.
 - Seed: Koramangala is (12.9352, 77.6245) and Whitefield is (12.9698, 77.7178).

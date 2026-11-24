@@ -163,6 +163,8 @@ type Error struct {
 	Code    string
 	Message string
 	State   any
+	// Extra fields written next to code, message and state (e.g. "missing").
+	Extra map[string]any
 }
 
 func (e *Error) Error() string { return e.Code + ": " + e.Message }

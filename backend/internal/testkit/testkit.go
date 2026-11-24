@@ -25,10 +25,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"commute-backend/internal/clock"
+	"commute-backend/internal/drivers"
 	"commute-backend/internal/httpapi"
 	"commute-backend/internal/notify"
 	"commute-backend/internal/offers"
 	"commute-backend/internal/seed"
+	"commute-backend/internal/storage"
 	"commute-backend/internal/store"
 	"commute-backend/internal/sweeper"
 )
@@ -48,7 +50,9 @@ type config struct {
 }
 
 // WithSeed picks the seed: "spec" (default; the doc's Integration tests
-// seed) or "empty" (config only: ride types and fare rules, no users).
+// seed), "d1" (the D1 doc's seed: config and plans, rider Priya, the admin
+// "Admin"; no drivers) or "empty" (config only: ride types, fare rules and
+// plans, no users).
 func WithSeed(name string) Option { return func(c *config) { c.seed = name } }
 
 // WithShuffle fixes the pick order: driver first names, first tried first.
@@ -63,7 +67,10 @@ type Env struct {
 	Push    *PushRecorder
 	// The services behind the API, for tests that need them directly.
 	Offers  *offers.Service
+	Drivers *drivers.Service
 	Sweeper *sweeper.Sweeper
+	// The in-memory file store behind the signed upload and read URLs.
+	Storage *storage.Local
 
 	mu    sync.Mutex
 	users map[string]uuid.UUID // by first name
@@ -148,18 +155,33 @@ func Start(t *testing.T, opts ...Option) *Env {
 			env.users[name] = id
 			env.names[id] = name
 		}
+	case "d1":
+		// D1: rider Priya, the admin, the plans (from Config); no drivers.
+		ids, err := seed.D1(ctx, pool)
+		if err != nil {
+			t.Fatalf("testkit: d1 seed: %v", err)
+		}
+		for name, id := range ids {
+			env.users[name] = id
+			env.names[id] = name
+		}
 	case "empty", "":
 	default:
 		t.Fatalf("testkit: unknown seed %q", cfg.seed)
 	}
 
+	env.Storage = &storage.Local{Secret: "testkit-storage-secret", Clock: env.Clock}
+	env.Drivers = &drivers.Service{DB: pool, Clock: env.Clock, Storage: env.Storage, RequireFile: true, Log: quiet}
 	api := &httpapi.Server{
-		DB: pool, Clock: env.Clock, Offers: env.Offers, Sweeper: env.Sweeper, City: seed.City,
+		DB: pool, Clock: env.Clock, Offers: env.Offers, Drivers: env.Drivers, Storage: env.Storage,
+		Sweeper: env.Sweeper, City: seed.City,
 		FixedOTP: FixedOTP, OTPSecret: "testkit-otp-secret", OTPResendSeconds: 0, OTPMaxSendsPerHour: 1000,
 		OTPSender: httpapi.OTPSenderFunc(func(context.Context, string, string) error { return nil }),
 		Maps:      httpapi.DemoMaps(), Log: quiet,
 	}
-	srv := httptest.NewServer(api.Handler())
+	srv := httptest.NewUnstartedServer(api.Handler())
+	env.Storage.BaseURL = "http://" + srv.Listener.Addr().String()
+	srv.Start()
 	t.Cleanup(srv.Close)
 	env.BaseURL = srv.URL
 	return env

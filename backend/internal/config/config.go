@@ -14,10 +14,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"commute-backend/internal/clock"
+	"commute-backend/internal/drivers"
 	"commute-backend/internal/httpapi"
 	"commute-backend/internal/notify"
 	"commute-backend/internal/offers"
 	"commute-backend/internal/seed"
+	"commute-backend/internal/storage"
 	"commute-backend/internal/sweeper"
 )
 
@@ -129,6 +131,27 @@ func Build(ctx context.Context, c Config, getenv func(string) string, pool *pgxp
 		Maps: maps, MapStyle: style, CORSOrigins: c.CORSOrigins, SweepToken: c.SweepToken,
 		EnableDevRoutes: c.EnableDevRoutes, Log: log,
 	}
+	// Driver documents: kept by ride-api (in memory, or under STORAGE_DIR)
+	// behind signed URLs on PUBLIC_URL. Supabase Storage would sit behind
+	// the same storage.Storage interface.
+	secret := getenv("STORAGE_SECRET")
+	if secret == "" {
+		if c.Production {
+			return nil, errors.New("refusing to start in production without STORAGE_SECRET")
+		}
+		secret = "dev-only-storage-secret"
+	}
+	publicURL := getenv("PUBLIC_URL")
+	if publicURL == "" {
+		port := getenv("PORT")
+		if port == "" {
+			port = "8080"
+		}
+		publicURL = "http://localhost:" + port
+	}
+	files := &storage.Local{BaseURL: publicURL, Secret: secret, Dir: getenv("STORAGE_DIR"), Clock: clk}
+	api.Storage = files
+	api.Drivers = &drivers.Service{DB: pool, Clock: clk, Storage: files, RequireFile: true, Log: log}
 	if off, ok := clk.(*clock.Offset); ok {
 		api.DevClock = off
 	}

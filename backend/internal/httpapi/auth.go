@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"math"
 	"math/big"
@@ -15,6 +16,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"commute-backend/internal/offers"
 )
 
 type contextT = context.Context
@@ -185,8 +188,9 @@ type UserView struct {
 
 func (s *Server) userByPhone(ctx context.Context, phone string) (UserView, bool, error) {
 	var u UserView
-	err := s.DB.QueryRow(ctx, `select u.id, u.phone, u.role, coalesce(r.name, d.name, '') from users u
-		left join riders r on r.user_id = u.id left join drivers d on d.user_id = u.id where u.phone = $1`, phone).
+	err := s.DB.QueryRow(ctx, `select u.id, u.phone, u.role, coalesce(r.name, d.name, a.name, '') from users u
+		left join riders r on r.user_id = u.id left join drivers d on d.user_id = u.id
+		left join admins a on a.user_id = u.id where u.phone = $1`, phone).
 		Scan(&u.ID, &u.Phone, &u.Role, &u.Name)
 	if noRows(err) {
 		return u, false, nil
@@ -239,17 +243,14 @@ func (s *Server) authRoutes(handle func(string, handler)) {
 		return nil
 	})
 
+	// The driver app (D1 auth.start / auth.verify): any number gets a code; a
+	// new number gets a driver session with no profile yet (driver.register
+	// makes one). A rider's number also signs in here, and driver.register
+	// then refuses it with phone_in_use_as_rider.
 	handle("POST /v1/driver/auth/otp", func(w http.ResponseWriter, r *http.Request) error {
 		phone, err := parsePhone(r)
 		if err != nil {
 			return err
-		}
-		u, ok, err := s.userByPhone(r.Context(), phone)
-		if err != nil {
-			return err
-		}
-		if !ok || u.Role != "driver" {
-			return apiErr(403, "not_a_driver", "This number isn't registered as a driver.")
 		}
 		if err := s.sendCode(r.Context(), phone, "driver"); err != nil {
 			return err
@@ -263,20 +264,36 @@ func (s *Server) authRoutes(handle func(string, handler)) {
 			return err
 		}
 		if err := s.checkCode(r.Context(), phone, "driver", code); err != nil {
+			var oe *offers.Error
+			if errors.As(err, &oe) && oe.Code == "invalid_code" {
+				oe.Code, oe.Message = "wrong_code", "That code didn't match"
+			}
 			return err
 		}
 		u, ok, err := s.userByPhone(r.Context(), phone)
 		if err != nil {
 			return err
 		}
-		if !ok || u.Role != "driver" {
-			return apiErr(403, "not_a_driver", "This number isn't registered as a driver.")
+		if !ok {
+			if _, err := s.DB.Exec(r.Context(), `insert into users (phone, role) values ($1, 'driver') on conflict (phone) do nothing`, phone); err != nil {
+				return err
+			}
+			if u, _, err = s.userByPhone(r.Context(), phone); err != nil {
+				return err
+			}
 		}
-		token, err := s.newSession(r.Context(), u.ID, u.Role)
+		if u.Role == "admin" {
+			return apiErr(403, "not_a_driver", "This number is an admin account.")
+		}
+		var exists bool
+		if err := s.DB.QueryRow(r.Context(), "select exists (select 1 from drivers where user_id = $1)", u.ID).Scan(&exists); err != nil {
+			return err
+		}
+		token, err := s.newSession(r.Context(), u.ID, "driver")
 		if err != nil {
 			return err
 		}
-		writeJSON(w, 200, map[string]any{"token": token, "user": u})
+		writeJSON(w, 200, map[string]any{"token": token, "user": u, "driver_exists": exists})
 		return nil
 	})
 
@@ -286,8 +303,9 @@ func (s *Server) authRoutes(handle func(string, handler)) {
 			return err
 		}
 		var u UserView
-		err = s.DB.QueryRow(r.Context(), `select u.id, u.phone, u.role, coalesce(r.name, d.name, '') from users u
-			left join riders r on r.user_id = u.id left join drivers d on d.user_id = u.id where u.id = $1`, id).
+		err = s.DB.QueryRow(r.Context(), `select u.id, u.phone, u.role, coalesce(r.name, d.name, a.name, '') from users u
+			left join riders r on r.user_id = u.id left join drivers d on d.user_id = u.id
+			left join admins a on a.user_id = u.id where u.id = $1`, id).
 			Scan(&u.ID, &u.Phone, &u.Role, &u.Name)
 		if err != nil {
 			return err
@@ -360,6 +378,17 @@ func (s *Server) requireDriver(r *http.Request) (uuid.UUID, error) {
 	}
 	if role != "driver" {
 		return id, apiErr(403, "drivers_only", "This needs a driver account.")
+	}
+	return id, nil
+}
+
+func (s *Server) requireAdmin(r *http.Request) (uuid.UUID, error) {
+	id, role, err := s.requireUser(r)
+	if err != nil {
+		return id, err
+	}
+	if role != "admin" {
+		return id, apiErr(403, "admins_only", "This needs an admin account.")
 	}
 	return id, nil
 }

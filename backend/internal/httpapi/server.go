@@ -22,6 +22,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"commute-backend/internal/clock"
+	"commute-backend/internal/drivers"
 	"commute-backend/internal/offers"
 	"commute-backend/internal/scheduling"
 	"commute-backend/internal/sweeper"
@@ -32,8 +33,12 @@ type Server struct {
 	DB      *pgxpool.Pool
 	Clock   clock.Clock
 	Offers  *offers.Service
+	Drivers *drivers.Service
 	Sweeper *sweeper.Sweeper
 	City    string
+	// Serves /storage/ (signed upload and read URLs) when files are kept
+	// by ride-api itself (storage.Local); nil with an outside store.
+	Storage http.Handler
 
 	// Fixed sign-in code for dev and tests. Never set in production.
 	FixedOTP           string
@@ -82,7 +87,11 @@ func apiErr(status int, code, message string) error {
 func (s *Server) writeError(w http.ResponseWriter, r *http.Request, err error) {
 	var oe *offers.Error
 	if errors.As(err, &oe) {
-		body := map[string]any{"code": oe.Code, "message": oe.Message, "state": oe.State}
+		body := map[string]any{}
+		for k, v := range oe.Extra {
+			body[k] = v
+		}
+		body["code"], body["message"], body["state"] = oe.Code, oe.Message, oe.State
 		writeJSON(w, oe.Status, body)
 		return
 	}
@@ -161,6 +170,15 @@ func (s *Server) Handler() http.Handler {
 	s.authRoutes(handle)
 	s.seriesRoutes(handle)
 	s.offerRoutes(handle)
+	if s.Drivers != nil {
+		s.driverRoutes(handle)
+		s.adminRoutes(handle)
+	}
+	if s.Storage != nil {
+		// Not through handle: uploads are up to 5 MB.
+		mux.Handle("PUT /storage/", s.Storage)
+		mux.Handle("GET /storage/", s.Storage)
+	}
 	s.mapStyleRoutes(handle)
 	handle("GET /v1/places", func(w http.ResponseWriter, r *http.Request) error {
 		if _, _, err := s.requireUser(r); err != nil {

@@ -3,7 +3,7 @@
 //	db migrate        apply new migrations
 //	db seed-config    add missing ride types, fare rules and settings; never deletes
 //	db seed           wipe every table and load the spec world (dev only):
-//	                  rider Priya, auto drivers Ravi, Meena, Anil, Suresh, bike driver Vijay
+//	                  rider Priya, auto drivers Ravi, Meena, Anil, Suresh, bike driver Vijay, the admin
 package main
 
 import (
@@ -49,7 +49,7 @@ func run(args []string) error {
 		if os.Getenv("APP_ENV") == "production" {
 			return fmt.Errorf("seed wipes every table; use seed-config in production")
 		}
-		if _, err := pool.Exec(ctx, `truncate sweeper_runs, notification_outbox, events, offer_recipients, offers, rides,
+		if _, err := pool.Exec(ctx, `truncate subscription_payments, driver_items, vehicles, plans, admins, sweeper_runs, notification_outbox, events, offer_recipients, offers, rides,
 			series_slots, series, devices, sessions, otp_codes, drivers, riders, users, fare_rules, ride_type_config, app_config cascade`); err != nil {
 			return err
 		}
@@ -60,7 +60,10 @@ func run(args []string) error {
 		if _, err := seed.Spec(ctx, pool, svc); err != nil {
 			return err
 		}
-		fmt.Println("Seeded: riders Priya (9000000101), Ankit, Kavya; drivers Ravi (9000000201), Meena, Anil, Suresh, Vijay (bike)")
+		if _, err := seed.Admin(ctx, pool); err != nil {
+			return err
+		}
+		fmt.Println("Seeded: riders Priya (9000000101), Ankit, Kavya; drivers Ravi (9000000201), Meena, Anil, Suresh, Vijay (bike); admin (9000000001)")
 	default:
 		return fmt.Errorf("unknown command %q: use migrate, seed-config or seed", args[0])
 	}

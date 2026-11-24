@@ -6,6 +6,7 @@ package seed
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -49,14 +50,73 @@ func Config(ctx context.Context, pool *pgxpool.Pool) error {
 			return err
 		}
 	}
+	for _, p := range Plans {
+		if _, err := pool.Exec(ctx, `insert into plans (vehicle_type, cab_class, label, monthly_price)
+			values ($1, nullif($2, ''), $3, $4) on conflict do nothing`, p.VehicleType, p.CabClass, p.Label, p.MonthlyPrice); err != nil {
+			return err
+		}
+	}
 	for k, v := range map[string]string{
 		"series_window_minutes": "15", "ride_window_minutes": "5", "max_rounds": "3", "horizon_days": "14",
+		// D1: sign-up cities, and the UPI ID drivers pay the subscription to.
+		"driver_cities": `[{"code": "blr", "name": "Bengaluru"}]`, "payee_upi": `"commuteride@icici"`,
 	} {
 		if _, err := pool.Exec(ctx, "insert into app_config (key, value) values ($1, $2::jsonb) on conflict do nothing", k, v); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// Plan is one subscription plan (D1): one per vehicle type and cab class.
+type Plan struct {
+	VehicleType, CabClass, Label string
+	MonthlyPrice                 int
+}
+
+// Plans are the default monthly prices, in rupees.
+var Plans = []Plan{
+	{"bike", "", "Bike plan", 799},
+	{"auto", "", "Auto plan", 1199},
+	{"cab", "hatchback", "Hatchback plan", 1999},
+	{"cab", "sedan", "Sedan plan", 2299},
+	{"cab", "suv", "SUV plan", 2799},
+}
+
+// AdminPerson is the seeded admin account (signs in through /v1/auth/*).
+var AdminPerson = Person{Name: "Admin", Phone: "9000000001", Role: "admin"}
+
+// Admin adds the admin account; returns its id.
+func Admin(ctx context.Context, pool *pgxpool.Pool) (uuid.UUID, error) {
+	var id uuid.UUID
+	err := pool.QueryRow(ctx, `insert into users (phone, role) values ($1, 'admin')
+		on conflict (phone) do update set role = 'admin' returning id`, AdminPerson.Phone).Scan(&id)
+	if err != nil {
+		return id, err
+	}
+	_, err = pool.Exec(ctx, "insert into admins (user_id, name) values ($1, $2) on conflict do nothing", id, AdminPerson.Name)
+	return id, err
+}
+
+// D1 loads the D1 Integration tests seed (after Config): rider Priya and the
+// admin; no drivers (each test signs its drivers up). Returns ids by first name.
+func D1(ctx context.Context, pool *pgxpool.Pool) (map[string]uuid.UUID, error) {
+	ids := map[string]uuid.UUID{}
+	p := SpecPeople[0]
+	var id uuid.UUID
+	if err := pool.QueryRow(ctx, "insert into users (phone, role) values ($1, 'rider') returning id", p.Phone).Scan(&id); err != nil {
+		return nil, err
+	}
+	if _, err := pool.Exec(ctx, "insert into riders (user_id, name, rating) values ($1, $2, 4.8)", id, p.Name); err != nil {
+		return nil, err
+	}
+	ids[offers.FirstName(p.Name)] = id
+	admin, err := Admin(ctx, pool)
+	if err != nil {
+		return nil, err
+	}
+	ids[AdminPerson.Name] = admin
+	return ids, nil
 }
 
 // Places used by the spec seed. Koramangala → Whitefield is 51 minutes by
@@ -108,9 +168,16 @@ func Spec(ctx context.Context, pool *pgxpool.Pool, svc *offers.Service) (map[str
 		if p.Role == "rider" {
 			_, err = pool.Exec(ctx, "insert into riders (user_id, name, rating) values ($1, $2, 4.8)", id, p.Name)
 		} else {
+			// Live and paid, as if through D1: verified vehicle, day off "none".
 			_, err = pool.Exec(ctx, `insert into drivers (user_id, name, city, vehicle_type, vehicle_number, vehicle_desc, status,
-				subscription_until, rating) values ($1, $2, $3, $4, $5, $6, 'live', $7, 4.8)`,
-				id, p.Name, City, p.VehicleType, p.VehicleNumber, p.VehicleDesc, paidUntil)
+				subscription_until, rating, reference, day_off_set, upi_id, approved_at)
+				values ($1, $2, $3, $4, $5, $6, 'live', $7, 4.8, $8, true, $9, now())`,
+				id, p.Name, City, p.VehicleType, p.VehicleNumber, p.VehicleDesc, paidUntil,
+				fmt.Sprintf("DRV-%05d", 10000+len(ids)), strings.ToLower(offers.FirstName(p.Name))+"@okaxis")
+			if err == nil {
+				_, err = pool.Exec(ctx, `insert into vehicles (driver_id, type, plate, colour, review_state)
+					values ($1, $2, $3, $4, 'verified')`, id, p.VehicleType, p.VehicleNumber, "")
+			}
 		}
 		if err != nil {
 			return nil, err
