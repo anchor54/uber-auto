@@ -1,0 +1,73 @@
+00:00 +0: loading /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart
+00:00 +0: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on small phone 360x640
+00:00 +1: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on small phone 360x640
+00:00 +2: /home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart: D2 see request → interested → win banner → week on small phone 360x640
+00:02 +3: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+00:02 +4: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+00:03 +5: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+00:03 +6: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+00:04 +7: /home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart: demo backend mark and withdraw interest; both repeatable
+unhandled error during finalization of test:
+/home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart
+TestDeviceException(Shell subprocess crashed with SIGTERM (-15).)
+#0      FlutterTesterTestDevice.finished (package:flutter_tools/src/test/flutter_tester_device.dart:255:5)
+<asynchronous suspension>
+#1      FlutterTesterTestDevice.kill (package:flutter_tools/src/test/flutter_tester_device.dart:237:5)
+<asynchronous suspension>
+#2      FlutterPlatform._startTest.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:696:9)
+<asynchronous suspension>
+#3      FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:597:11)
+<asynchronous suspension>
+#4      asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
+unhandled error during finalization of test:
+/home/runner/work/uber-auto/uber-auto/apps/driver/test/flows/d2_flow_test.dart
+PathNotFoundException: Deletion failed, path = '/tmp/flutter_tools.JPAGWV/flutter_test_listener.VKHNLX' (OS Error: No such file or directory, errno = 2)
+#0      _Directory._deleteSync (dart:io/directory_impl.dart:216:7)
+#1      FileSystemEntity.deleteSync (dart:io/file_system_entity.dart:425:7)
+#2      ForwardingFileSystemEntity.deleteSync (package:file/src/forwarding/forwarding_file_system_entity.dart:70:16)
+#3      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:716:22)
+#4      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1116:16)
+#5      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:715:12)
+#6      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:716:22)
+#7      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1116:16)
+#8      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:715:12)
+#9      FlutterPlatform._createListenerDart.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:827:15)
+#10     FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:597:26)
+<asynchronous suspension>
+#11     asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
+unhandled error during finalization of test:
+/home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart
+TestDeviceException(Shell subprocess crashed with SIGTERM (-15).)
+#0      FlutterTesterTestDevice.finished (package:flutter_tools/src/test/flutter_tester_device.dart:255:5)
+<asynchronous suspension>
+#1      FlutterTesterTestDevice.kill (package:flutter_tools/src/test/flutter_tester_device.dart:237:5)
+<asynchronous suspension>
+#2      FlutterPlatform._startTest.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:696:9)
+<asynchronous suspension>
+#3      FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:597:11)
+<asynchronous suspension>
+#4      asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
+unhandled error during finalization of test:
+/home/runner/work/uber-auto/uber-auto/apps/driver/test/contract/driver_api_contract_test.dart
+PathNotFoundException: Deletion failed, path = '/tmp/flutter_tools.JPAGWV/flutter_test_listener.CPANVZ' (OS Error: No such file or directory, errno = 2)
+#0      _Directory._deleteSync (dart:io/directory_impl.dart:216:7)
+#1      FileSystemEntity.deleteSync (dart:io/file_system_entity.dart:425:7)
+#2      ForwardingFileSystemEntity.deleteSync (package:file/src/forwarding/forwarding_file_system_entity.dart:70:16)
+#3      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:716:22)
+#4      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1116:16)
+#5      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:715:12)
+#6      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:716:22)
+#7      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1116:16)
+#8      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:715:12)
+#9      FlutterPlatform._createListenerDart.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:827:15)
+#10     FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:597:26)
+<asynchronous suspension>
+#11     asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
